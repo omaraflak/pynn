@@ -19,7 +19,12 @@ class Optimizer(abc.ABC):
 
 
 class SGD(Optimizer):
-    def __init__(self, module: modules.Module, learning_rate: float = 0.01, momentum: float = 0.9):
+    def __init__(
+        self,
+        module: modules.Module,
+        learning_rate: float = 0.01,
+        momentum: float = 0.9
+    ):
         super().__init__(module)
         self.learning_rate = learning_rate
         self.momentum = momentum
@@ -29,6 +34,7 @@ class SGD(Optimizer):
         parameters = self.module.parameters()
         gradients = self.module.gradients()
         for i in range(len(parameters)):
-            self.v[i] = self.v[i] * self.momentum + self.learning_rate * gradients[i]
+            self.v[i] = (
+                self.momentum * self.v[i] + self.learning_rate * gradients[i]
+            )
             parameters[i] -= self.v[i]
-
