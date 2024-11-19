@@ -32,6 +32,7 @@ class Linear(Module):
         self.bias = np.random.randn(output_size, 1)
         self.weights_grad = np.zeros_like(self.weights)
         self.bias_grad = np.zeros_like(self.bias)
+        # TODO: extract this logic into initializers...
         if xavier:
             self.weights = self.weights / np.sqrt(input_size)
             self.bias = self.bias / np.sqrt(output_size)
