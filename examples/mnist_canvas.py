@@ -18,12 +18,12 @@ class MnistCanvas:
         self.fig, self.ax = plt.subplots()
         self.ax.set_xlim(0, self.size)
         self.ax.set_ylim(0, self.size)
-        self.ax.set_aspect('equal', adjustable='box')
+        self.ax.set_aspect("equal", adjustable="box")
 
-        self.fig.canvas.mpl_connect('button_press_event', self._on_click)
-        self.fig.canvas.mpl_connect('motion_notify_event', self._on_move)
-        self.fig.canvas.mpl_connect('button_release_event', self._on_release)
-        self.fig.canvas.mpl_connect('key_press_event', self._on_key_press)
+        self.fig.canvas.mpl_connect("button_press_event", self._on_click)
+        self.fig.canvas.mpl_connect("motion_notify_event", self._on_move)
+        self.fig.canvas.mpl_connect("button_release_event", self._on_release)
+        self.fig.canvas.mpl_connect("key_press_event", self._on_key_press)
 
     def show(self):
         plt.show()
@@ -32,14 +32,14 @@ class MnistCanvas:
         if event.inaxes:
             self.x_coords.append(event.xdata)
             self.y_coords.append(event.ydata)
-            plt.plot(self.x_coords, self.y_coords, 'k-', lw=30)
+            plt.plot(self.x_coords, self.y_coords, "k-", lw=30)
             plt.draw()
 
     def _on_move(self, event):
         if event.inaxes and event.button == 1:
             self.x_coords.append(event.xdata)
             self.y_coords.append(event.ydata)
-            plt.plot(self.x_coords, self.y_coords, 'k-', lw=30)
+            plt.plot(self.x_coords, self.y_coords, "k-", lw=30)
             plt.draw()
 
     def _on_release(self, _):
@@ -47,25 +47,25 @@ class MnistCanvas:
         self.y_coords = []
 
     def _on_key_press(self, event):
-        if event.key == 'c':
+        if event.key == "c":
             self.ax.cla()
             self.x_coords = []
             self.y_coords = []
             self.ax.set_xlim(0, self.size)
             self.ax.set_ylim(0, self.size)
             plt.draw()
-        elif event.key == 'v':
+        elif event.key == "v":
             self.fig.canvas.draw()
             output = self.model.forward(self._get_image())
             idx = np.argmax(output)
             print(
-                f'Predicted class: {idx}, probability: {int(output[idx] * 100)}%')
+                f"Predicted class: {idx}, probability: {int(output[idx] * 100)}%")
 
     def _get_image(self) -> np.ndarray:
-        path = '/tmp/img.png'
-        plt.axis('off')
+        path = "/tmp/img.png"
+        plt.axis("off")
         plt.tight_layout()
-        plt.savefig(path, bbox_inches='tight')
+        plt.savefig(path, bbox_inches="tight")
         image = cv2.imread(path, cv2.IMREAD_GRAYSCALE)
         new_image = 255 - image
         new_image = cv2.resize(new_image, (self.size, self.size))

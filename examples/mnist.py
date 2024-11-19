@@ -45,7 +45,7 @@ def main():
 
     for x, y in zip(x_test[:20], y_test[:20]):
         output = model.forward(x)
-        print("pred:", np.argmax(output), " true:", np.argmax(y))
+        print("pred:", np.argmax(output), "true:", np.argmax(y))
 
     print(
         "Loss over test set:",
