@@ -13,8 +13,9 @@ def train(
     loss: losses.Loss,
     optimizer: optimizers.Optimizer,
     epochs: int,
-):
+) -> list[float]:
     """Performs training on the given data, loss, and optimizer."""
+    errors = []
     for i in range(epochs):
         error = 0
         for x, y in zip(x_train, y_train):
@@ -25,7 +26,9 @@ def train(
             optimizer.step()
 
         error /= len(x_train)
+        errors.append(error)
         print(f"{i+1}/{epochs} error={error:.5f}")
+    return errors
 
 
 def evaluate(
