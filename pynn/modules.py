@@ -22,10 +22,6 @@ class Module:
     def gradients(self) -> list[np.ndarray]:
         return []
 
-    def zero_gradients(self):
-        for grad in self.gradients():
-            grad.fill(0)
-
 
 class Linear(Module):
     """Linear transformation applied to input column vector."""

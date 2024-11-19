@@ -3,6 +3,7 @@
 import numpy as np
 from pynn import losses
 from pynn import modules
+from pynn import optimizers
 
 
 def train(
@@ -10,19 +11,18 @@ def train(
     x_train: np.ndarray,
     y_train: np.ndarray,
     loss: losses.Loss,
+    optimizer: optimizers.Optimizer,
     epochs: int,
-    learning_rate: float,
 ):
-    """Performs SGD training on the given data and loss."""
+    """Performs training on the given data, loss, and optimizer."""
     for i in range(epochs):
         error = 0
         for x, y in zip(x_train, y_train):
             output = module.forward(x)
             error += loss.loss(y, output)
-            module.zero_gradients()
+            optimizer.zero_gradients()
             module.backward(loss.loss_prime(y, output))
-            for param, grad in zip(module.parameters(), module.gradients()):
-                param -= learning_rate * grad
+            optimizer.step()
 
         error /= len(x_train)
         print(f"{i+1}/{epochs} error={error:.5f}")

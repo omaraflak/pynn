@@ -3,6 +3,7 @@
 from pynn import trainer
 from pynn import modules
 from pynn import losses
+from pynn import optimizers
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -37,7 +38,12 @@ def main():
     ])
 
     trainer.train(
-        model, x_train, y_train, losses.MSE(), epochs=1000, learning_rate=0.1
+        model,
+        x_train,
+        y_train,
+        losses.MSE(),
+        optimizers.SGD(model, learning_rate=0.1),
+        epochs=1000,
     )
 
     for x in x_train:

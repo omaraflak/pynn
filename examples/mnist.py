@@ -3,6 +3,7 @@
 from pynn import trainer
 from pynn import modules
 from pynn import losses
+from pynn import optimizers
 from examples import mnist_canvas
 import numpy as np
 import keras
@@ -38,8 +39,8 @@ def main():
         x_train,
         y_train,
         losses.CrossEntropy(),
+        optimizers.SGD(model, learning_rate=0.01),
         epochs=50,
-        learning_rate=0.01,
     )
 
     for x, y in zip(x_test[:20], y_test[:20]):

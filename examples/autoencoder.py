@@ -3,6 +3,7 @@
 from pynn import trainer
 from pynn import modules
 from pynn import losses
+from pynn import optimizers
 import numpy as np
 import matplotlib.pyplot as plt
 import keras
@@ -50,8 +51,8 @@ def main():
         x_train,
         x_train,
         losses.MSE(),
+        optimizers.SGD(model, learning_rate=0.1),
         epochs=300,
-        learning_rate=0.1,
     )
 
     print("Test loss:", trainer.evaluate(model, x_test, x_test, losses.MSE()))
