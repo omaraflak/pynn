@@ -1,4 +1,4 @@
-all: libtensor.so
+all: libtensor_gpu.so libtensor.so
 
 libtensor_gpu.so: tensor_gpu.o
 	nvcc -shared tensor_gpu.o -o libtensor_gpu.so

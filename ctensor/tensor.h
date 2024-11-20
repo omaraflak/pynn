@@ -17,12 +17,16 @@ Tensor *create_tensor(uint32_t *shape, uint32_t dims);
 void delete_tensor(Tensor *tensor);
 
 uint32_t get_size_from_shape(uint32_t *shape, uint32_t dims);
-void fill_tensor(Tensor *x, float value);
+void fill_tensor(Tensor *tensor, float value);
+void set_tensor(Tensor *tensor, float *data);
 
-Tensor *add_tensor(Tensor *a, Tensor *b);
-Tensor *subtract_tensor(Tensor *a, Tensor *b);
-Tensor *multiply_tensor(Tensor *a, Tensor *b);
-Tensor *divide_tensor(Tensor *a, Tensor *b);
-Tensor *matmul_tensor(Tensor *a, Tensor *b);
+void reshape_tensor(Tensor *tensor, uint32_t *shape, uint32_t dims);
+float get_tensor_item(Tensor *tensor, uint32_t *indices);
+
+Tensor *add_tensors(Tensor *a, Tensor *b);
+Tensor *subtract_tensors(Tensor *a, Tensor *b);
+Tensor *multiply_tensors(Tensor *a, Tensor *b);
+Tensor *divide_tensors(Tensor *a, Tensor *b);
+Tensor *matmul_tensors(Tensor *a, Tensor *b);
 
 #endif // TENSOR

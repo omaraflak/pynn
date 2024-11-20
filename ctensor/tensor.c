@@ -41,15 +41,57 @@ uint32_t get_size_from_shape(uint32_t *shape, uint32_t dims)
     return size;
 }
 
-void fill_tensor(Tensor *x, float value)
+void fill_tensor(Tensor *tensor, float value)
 {
-    for (uint32_t i = 0; i < x->size; i++)
+    for (uint32_t i = 0; i < tensor->size; i++)
     {
-        x->data[i] = value;
+        tensor->data[i] = value;
     }
 }
 
-Tensor *add_tensor(Tensor *a, Tensor *b)
+void set_tensor(Tensor *tensor, float *data)
+{
+    for (uint32_t i = 0; i < tensor->size; i++)
+    {
+        tensor->data[i] = data[i];
+    }
+}
+
+void reshape_tensor(Tensor *tensor, uint32_t *shape, uint32_t dims)
+{
+    if (tensor->dims != dims)
+    {
+        free(tensor->shape);
+        free(tensor->stride);
+        tensor->dims = dims;
+        tensor->shape = malloc(sizeof(uint32_t) * dims);
+        tensor->stride = malloc(sizeof(uint32_t) * dims);
+    }
+    for (uint32_t i = 0; i < dims; i++)
+    {
+        tensor->shape[i] = shape[i];
+    }
+    for (uint32_t i = 0; i < dims; i++)
+    {
+        tensor->stride[i] = 1;
+        for (uint32_t j = i + 1; j < dims; j++)
+        {
+            tensor->stride[i] *= shape[j];
+        }
+    }
+}
+
+float get_tensor_item(Tensor *tensor, uint32_t *indices)
+{
+    uint32_t index = 0;
+    for (uint32_t i = 0; i < tensor->dims; i++)
+    {
+        index += tensor->stride[i] * indices[i];
+    }
+    return tensor->data[index];
+}
+
+Tensor *add_tensors(Tensor *a, Tensor *b)
 {
     Tensor *result = create_tensor(a->shape, a->dims);
     for (uint32_t i = 0; i < result->size; i++)
@@ -59,7 +101,7 @@ Tensor *add_tensor(Tensor *a, Tensor *b)
     return result;
 }
 
-Tensor *subtract_tensor(Tensor *a, Tensor *b)
+Tensor *subtract_tensors(Tensor *a, Tensor *b)
 {
     Tensor *result = create_tensor(a->shape, a->dims);
     for (uint32_t i = 0; i < result->size; i++)
@@ -69,7 +111,7 @@ Tensor *subtract_tensor(Tensor *a, Tensor *b)
     return result;
 }
 
-Tensor *multiply_tensor(Tensor *a, Tensor *b)
+Tensor *multiply_tensors(Tensor *a, Tensor *b)
 {
     Tensor *result = create_tensor(a->shape, a->dims);
     for (uint32_t i = 0; i < result->size; i++)
@@ -79,7 +121,7 @@ Tensor *multiply_tensor(Tensor *a, Tensor *b)
     return result;
 }
 
-Tensor *divide_tensor(Tensor *a, Tensor *b)
+Tensor *divide_tensors(Tensor *a, Tensor *b)
 {
     Tensor *result = create_tensor(a->shape, a->dims);
     for (uint32_t i = 0; i < result->size; i++)
@@ -89,7 +131,7 @@ Tensor *divide_tensor(Tensor *a, Tensor *b)
     return result;
 }
 
-Tensor *matmul_tensor(Tensor *a, Tensor *b)
+Tensor *matmul_tensors(Tensor *a, Tensor *b)
 {
     uint32_t shape[2] = {a->shape[0], b->shape[1]};
     Tensor *result = create_tensor(shape, 2);
