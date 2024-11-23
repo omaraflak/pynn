@@ -13,7 +13,7 @@ class CTensor(ctypes.Structure):
 
 
 def init_tensor_c_lib() -> ctypes.CDLL:
-    lib = ctypes.CDLL('libtensor.so')
+    lib = ctypes.CDLL('/content/libtensor.so')
 
     lib.create_tensor.argtypes = [
         ctypes.POINTER(ctypes.c_float), ctypes.POINTER(ctypes.c_uint32), ctypes.c_uint32]
