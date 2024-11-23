@@ -1,13 +1,4 @@
 #include "cpu.h"
-#include <string.h>
-
-void fill_tensor_data_cpu(Tensor *tensor, float value)
-{
-    for (uint32_t i = 0; i < tensor->size; i++)
-    {
-        tensor->data[i] = value;
-    }
-}
 
 void add_tensors_cpu(Tensor *a, Tensor *b, float *result)
 {

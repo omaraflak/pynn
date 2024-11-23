@@ -8,13 +8,14 @@ class CTensor(ctypes.Structure):
         ('stride', ctypes.POINTER(ctypes.c_uint32)),
         ('dims', ctypes.c_uint32),
         ('size', ctypes.c_uint32),
+        ('device', ctypes.c_uint32),
     ]
 
 
 def init_tensor_c_lib() -> ctypes.CDLL:
     lib = ctypes.CDLL('libtensor.so')
     lib.create_tensor.argtypes = [
-        ctypes.POINTER(ctypes.c_uint32), ctypes.c_uint32]
+        ctypes.POINTER(ctypes.c_float), ctypes.POINTER(ctypes.c_uint32), ctypes.c_uint32]
     lib.create_tensor.restype = ctypes.POINTER(CTensor)
     lib.delete_tensor.argtypes = [ctypes.POINTER(CTensor)]
     lib.delete_tensor.restype = None

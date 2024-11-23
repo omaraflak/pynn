@@ -50,6 +50,25 @@ Tensor *copy_tensor(Tensor *tensor)
     return create_tensor(data, shape, tensor->dims);
 }
 
+void tensor_cpu_to_gpu(Tensor *tensor)
+{
+    float *data;
+    cudaMalloc(&data, sizeof(float) * tensor->size);
+    cudaMemcpy(data, tensor->data, sizeof(float) * tensor->size, cudaMemcpyHostToDevice);
+    free(tensor->data);
+    tensor->data = data;
+    tensor->device = 1;
+}
+
+void tensor_gpu_to_cpu(Tensor *tensor)
+{
+    float *data = (float *)malloc(sizeof(float) * tensor->size);
+    cudaMemcpy(data, tensor->data, sizeof(float) * tensor->size, cudaMemcpyDeviceToHost);
+    cudaFree(tensor->data);
+    tensor->data = data;
+    tensor->device = 0;
+}
+
 void fill_tensor_data(Tensor *tensor, float value)
 {
     for (uint32_t i = 0; i < tensor->size; i++)
@@ -102,14 +121,16 @@ Tensor *add_tensors(Tensor *a, Tensor *b)
     {
         data = (float *)malloc(sizeof(float) * a->size);
         add_tensors_cpu(a, b, data);
+        return create_tensor(data, shape, a->dims);
     }
     else
     {
         cudaMalloc(&data, sizeof(float) * a->size);
         add_tensors_gpu(a, b, data);
+        Tensor *result = create_tensor(data, shape, a->dims);
+        result->device = 1;
+        return result;
     }
-
-    return create_tensor(data, shape, a->dims);
 }
 
 Tensor *matmul_tensors(Tensor *a, Tensor *b)
@@ -124,12 +145,14 @@ Tensor *matmul_tensors(Tensor *a, Tensor *b)
     {
         data = (float *)malloc(sizeof(float) * size);
         matmul_tensors_cpu(a, b, data);
+        return create_tensor(data, shape, 2);
     }
     else
     {
         cudaMalloc(&data, sizeof(float) * size);
         matmul_tensors_gpu(a, b, data);
+        Tensor *result = create_tensor(data, shape, 2);
+        result->device = 1;
+        return result;
     }
-
-    return create_tensor(data, shape, 2);
 }

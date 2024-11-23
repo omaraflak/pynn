@@ -1,32 +1,12 @@
 #include "gpu.h"
-#include "tensor.h"
 #include <stdlib.h>
 
-void delete_device_tensor(Tensor *tensor)
+void delete_tensor_gpu(Tensor *tensor)
 {
     cudaFree(tensor->data);
     free(tensor->shape);
     free(tensor->stride);
     free(tensor);
-}
-
-void host_to_device(Tensor *tensor)
-{
-    float *data;
-    cudaMalloc(&data, sizeof(float) * tensor->size);
-    cudaMemcpy(data, tensor->data, sizeof(float) * tensor->size, cudaMemcpyHostToDevice);
-    free(tensor->data);
-    tensor->data = data;
-    tensor->device = 1;
-}
-
-void device_to_host(Tensor *tensor)
-{
-    float *data = (float *)malloc(sizeof(float) * tensor->size);
-    cudaMemcpy(data, tensor->data, sizeof(float) * tensor->size, cudaMemcpyDeviceToHost);
-    cudaFree(tensor->data);
-    tensor->data = data;
-    tensor->device = 0;
 }
 
 __global__ void add_tensors_kernel(float *a, float *b, uint32_t n, float *result)
