@@ -64,8 +64,8 @@ void reshape_tensor(Tensor *tensor, uint32_t *shape, uint32_t dims)
         free(tensor->shape);
         free(tensor->stride);
         tensor->dims = dims;
-        tensor->shape = malloc(sizeof(uint32_t) * dims);
-        tensor->stride = malloc(sizeof(uint32_t) * dims);
+        tensor->shape = (uint32_t *)malloc(sizeof(uint32_t) * dims);
+        tensor->stride = (uint32_t *)malloc(sizeof(uint32_t) * dims);
     }
     for (uint32_t i = 0; i < dims; i++)
     {
