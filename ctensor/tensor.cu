@@ -44,15 +44,14 @@ Tensor *copy_tensor(Tensor *tensor)
 
 void delete_tensor(Tensor *tensor)
 {
-    free(tensor->data);
-    free(tensor->shape);
-    free(tensor->stride);
-    free(tensor);
-}
-
-void delete_tensor_gpu(Tensor *tensor)
-{
-    cudaFree(tensor->data);
+    if (tensor->device == 0)
+    {
+        free(tensor->data);
+    }
+    else
+    {
+        cudaFree(tensor->data);
+    }
     free(tensor->shape);
     free(tensor->stride);
     free(tensor);
