@@ -15,8 +15,9 @@ typedef struct
 } Tensor;
 
 Tensor *create_tensor(float *data, uint32_t *shape, uint32_t dims);
-void delete_tensor(Tensor *tensor);
 Tensor *copy_tensor(Tensor *tensor);
+void delete_tensor(Tensor *tensor);
+void delete_tensor_gpu(Tensor *tensor);
 
 void tensor_cpu_to_gpu(Tensor *tensor);
 void tensor_gpu_to_cpu(Tensor *tensor);

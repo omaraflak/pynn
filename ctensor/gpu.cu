@@ -1,14 +1,6 @@
 #include "gpu.h"
 #include <stdlib.h>
 
-void delete_tensor_gpu(Tensor *tensor)
-{
-    cudaFree(tensor->data);
-    free(tensor->shape);
-    free(tensor->stride);
-    free(tensor);
-}
-
 __global__ void add_tensors_kernel(float *a, float *b, uint32_t n, float *result)
 {
     uint32_t index = blockDim.x * blockIdx.x + threadIdx.x;

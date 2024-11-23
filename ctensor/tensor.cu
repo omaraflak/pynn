@@ -33,6 +33,15 @@ Tensor *create_tensor(float *data, uint32_t *shape, uint32_t dims)
     return tensor;
 }
 
+Tensor *copy_tensor(Tensor *tensor)
+{
+    float *data = (float *)malloc(sizeof(float) * tensor->size);
+    uint32_t *shape = (uint32_t *)malloc(sizeof(uint32_t) * tensor->dims);
+    memcpy(data, tensor->data, sizeof(float) * tensor->size);
+    memcpy(shape, tensor->shape, sizeof(uint32_t) * tensor->dims);
+    return create_tensor(data, shape, tensor->dims);
+}
+
 void delete_tensor(Tensor *tensor)
 {
     free(tensor->data);
@@ -41,13 +50,12 @@ void delete_tensor(Tensor *tensor)
     free(tensor);
 }
 
-Tensor *copy_tensor(Tensor *tensor)
+void delete_tensor_gpu(Tensor *tensor)
 {
-    float *data = (float *)malloc(sizeof(float) * tensor->size);
-    uint32_t *shape = (uint32_t *)malloc(sizeof(uint32_t) * tensor->dims);
-    memcpy(data, tensor->data, sizeof(float) * tensor->size);
-    memcpy(shape, tensor->shape, sizeof(uint32_t) * tensor->dims);
-    return create_tensor(data, shape, tensor->dims);
+    cudaFree(tensor->data);
+    free(tensor->shape);
+    free(tensor->stride);
+    free(tensor);
 }
 
 void tensor_cpu_to_gpu(Tensor *tensor)

@@ -3,8 +3,6 @@
 
 #include "tensor.h"
 
-void delete_tensor_gpu(Tensor *tensor);
-
 __global__ void add_tensors_kernel(float *a, float *b, uint32_t n, float *result);
 void add_tensors_gpu(Tensor *a, Tensor *b, float *result);
 
