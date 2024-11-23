@@ -1,6 +1,7 @@
 #include "tensor.h"
 #include "cpu.h"
-#include <string.h>
+#include "gpu.h"
+#include <cstring>
 
 uint32_t get_size_from_shape(uint32_t *shape, uint32_t dims)
 {
@@ -93,10 +94,21 @@ float get_tensor_item(Tensor *tensor, uint32_t *indices)
 
 Tensor *add_tensors(Tensor *a, Tensor *b)
 {
-    float *data = (float *)malloc(sizeof(float) * a->size);
     uint32_t *shape = (uint32_t *)malloc(sizeof(uint32_t) * a->dims);
     memcpy(shape, a->shape, sizeof(uint32_t) * a->dims);
-    add_tensors_cpu(a, b, data);
+    float *data;
+
+    if (a->device == 0 && b->device == 0)
+    {
+        data = (float *)malloc(sizeof(float) * a->size);
+        add_tensors_cpu(a, b, data);
+    }
+    else
+    {
+        cudaMalloc(&data, sizeof(float) * a->size);
+        add_tensors_gpu(a, b, data);
+    }
+
     return create_tensor(data, shape, a->dims);
 }
 
@@ -106,7 +118,18 @@ Tensor *matmul_tensors(Tensor *a, Tensor *b)
     shape[0] = a->shape[0];
     shape[1] = b->shape[1];
     uint32_t size = shape[0] * shape[1];
-    float *data = (float *)malloc(sizeof(float) * size);
-    matmul_tensors_cpu(a, b, data);
+    float *data;
+
+    if (a->device == 0 && b->device == 0)
+    {
+        data = (float *)malloc(sizeof(float) * size);
+        matmul_tensors_cpu(a, b, data);
+    }
+    else
+    {
+        cudaMalloc(&data, sizeof(float) * size);
+        matmul_tensors_gpu(a, b, data);
+    }
+
     return create_tensor(data, shape, 2);
 }
