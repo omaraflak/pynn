@@ -47,3 +47,35 @@ void matmul_tensors_cpu(Tensor *a, Tensor *b, float *result)
         }
     }
 }
+
+void broadcast_add_tensor_cpu(Tensor *a, float value, float *result)
+{
+    for (uint32_t i = 0; i < a->size; i++)
+    {
+        result[i] = a->data[i] + value;
+    }
+}
+
+void broadcast_subtract_tensor_cpu(Tensor *a, float value, float *result)
+{
+    for (uint32_t i = 0; i < a->size; i++)
+    {
+        result[i] = a->data[i] - value;
+    }
+}
+
+void broadcast_multiply_tensor_cpu(Tensor *a, float value, float *result)
+{
+    for (uint32_t i = 0; i < a->size; i++)
+    {
+        result[i] = a->data[i] * value;
+    }
+}
+
+void broadcast_divide_tensor_cpu(Tensor *a, float value, float *result)
+{
+    for (uint32_t i = 0; i < a->size; i++)
+    {
+        result[i] = a->data[i] / value;
+    }
+}

@@ -1,3 +1,4 @@
+from __future__ import annotations
 import ctypes
 
 
@@ -73,6 +74,26 @@ def _init_tensor_c_lib() -> ctypes.CDLL:
     ]
     lib.matmul_tensors.restype = ctypes.POINTER(CTensor)
 
+    lib.broadcast_add_tensor.argtypes = [
+        ctypes.POINTER(CTensor),
+        ctypes.c_float
+    ]
+    lib.broadcast_add_tensor.restype = ctypes.POINTER(CTensor)
+    lib.broadcast_subtract_tensor.argtypes = [
+        ctypes.POINTER(CTensor),
+        ctypes.c_float
+    ]
+    lib.broadcast_subtract_tensor.restype = ctypes.POINTER(CTensor)
+    lib.broadcast_multiply_tensor.argtypes = [
+        ctypes.POINTER(CTensor),
+        ctypes.c_float
+    ]
+    lib.broadcast_multiply_tensor.restype = ctypes.POINTER(CTensor)
+    lib.broadcast_divide_tensor.argtypes = [
+        ctypes.POINTER(CTensor),
+        ctypes.c_float
+    ]
+    lib.broadcast_divide_tensor.restype = ctypes.POINTER(CTensor)
     return lib
 
 
@@ -122,7 +143,7 @@ class Tensor:
     def device(self) -> int:
         return self.c_tensor.contents.device
 
-    def copy(self) -> 'Tensor':
+    def copy(self) -> Tensor:
         c_tensor = Tensor._C.tensor_copy(self.c_tensor)
         return Tensor(None, None, c_tensor)
 
@@ -139,23 +160,41 @@ class Tensor:
             ctypes.c_uint32(len(shape))
         )
 
-    def add(self, other: 'Tensor') -> 'Tensor':
-        c_tensor = Tensor._C.add_tensors(self.c_tensor, other.c_tensor)
+    def add(self, other: Tensor | float) -> Tensor:
+        if isinstance(other, Tensor):
+            c_tensor = Tensor._C.add_tensors(self.c_tensor, other.c_tensor)
+        else:
+            c_tensor = Tensor._C.broadcast_add_tensor(
+                self.c_tensor, ctypes.c_float(other))
         return Tensor(None, None, c_tensor)
 
-    def subtract(self, other: 'Tensor') -> 'Tensor':
-        c_tensor = Tensor._C.subtract_tensors(self.c_tensor, other.c_tensor)
+    def subtract(self, other: Tensor | float) -> Tensor:
+        if isinstance(other, Tensor):
+            c_tensor = Tensor._C.subtract_tensors(
+                self.c_tensor, other.c_tensor)
+        else:
+            c_tensor = Tensor._C.broadcast_subtract_tensor(
+                self.c_tensor, ctypes.c_float(other))
         return Tensor(None, None, c_tensor)
 
-    def multiply(self, other: 'Tensor') -> 'Tensor':
-        c_tensor = Tensor._C.multiply_tensors(self.c_tensor, other.c_tensor)
+    def multiply(self, other: Tensor | float) -> Tensor:
+        if isinstance(other, Tensor):
+            c_tensor = Tensor._C.multiply_tensors(
+                self.c_tensor, other.c_tensor)
+        else:
+            c_tensor = Tensor._C.broadcast_multiply_tensor(
+                self.c_tensor, ctypes.c_float(other))
         return Tensor(None, None, c_tensor)
 
-    def divide(self, other: 'Tensor') -> 'Tensor':
-        c_tensor = Tensor._C.divide_tensors(self.c_tensor, other.c_tensor)
+    def divide(self, other: Tensor | float) -> Tensor:
+        if isinstance(other, Tensor):
+            c_tensor = Tensor._C.divide_tensors(self.c_tensor, other.c_tensor)
+        else:
+            c_tensor = Tensor._C.broadcast_divide_tensor(
+                self.c_tensor, ctypes.c_float(other))
         return Tensor(None, None, c_tensor)
 
-    def matmul(self, other: 'Tensor') -> 'Tensor':
+    def matmul(self, other: Tensor) -> Tensor:
         c_tensor = Tensor._C.matmul_tensors(self.c_tensor, other.c_tensor)
         return Tensor(None, None, c_tensor)
 
@@ -168,17 +207,18 @@ class Tensor:
     def __del__(self):
         Tensor._C.delete_tensor(self.c_tensor)
 
-    def __add__(self, other: 'Tensor') -> 'Tensor':
-        return self.add(other)
+    def __add__(self, other: Tensor | float) -> Tensor:
+        if isinstance(other, Tensor):
+            return self.add(other)
 
-    def __sub__(self, other: 'Tensor') -> 'Tensor':
+    def __sub__(self, other: Tensor | float) -> Tensor:
         return self.subtract(other)
 
-    def __mul__(self, other: 'Tensor') -> 'Tensor':
+    def __mul__(self, other: Tensor | float) -> Tensor:
         return self.multiply(other)
 
-    def __truediv__(self, other: 'Tensor') -> 'Tensor':
+    def __truediv__(self, other: Tensor | float) -> Tensor:
         return self.divide(other)
 
-    def __matmul__(self, other: 'Tensor') -> 'Tensor':
+    def __matmul__(self, other: Tensor) -> Tensor:
         return self.matmul(other)

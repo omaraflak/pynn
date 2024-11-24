@@ -54,6 +54,30 @@ class TestTensor(unittest.TestCase):
         self.assertEqual(c.device, 0)
         self.assertEqual(c.data, [2, 4, 6, 8, 10, 12])
 
+    def test_broadcast_add_cpu(self):
+        a = Tensor([1, 2, 3, 4, 5, 6], (3, 2))
+
+        c = a.add(1)
+
+        self.assertEqual(c.size, 6)
+        self.assertEqual(c.dims, 2)
+        self.assertEqual(c.shape, (3, 2))
+        self.assertEqual(c.device, 0)
+        self.assertEqual(c.data, [2, 3, 4, 5, 6, 7])
+
+    def test_broadcast_add_gpu(self):
+        a = Tensor([1, 2, 3, 4, 5, 6], (3, 2))
+        a.to_gpu()
+
+        c = a.add(1)
+        c.to_cpu()
+
+        self.assertEqual(c.size, 6)
+        self.assertEqual(c.dims, 2)
+        self.assertEqual(c.shape, (3, 2))
+        self.assertEqual(c.device, 0)
+        self.assertEqual(c.data, [2, 3, 4, 5, 6, 7])
+
     def test_subtract_cpu(self):
         a = Tensor([1, 2, 3, 4, 5, 6], (3, 2))
         b = Tensor([6, 4, 3, 2, 7, 6], (3, 2))

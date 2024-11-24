@@ -34,6 +34,11 @@ extern "C"
     Tensor *multiply_tensors(Tensor *a, Tensor *b);
     Tensor *divide_tensors(Tensor *a, Tensor *b);
     Tensor *matmul_tensors(Tensor *a, Tensor *b);
+
+    Tensor *broadcast_add_tensor(Tensor *a, float value);
+    Tensor *broadcast_subtract_tensor(Tensor *a, float value);
+    Tensor *broadcast_multiply_tensor(Tensor *a, float value);
+    Tensor *broadcast_divide_tensor(Tensor *a, float value);
 }
 
 #endif // TENSOR
