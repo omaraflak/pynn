@@ -208,17 +208,29 @@ class Tensor:
         Tensor._C.delete_tensor(self.c_tensor)
 
     def __add__(self, other: Tensor | float) -> Tensor:
-        if isinstance(other, Tensor):
-            return self.add(other)
+        return self.add(other)
+
+    def __radd__(self, other: Tensor | float) -> Tensor:
+        return self.add(other)
 
     def __sub__(self, other: Tensor | float) -> Tensor:
         return self.subtract(other)
 
+    # def __rsub__(self, other: Tensor | float) -> Tensor:
+    #     return (-self).add(other)
+
     def __mul__(self, other: Tensor | float) -> Tensor:
+        return self.multiply(other)
+
+    def __rmul__(self, other: Tensor | float) -> Tensor:
         return self.multiply(other)
 
     def __truediv__(self, other: Tensor | float) -> Tensor:
         return self.divide(other)
+
+    # def __rtruediv__(self, other: Tensor | float) -> Tensor:
+    #     other / self
+    #     return (self).divide(other)
 
     def __matmul__(self, other: Tensor) -> Tensor:
         return self.matmul(other)
