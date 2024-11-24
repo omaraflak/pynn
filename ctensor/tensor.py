@@ -52,6 +52,21 @@ def init_tensor_c_lib() -> ctypes.CDLL:
         ctypes.POINTER(CTensor)
     ]
     lib.add_tensors.restype = ctypes.POINTER(CTensor)
+    lib.subtract_tensors.argtypes = [
+        ctypes.POINTER(CTensor),
+        ctypes.POINTER(CTensor)
+    ]
+    lib.subtract_tensors.restype = ctypes.POINTER(CTensor)
+    lib.multiply_tensors.argtypes = [
+        ctypes.POINTER(CTensor),
+        ctypes.POINTER(CTensor)
+    ]
+    lib.multiply_tensors.restype = ctypes.POINTER(CTensor)
+    lib.divide_tensors.argtypes = [
+        ctypes.POINTER(CTensor),
+        ctypes.POINTER(CTensor)
+    ]
+    lib.divide_tensors.restype = ctypes.POINTER(CTensor)
     lib.matmul_tensors.argtypes = [
         ctypes.POINTER(CTensor),
         ctypes.POINTER(CTensor)
@@ -124,6 +139,18 @@ class Tensor:
         c_tensor = Tensor._C.add_tensors(self.c_tensor, other.c_tensor)
         return Tensor(None, None, c_tensor)
 
+    def subtract(self, other: 'Tensor') -> 'Tensor':
+        c_tensor = Tensor._C.subtract_tensors(self.c_tensor, other.c_tensor)
+        return Tensor(None, None, c_tensor)
+
+    def multiply(self, other: 'Tensor') -> 'Tensor':
+        c_tensor = Tensor._C.multiply_tensors(self.c_tensor, other.c_tensor)
+        return Tensor(None, None, c_tensor)
+
+    def divide(self, other: 'Tensor') -> 'Tensor':
+        c_tensor = Tensor._C.divide_tensors(self.c_tensor, other.c_tensor)
+        return Tensor(None, None, c_tensor)
+
     def dot(self, other: 'Tensor') -> 'Tensor':
         c_tensor = Tensor._C.matmul_tensors(self.c_tensor, other.c_tensor)
         return Tensor(None, None, c_tensor)
@@ -136,3 +163,15 @@ class Tensor:
 
     def __del__(self):
         Tensor._C.delete_tensor(self.c_tensor)
+
+    def __add__(self, other: 'Tensor') -> 'Tensor':
+        return self.add(other)
+
+    def __sub__(self, other: 'Tensor') -> 'Tensor':
+        return self.subtract(other)
+
+    def __mul__(self, other: 'Tensor') -> 'Tensor':
+        return self.multiply(other)
+
+    def __truediv__(self, other: 'Tensor') -> 'Tensor':
+        return self.divide(other)

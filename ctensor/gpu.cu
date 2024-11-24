@@ -20,6 +20,63 @@ void add_tensors_gpu(Tensor *a, Tensor *b, float *result)
     cudaDeviceSynchronize();
 }
 
+__global__ void subtract_tensors_kernel(float *a, float *b, uint32_t n, float *result)
+{
+    uint32_t index = blockDim.x * blockIdx.x + threadIdx.x;
+    uint32_t stride = gridDim.x * blockDim.x;
+
+    for (uint32_t i = index; i < n; i += stride)
+    {
+        result[i] = a[i] - b[i];
+    }
+}
+
+void subtract_tensors_gpu(Tensor *a, Tensor *b, float *result)
+{
+    uint32_t block_dim = 256;
+    uint32_t grid_dim = (a->size + block_dim - 1) / block_dim;
+    subtract_tensors_kernel<<<grid_dim, block_dim>>>(a->data, b->data, a->size, result);
+    cudaDeviceSynchronize();
+}
+
+__global__ void multiply_tensors_kernel(float *a, float *b, uint32_t n, float *result)
+{
+    uint32_t index = blockDim.x * blockIdx.x + threadIdx.x;
+    uint32_t stride = gridDim.x * blockDim.x;
+
+    for (uint32_t i = index; i < n; i += stride)
+    {
+        result[i] = a[i] * b[i];
+    }
+}
+
+void multiply_tensors_gpu(Tensor *a, Tensor *b, float *result)
+{
+    uint32_t block_dim = 256;
+    uint32_t grid_dim = (a->size + block_dim - 1) / block_dim;
+    multiply_tensors_kernel<<<grid_dim, block_dim>>>(a->data, b->data, a->size, result);
+    cudaDeviceSynchronize();
+}
+
+__global__ void divide_tensors_kernel(float *a, float *b, uint32_t n, float *result)
+{
+    uint32_t index = blockDim.x * blockIdx.x + threadIdx.x;
+    uint32_t stride = gridDim.x * blockDim.x;
+
+    for (uint32_t i = index; i < n; i += stride)
+    {
+        result[i] = a[i] / b[i];
+    }
+}
+
+void divide_tensors_gpu(Tensor *a, Tensor *b, float *result)
+{
+    uint32_t block_dim = 256;
+    uint32_t grid_dim = (a->size + block_dim - 1) / block_dim;
+    divide_tensors_kernel<<<grid_dim, block_dim>>>(a->data, b->data, a->size, result);
+    cudaDeviceSynchronize();
+}
+
 // MxP @ PxN => MxN
 __global__ void matmul_tensors_kernel(float *a, float *b, uint32_t m, uint32_t p, uint32_t n, float *result)
 {

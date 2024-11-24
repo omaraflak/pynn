@@ -14,7 +14,7 @@ uint32_t _get_size_from_shape(uint32_t *shape, uint32_t dims)
     return size;
 }
 
-Tensor *_create_tensor(float *data, uint32_t *shape, uint32_t dims)
+Tensor *_create_tensor(float *data, uint32_t *shape, uint32_t dims, uint32_t device)
 {
     Tensor *tensor = (Tensor *)malloc(sizeof(Tensor));
     tensor->data = data;
@@ -22,7 +22,7 @@ Tensor *_create_tensor(float *data, uint32_t *shape, uint32_t dims)
     tensor->stride = (uint32_t *)malloc(sizeof(uint32_t) * dims);
     tensor->size = _get_size_from_shape(shape, dims);
     tensor->dims = dims;
-    tensor->device = 0;
+    tensor->device = device;
     for (uint32_t i = 0; i < dims; i++)
     {
         tensor->stride[i] = 1;
@@ -86,7 +86,7 @@ Tensor *copy_tensor(Tensor *tensor)
     uint32_t *shape = (uint32_t *)malloc(sizeof(uint32_t) * tensor->dims);
     memcpy(data, tensor->data, sizeof(float) * tensor->size);
     memcpy(shape, tensor->shape, sizeof(uint32_t) * tensor->dims);
-    return _create_tensor(data, shape, tensor->dims);
+    return _create_tensor(data, shape, tensor->dims, /* device=*/0);
 }
 
 void delete_tensor(Tensor *tensor)
@@ -175,15 +175,73 @@ Tensor *add_tensors(Tensor *a, Tensor *b)
     {
         data = (float *)malloc(sizeof(float) * a->size);
         add_tensors_cpu(a, b, data);
-        return _create_tensor(data, shape, a->dims);
+        return _create_tensor(data, shape, a->dims, /* device=*/0);
     }
     else
     {
         cudaMalloc(&data, sizeof(float) * a->size);
         add_tensors_gpu(a, b, data);
-        Tensor *result = _create_tensor(data, shape, a->dims);
-        result->device = 1;
-        return result;
+        return _create_tensor(data, shape, a->dims, /* device=*/1);
+    }
+}
+
+Tensor *subtract_tensors(Tensor *a, Tensor *b)
+{
+    uint32_t *shape = (uint32_t *)malloc(sizeof(uint32_t) * a->dims);
+    memcpy(shape, a->shape, sizeof(uint32_t) * a->dims);
+    float *data;
+
+    if (a->device == 0 && b->device == 0)
+    {
+        data = (float *)malloc(sizeof(float) * a->size);
+        subtract_tensors_cpu(a, b, data);
+        return _create_tensor(data, shape, a->dims, /* device=*/0);
+    }
+    else
+    {
+        cudaMalloc(&data, sizeof(float) * a->size);
+        subtract_tensors_gpu(a, b, data);
+        return _create_tensor(data, shape, a->dims, /* device=*/1);
+    }
+}
+
+Tensor *multiply_tensors(Tensor *a, Tensor *b)
+{
+    uint32_t *shape = (uint32_t *)malloc(sizeof(uint32_t) * a->dims);
+    memcpy(shape, a->shape, sizeof(uint32_t) * a->dims);
+    float *data;
+
+    if (a->device == 0 && b->device == 0)
+    {
+        data = (float *)malloc(sizeof(float) * a->size);
+        multiply_tensors_cpu(a, b, data);
+        return _create_tensor(data, shape, a->dims, /* device=*/0);
+    }
+    else
+    {
+        cudaMalloc(&data, sizeof(float) * a->size);
+        multiply_tensors_gpu(a, b, data);
+        return _create_tensor(data, shape, a->dims, /* device=*/1);
+    }
+}
+
+Tensor *divide_tensors(Tensor *a, Tensor *b)
+{
+    uint32_t *shape = (uint32_t *)malloc(sizeof(uint32_t) * a->dims);
+    memcpy(shape, a->shape, sizeof(uint32_t) * a->dims);
+    float *data;
+
+    if (a->device == 0 && b->device == 0)
+    {
+        data = (float *)malloc(sizeof(float) * a->size);
+        divide_tensors_cpu(a, b, data);
+        return _create_tensor(data, shape, a->dims, /* device=*/0);
+    }
+    else
+    {
+        cudaMalloc(&data, sizeof(float) * a->size);
+        divide_tensors_gpu(a, b, data);
+        return _create_tensor(data, shape, a->dims, /* device=*/1);
     }
 }
 
@@ -199,14 +257,12 @@ Tensor *matmul_tensors(Tensor *a, Tensor *b)
     {
         data = (float *)malloc(sizeof(float) * size);
         matmul_tensors_cpu(a, b, data);
-        return _create_tensor(data, shape, 2);
+        return _create_tensor(data, shape, /* dims=*/2, /* device=*/0);
     }
     else
     {
         cudaMalloc(&data, sizeof(float) * size);
         matmul_tensors_gpu(a, b, data);
-        Tensor *result = _create_tensor(data, shape, 2);
-        result->device = 1;
-        return result;
+        return _create_tensor(data, shape, /* dims=*/2, /* device=*/1);
     }
 }

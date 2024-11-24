@@ -30,6 +30,9 @@ extern "C"
     float get_tensor_item(Tensor *tensor, uint32_t *indices);
 
     Tensor *add_tensors(Tensor *a, Tensor *b);
+    Tensor *subtract_tensors(Tensor *a, Tensor *b);
+    Tensor *multiply_tensors(Tensor *a, Tensor *b);
+    Tensor *divide_tensors(Tensor *a, Tensor *b);
     Tensor *matmul_tensors(Tensor *a, Tensor *b);
 }
 
