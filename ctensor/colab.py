@@ -9,6 +9,7 @@ files = [
     "gpu.cu",
     "Makefile",
     "tensor.py",
+    "test.py",
 ]
 
 names = [file.replace(".", "_") for file in files]
