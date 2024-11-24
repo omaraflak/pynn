@@ -14,10 +14,8 @@ typedef struct
     uint32_t device;
 } Tensor;
 
-#ifdef __cplusplus
 extern "C"
 {
-#endif
     void print_tensor_info(Tensor *tensor);
 
     Tensor *create_tensor(float *data, uint32_t *shape, uint32_t dims);
@@ -33,9 +31,6 @@ extern "C"
 
     Tensor *add_tensors(Tensor *a, Tensor *b);
     Tensor *matmul_tensors(Tensor *a, Tensor *b);
-
-#ifdef __cplusplus
 }
-#endif
 
 #endif // TENSOR
