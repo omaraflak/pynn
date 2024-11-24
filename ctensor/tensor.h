@@ -16,32 +16,32 @@ typedef struct
 
 extern "C"
 {
-    void print_tensor_info(Tensor *tensor);
+    void tensor_print_info(Tensor *tensor);
 
-    Tensor *create_tensor(float *data, uint32_t *shape, uint32_t dims);
-    Tensor *copy_tensor(Tensor *tensor);
-    void delete_tensor(Tensor *tensor);
+    Tensor *tensor_create(float *data, uint32_t *shape, uint32_t dims);
+    Tensor *tensor_copy(Tensor *tensor);
+    void tensor_delete(Tensor *tensor);
 
     void tensor_cpu_to_gpu(Tensor *tensor);
     void tensor_gpu_to_cpu(Tensor *tensor);
 
-    void fill_tensor(Tensor *tensor, float value);
-    void reshape_tensor(Tensor *tensor, uint32_t *shape, uint32_t dims);
-    float get_tensor_item(Tensor *tensor, uint32_t *indices);
+    void tensor_fill(Tensor *tensor, float value);
+    void tensor_reshape(Tensor *tensor, uint32_t *shape, uint32_t dims);
+    float tensor_get_item(Tensor *tensor, uint32_t *indices);
 
-    Tensor *unary_minus_tensor(Tensor *a);
+    Tensor *tensor_unary_minus(Tensor *a);
 
-    Tensor *add_tensors(Tensor *a, Tensor *b);
-    Tensor *subtract_tensors(Tensor *a, Tensor *b);
-    Tensor *multiply_tensors(Tensor *a, Tensor *b);
-    Tensor *divide_tensors(Tensor *a, Tensor *b);
-    Tensor *matmul_tensors(Tensor *a, Tensor *b);
+    Tensor *tensor_add(Tensor *a, Tensor *b);
+    Tensor *tensor_subtract(Tensor *a, Tensor *b);
+    Tensor *tensor_multiply(Tensor *a, Tensor *b);
+    Tensor *tensor_divide(Tensor *a, Tensor *b);
+    Tensor *tensor_matmul(Tensor *a, Tensor *b);
 
-    Tensor *broadcast_add_tensor(Tensor *a, float value);
-    Tensor *broadcast_subtract_tensor(Tensor *a, float value);
-    Tensor *broadcast_multiply_tensor(Tensor *a, float value);
-    Tensor *broadcast_divide_tensor(Tensor *a, float value);
-    Tensor *broadcast_right_divide_tensor(Tensor *a, float value);
+    Tensor *tensor_broadcast_add(Tensor *a, float value);
+    Tensor *tensor_broadcast_subtract(Tensor *a, float value);
+    Tensor *tensor_broadcast_multiply(Tensor *a, float value);
+    Tensor *tensor_broadcast_divide(Tensor *a, float value);
+    Tensor *tensor_broadcast_right_divide(Tensor *a, float value);
 }
 
 #endif // TENSOR

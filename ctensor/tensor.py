@@ -16,91 +16,91 @@ class CTensor(ctypes.Structure):
 def _init_tensor_c_lib() -> ctypes.CDLL:
     lib = ctypes.CDLL('/content/libtensor.so')
 
-    lib.print_tensor_info.argtypes = [ctypes.POINTER(CTensor)]
-    lib.print_tensor_info.restype = None
-    lib.create_tensor.argtypes = [
+    lib.tensor_print_info.argtypes = [ctypes.POINTER(CTensor)]
+    lib.tensor_print_info.restype = None
+    lib.tensor_create.argtypes = [
         ctypes.POINTER(ctypes.c_float),
         ctypes.POINTER(ctypes.c_uint32),
         ctypes.c_uint32
     ]
-    lib.create_tensor.restype = ctypes.POINTER(CTensor)
-    lib.copy_tensor.argtypes = [ctypes.POINTER(CTensor)]
-    lib.copy_tensor.restype = ctypes.POINTER(CTensor)
-    lib.delete_tensor.argtypes = [ctypes.POINTER(CTensor)]
-    lib.delete_tensor.restype = None
+    lib.tensor_create.restype = ctypes.POINTER(CTensor)
+    lib.tensor_copy.argtypes = [ctypes.POINTER(CTensor)]
+    lib.tensor_copy.restype = ctypes.POINTER(CTensor)
+    lib.tensor_delete.argtypes = [ctypes.POINTER(CTensor)]
+    lib.tensor_delete.restype = None
 
     lib.tensor_cpu_to_gpu.argtypes = [ctypes.POINTER(CTensor)]
     lib.tensor_cpu_to_gpu.restype = None
     lib.tensor_gpu_to_cpu.argtypes = [ctypes.POINTER(CTensor)]
     lib.tensor_gpu_to_cpu.restype = None
 
-    lib.fill_tensor.argtypes = [ctypes.POINTER(CTensor), ctypes.c_float]
-    lib.fill_tensor.restype = None
-    lib.reshape_tensor.argtypes = [
+    lib.tensor_fill.argtypes = [ctypes.POINTER(CTensor), ctypes.c_float]
+    lib.tensor_fill.restype = None
+    lib.tensor_reshape.argtypes = [
         ctypes.POINTER(CTensor),
         ctypes.POINTER(ctypes.c_uint32),
         ctypes.c_uint32
     ]
-    lib.reshape_tensor.restype = None
-    lib.get_tensor_item.argtypes = [
+    lib.tensor_reshape.restype = None
+    lib.tensor_get_item.argtypes = [
         ctypes.POINTER(CTensor),
         ctypes.POINTER(ctypes.c_uint32)
     ]
-    lib.get_tensor_item.restype = ctypes.c_float
+    lib.tensor_get_item.restype = ctypes.c_float
 
-    lib.unary_minus_tensor.argtypes = [ctypes.POINTER(CTensor)]
-    lib.unary_minus_tensor.restype = ctypes.POINTER(CTensor)
-    lib.add_tensors.argtypes = [
+    lib.tensor_unary_minus.argtypes = [ctypes.POINTER(CTensor)]
+    lib.tensor_unary_minus.restype = ctypes.POINTER(CTensor)
+    lib.tensor_add.argtypes = [
         ctypes.POINTER(CTensor),
         ctypes.POINTER(CTensor)
     ]
-    lib.add_tensors.restype = ctypes.POINTER(CTensor)
-    lib.subtract_tensors.argtypes = [
+    lib.tensor_add.restype = ctypes.POINTER(CTensor)
+    lib.tensor_subtract.argtypes = [
         ctypes.POINTER(CTensor),
         ctypes.POINTER(CTensor)
     ]
-    lib.subtract_tensors.restype = ctypes.POINTER(CTensor)
-    lib.multiply_tensors.argtypes = [
+    lib.tensor_subtract.restype = ctypes.POINTER(CTensor)
+    lib.tensor_multiply.argtypes = [
         ctypes.POINTER(CTensor),
         ctypes.POINTER(CTensor)
     ]
-    lib.multiply_tensors.restype = ctypes.POINTER(CTensor)
-    lib.divide_tensors.argtypes = [
+    lib.tensor_multiply.restype = ctypes.POINTER(CTensor)
+    lib.tensor_divide.argtypes = [
         ctypes.POINTER(CTensor),
         ctypes.POINTER(CTensor)
     ]
-    lib.divide_tensors.restype = ctypes.POINTER(CTensor)
-    lib.matmul_tensors.argtypes = [
+    lib.tensor_divide.restype = ctypes.POINTER(CTensor)
+    lib.tensor_matmul.argtypes = [
         ctypes.POINTER(CTensor),
         ctypes.POINTER(CTensor)
     ]
-    lib.matmul_tensors.restype = ctypes.POINTER(CTensor)
+    lib.tensor_matmul.restype = ctypes.POINTER(CTensor)
 
-    lib.broadcast_add_tensor.argtypes = [
+    lib.tensor_broadcast_add.argtypes = [
         ctypes.POINTER(CTensor),
         ctypes.c_float
     ]
-    lib.broadcast_add_tensor.restype = ctypes.POINTER(CTensor)
-    lib.broadcast_subtract_tensor.argtypes = [
+    lib.tensor_broadcast_add.restype = ctypes.POINTER(CTensor)
+    lib.tensor_broadcast_subtract.argtypes = [
         ctypes.POINTER(CTensor),
         ctypes.c_float
     ]
-    lib.broadcast_subtract_tensor.restype = ctypes.POINTER(CTensor)
-    lib.broadcast_multiply_tensor.argtypes = [
+    lib.tensor_broadcast_subtract.restype = ctypes.POINTER(CTensor)
+    lib.tensor_broadcast_multiply.argtypes = [
         ctypes.POINTER(CTensor),
         ctypes.c_float
     ]
-    lib.broadcast_multiply_tensor.restype = ctypes.POINTER(CTensor)
-    lib.broadcast_divide_tensor.argtypes = [
+    lib.tensor_broadcast_multiply.restype = ctypes.POINTER(CTensor)
+    lib.tensor_broadcast_divide.argtypes = [
         ctypes.POINTER(CTensor),
         ctypes.c_float
     ]
-    lib.broadcast_divide_tensor.restype = ctypes.POINTER(CTensor)
-    lib.broadcast_right_divide_tensor.argtypes = [
+    lib.tensor_broadcast_divide.restype = ctypes.POINTER(CTensor)
+    lib.tensor_broadcast_right_divide.argtypes = [
         ctypes.POINTER(CTensor),
         ctypes.c_float
     ]
-    lib.broadcast_right_divide_tensor.restype = ctypes.POINTER(CTensor)
+    lib.tensor_broadcast_right_divide.restype = ctypes.POINTER(CTensor)
     return lib
 
 
@@ -120,7 +120,7 @@ class Tensor:
         if not data or not shape:
             raise ValueError("Must provide data and shape.")
 
-        self.c_tensor = Tensor._C.create_tensor(
+        self.c_tensor = Tensor._C.tensor_create(
             (ctypes.c_float * len(data))(*data),
             (ctypes.c_uint32 * len(data))(*shape),
             ctypes.c_uint32(len(shape)),
@@ -151,7 +151,7 @@ class Tensor:
         return self.c_tensor.contents.device
 
     def copy(self) -> Tensor:
-        c_tensor = Tensor._C.copy_tensor(self.c_tensor)
+        c_tensor = Tensor._C.tensor_copy(self.c_tensor)
         return Tensor(None, None, c_tensor)
 
     def to_gpu(self):
@@ -161,70 +161,70 @@ class Tensor:
         Tensor._C.tensor_gpu_to_cpu(self.c_tensor)
 
     def reshape(self, shape: tuple[int, ...]):
-        Tensor._C.reshape_tensor(
+        Tensor._C.tensor_reshape(
             self.c_tensor,
             (ctypes.c_uint32 * len(shape))(*shape),
             ctypes.c_uint32(len(shape))
         )
 
     def fill(self, value: float):
-        Tensor._C.fill_tensor(self.c_tensor, ctypes.c_float(value))
+        Tensor._C.tensor_fill(self.c_tensor, ctypes.c_float(value))
 
     def unary_minus(self) -> Tensor:
-        c_tensor = Tensor._C.unary_minus_tensor(self.c_tensor)
+        c_tensor = Tensor._C.tensor_unary_minus(self.c_tensor)
         return Tensor(None, None, c_tensor)
 
     def add(self, other: Tensor | float) -> Tensor:
         if isinstance(other, Tensor):
-            c_tensor = Tensor._C.add_tensors(self.c_tensor, other.c_tensor)
+            c_tensor = Tensor._C.tensor_add(self.c_tensor, other.c_tensor)
         else:
-            c_tensor = Tensor._C.broadcast_add_tensor(
+            c_tensor = Tensor._C.tensor_broadcast_add(
                 self.c_tensor, ctypes.c_float(other))
         return Tensor(None, None, c_tensor)
 
     def subtract(self, other: Tensor | float) -> Tensor:
         if isinstance(other, Tensor):
-            c_tensor = Tensor._C.subtract_tensors(
+            c_tensor = Tensor._C.tensor_subtract(
                 self.c_tensor, other.c_tensor)
         else:
-            c_tensor = Tensor._C.broadcast_subtract_tensor(
+            c_tensor = Tensor._C.tensor_broadcast_subtract(
                 self.c_tensor, ctypes.c_float(other))
         return Tensor(None, None, c_tensor)
 
     def multiply(self, other: Tensor | float) -> Tensor:
         if isinstance(other, Tensor):
-            c_tensor = Tensor._C.multiply_tensors(
+            c_tensor = Tensor._C.tensor_multiply(
                 self.c_tensor, other.c_tensor)
         else:
-            c_tensor = Tensor._C.broadcast_multiply_tensor(
+            c_tensor = Tensor._C.tensor_broadcast_multiply(
                 self.c_tensor, ctypes.c_float(other))
         return Tensor(None, None, c_tensor)
 
     def divide(self, other: Tensor | float) -> Tensor:
         if isinstance(other, Tensor):
-            c_tensor = Tensor._C.divide_tensors(self.c_tensor, other.c_tensor)
+            c_tensor = Tensor._C.tensor_divide(self.c_tensor, other.c_tensor)
         else:
-            c_tensor = Tensor._C.broadcast_divide_tensor(
+            c_tensor = Tensor._C.tensor_broadcast_divide(
                 self.c_tensor, ctypes.c_float(other))
         return Tensor(None, None, c_tensor)
 
     def right_divide(self, other: float) -> Tensor:
-        c_tensor = Tensor._C.broadcast_right_divide_tensor(
+        c_tensor = Tensor._C.tensor_broadcast_right_divide(
             self.c_tensor, ctypes.c_float(other))
         return Tensor(None, None, c_tensor)
 
     def matmul(self, other: Tensor) -> Tensor:
-        c_tensor = Tensor._C.matmul_tensors(self.c_tensor, other.c_tensor)
+        c_tensor = Tensor._C.tensor_matmul(self.c_tensor, other.c_tensor)
         return Tensor(None, None, c_tensor)
 
     def get(self, *key: tuple[int, ...]) -> float:
-        return Tensor._C.get_tensor_item(self.c_tensor, (ctypes.c_uint32 * len(key))(*key))
+        return Tensor._C.tensor_get_item(self.c_tensor, (ctypes.c_uint32 * len(key))(*key))
 
     def print_info(self):
-        Tensor._C.print_tensor_info(self.c_tensor)
+        Tensor._C.tensor_print_info(self.c_tensor)
 
     def __del__(self):
-        Tensor._C.delete_tensor(self.c_tensor)
+        Tensor._C.tensor_delete(self.c_tensor)
 
     def __add__(self, other: Tensor | float) -> Tensor:
         return self.add(other)

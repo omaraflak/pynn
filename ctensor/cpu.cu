@@ -1,6 +1,6 @@
 #include "cpu.h"
 
-void fill_tensor_cpu(Tensor *a, float value)
+void tensor_fill_cpu(Tensor *a, float value)
 {
     for (uint32_t i = 0; i < a->size; i++)
     {
@@ -8,7 +8,7 @@ void fill_tensor_cpu(Tensor *a, float value)
     }
 }
 
-void unary_minus_tensor_cpu(Tensor *a, float *result)
+void tensor_unary_minus_cpu(Tensor *a, float *result)
 {
     for (uint32_t i = 0; i < a->size; i++)
     {
@@ -16,7 +16,7 @@ void unary_minus_tensor_cpu(Tensor *a, float *result)
     }
 }
 
-void add_tensors_cpu(Tensor *a, Tensor *b, float *result)
+void tensor_add_cpu(Tensor *a, Tensor *b, float *result)
 {
     for (uint32_t i = 0; i < a->size; i++)
     {
@@ -24,7 +24,7 @@ void add_tensors_cpu(Tensor *a, Tensor *b, float *result)
     }
 }
 
-void subtract_tensors_cpu(Tensor *a, Tensor *b, float *result)
+void tensor_subtract_cpu(Tensor *a, Tensor *b, float *result)
 {
     for (uint32_t i = 0; i < a->size; i++)
     {
@@ -32,7 +32,7 @@ void subtract_tensors_cpu(Tensor *a, Tensor *b, float *result)
     }
 }
 
-void multiply_tensors_cpu(Tensor *a, Tensor *b, float *result)
+void tensor_multiply_cpu(Tensor *a, Tensor *b, float *result)
 {
     for (uint32_t i = 0; i < a->size; i++)
     {
@@ -40,7 +40,7 @@ void multiply_tensors_cpu(Tensor *a, Tensor *b, float *result)
     }
 }
 
-void divide_tensors_cpu(Tensor *a, Tensor *b, float *result)
+void tensor_divide_cpu(Tensor *a, Tensor *b, float *result)
 {
     for (uint32_t i = 0; i < a->size; i++)
     {
@@ -48,7 +48,7 @@ void divide_tensors_cpu(Tensor *a, Tensor *b, float *result)
     }
 }
 
-void matmul_tensors_cpu(Tensor *a, Tensor *b, float *result)
+void tensor_matmul_cpu(Tensor *a, Tensor *b, float *result)
 {
     for (int i = 0; i < a->shape[0]; i++)
     {
@@ -64,7 +64,7 @@ void matmul_tensors_cpu(Tensor *a, Tensor *b, float *result)
     }
 }
 
-void broadcast_add_tensor_cpu(Tensor *a, float value, float *result)
+void tensor_broadcast_add_cpu(Tensor *a, float value, float *result)
 {
     for (uint32_t i = 0; i < a->size; i++)
     {
@@ -72,7 +72,7 @@ void broadcast_add_tensor_cpu(Tensor *a, float value, float *result)
     }
 }
 
-void broadcast_subtract_tensor_cpu(Tensor *a, float value, float *result)
+void tensor_broadcast_subtract_cpu(Tensor *a, float value, float *result)
 {
     for (uint32_t i = 0; i < a->size; i++)
     {
@@ -80,7 +80,7 @@ void broadcast_subtract_tensor_cpu(Tensor *a, float value, float *result)
     }
 }
 
-void broadcast_multiply_tensor_cpu(Tensor *a, float value, float *result)
+void tensor_broadcast_multiply_cpu(Tensor *a, float value, float *result)
 {
     for (uint32_t i = 0; i < a->size; i++)
     {
@@ -88,7 +88,7 @@ void broadcast_multiply_tensor_cpu(Tensor *a, float value, float *result)
     }
 }
 
-void broadcast_divide_tensor_cpu(Tensor *a, float value, float *result)
+void tensor_broadcast_divide_cpu(Tensor *a, float value, float *result)
 {
     for (uint32_t i = 0; i < a->size; i++)
     {
@@ -96,7 +96,7 @@ void broadcast_divide_tensor_cpu(Tensor *a, float value, float *result)
     }
 }
 
-void broadcast_right_divide_tensor_cpu(Tensor *a, float value, float *result)
+void tensor_broadcast_right_divide_cpu(Tensor *a, float value, float *result)
 {
     for (uint32_t i = 0; i < a->size; i++)
     {
