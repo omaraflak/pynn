@@ -79,6 +79,30 @@ class TestTensor(unittest.TestCase):
         self.assertEqual(x.device, 0)
         self.assertEqual(x.data, [1, 2, 3, 4, 5, 6])
 
+    def test_unary_minus_cpu(self):
+        x = Tensor([1, 2, 3, 4, 5, 6], (3, 2))
+
+        y = -x
+
+        self.assertEqual(y.size, 6)
+        self.assertEqual(y.dims, 2)
+        self.assertEqual(y.shape, (3, 2))
+        self.assertEqual(y.device, 0)
+        self.assertEqual(y.data, [-1, -2, -3, -4, -5, -6])
+
+    def test_unary_minus_gpu(self):
+        x = Tensor([1, 2, 3, 4, 5, 6], (3, 2))
+        x.to_gpu()
+
+        y = -x
+        y.to_cpu()
+
+        self.assertEqual(y.size, 6)
+        self.assertEqual(y.dims, 2)
+        self.assertEqual(y.shape, (3, 2))
+        self.assertEqual(y.device, 0)
+        self.assertEqual(y.data, [-1, -2, -3, -4, -5, -6])
+
     def test_add_cpu(self):
         a = Tensor([1, 2, 3, 4, 5, 6], (3, 2))
         b = Tensor([1, 2, 3, 4, 5, 6], (3, 2))
@@ -205,29 +229,29 @@ class TestTensor(unittest.TestCase):
         self.assertEqual(c.device, 0)
         self.assertEqual(c.data, [0, 1, 2, 3, 4, 5])
 
-    # def test_broadcast_right_subtract_cpu(self):
-    #     a = Tensor([1, 2, 3, 4, 5, 6], (3, 2))
+    def test_broadcast_right_subtract_cpu(self):
+        a = Tensor([1, 2, 3, 4, 5, 6], (3, 2))
 
-    #     c = 1 - a
+        c = 1 - a
 
-    #     self.assertEqual(c.size, 6)
-    #     self.assertEqual(c.dims, 2)
-    #     self.assertEqual(c.shape, (3, 2))
-    #     self.assertEqual(c.device, 0)
-    #     self.assertEqual(c.data, [0, -1, -2, -3, -4, -5])
+        self.assertEqual(c.size, 6)
+        self.assertEqual(c.dims, 2)
+        self.assertEqual(c.shape, (3, 2))
+        self.assertEqual(c.device, 0)
+        self.assertEqual(c.data, [0, -1, -2, -3, -4, -5])
 
-    # def test_broadcast_right_subtract_gpu(self):
-    #     a = Tensor([1, 2, 3, 4, 5, 6], (3, 2))
-    #     a.to_gpu()
+    def test_broadcast_right_subtract_gpu(self):
+        a = Tensor([1, 2, 3, 4, 5, 6], (3, 2))
+        a.to_gpu()
 
-    #     c = 1 - a
-    #     c.to_cpu()
+        c = 1 - a
+        c.to_cpu()
 
-    #     self.assertEqual(c.size, 6)
-    #     self.assertEqual(c.dims, 2)
-    #     self.assertEqual(c.shape, (3, 2))
-    #     self.assertEqual(c.device, 0)
-    #     self.assertEqual(c.data, [0, -1, -2, -3, -4, -5])
+        self.assertEqual(c.size, 6)
+        self.assertEqual(c.dims, 2)
+        self.assertEqual(c.shape, (3, 2))
+        self.assertEqual(c.device, 0)
+        self.assertEqual(c.data, [0, -1, -2, -3, -4, -5])
 
     def test_multiply_cpu(self):
         a = Tensor([1, 2, 3, 4, 5, 6], (3, 2))

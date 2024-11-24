@@ -8,6 +8,14 @@ void fill_tensor_cpu(Tensor *a, float value)
     }
 }
 
+void unary_minus_tensor_cpu(Tensor *a, float *result)
+{
+    for (uint32_t i = 0; i < a->size; i++)
+    {
+        result[i] = -a->data[i];
+    }
+}
+
 void add_tensors_cpu(Tensor *a, Tensor *b, float *result)
 {
     for (uint32_t i = 0; i < a->size; i++)

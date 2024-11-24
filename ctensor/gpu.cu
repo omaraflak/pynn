@@ -56,6 +56,25 @@ void fill_tensor_gpu(Tensor *a, float value)
     cudaDeviceSynchronize();
 }
 
+__global__ void unary_minus_tensor_kernel(float *a, uint32_t n, float *result)
+{
+    uint32_t index = blockDim.x * blockIdx.x + threadIdx.x;
+    uint32_t stride = gridDim.x * blockDim.x;
+
+    for (uint32_t i = index; i < n; i += stride)
+    {
+        result[i] = -a[i];
+    }
+}
+
+void unary_minus_tensor_gpu(Tensor *a, float *result)
+{
+    uint32_t grid_dim, block_dim;
+    _get_1d_gpu_config(&grid_dim, &block_dim, a->size);
+    unary_minus_tensor_kernel<<<grid_dim, block_dim>>>(a->data, a->size, result);
+    cudaDeviceSynchronize();
+}
+
 __global__ void add_tensors_kernel(float *a, float *b, uint32_t n, float *result)
 {
     uint32_t index = blockDim.x * blockIdx.x + threadIdx.x;

@@ -4,6 +4,7 @@
 #include "tensor.h"
 
 void fill_tensor_cpu(Tensor *a, float value);
+void unary_minus_tensor_cpu(Tensor *a, float *result);
 
 void add_tensors_cpu(Tensor *a, Tensor *b, float *result);
 void subtract_tensors_cpu(Tensor *a, Tensor *b, float *result);

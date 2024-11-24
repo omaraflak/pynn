@@ -29,6 +29,8 @@ extern "C"
     void reshape_tensor(Tensor *tensor, uint32_t *shape, uint32_t dims);
     float get_tensor_item(Tensor *tensor, uint32_t *indices);
 
+    Tensor *unary_minus_tensor(Tensor *a);
+
     Tensor *add_tensors(Tensor *a, Tensor *b);
     Tensor *subtract_tensors(Tensor *a, Tensor *b);
     Tensor *multiply_tensors(Tensor *a, Tensor *b);

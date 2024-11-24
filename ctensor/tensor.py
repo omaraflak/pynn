@@ -48,6 +48,8 @@ def _init_tensor_c_lib() -> ctypes.CDLL:
     ]
     lib.get_tensor_item.restype = ctypes.c_float
 
+    lib.unary_minus_tensor.argtypes = [ctypes.POINTER(CTensor)]
+    lib.unary_minus_tensor.restype = ctypes.POINTER(CTensor)
     lib.add_tensors.argtypes = [
         ctypes.POINTER(CTensor),
         ctypes.POINTER(CTensor)
@@ -168,6 +170,10 @@ class Tensor:
     def fill(self, value: float):
         Tensor._C.fill_tensor(self.c_tensor, ctypes.c_float(value))
 
+    def unary_minus(self) -> Tensor:
+        c_tensor = Tensor._C.unary_minus_tensor(self.c_tensor)
+        return Tensor(None, None, c_tensor)
+
     def add(self, other: Tensor | float) -> Tensor:
         if isinstance(other, Tensor):
             c_tensor = Tensor._C.add_tensors(self.c_tensor, other.c_tensor)
@@ -229,8 +235,8 @@ class Tensor:
     def __sub__(self, other: Tensor | float) -> Tensor:
         return self.subtract(other)
 
-    # def __rsub__(self, other: Tensor | float) -> Tensor:
-    #     return (-self).add(other)
+    def __rsub__(self, other: Tensor | float) -> Tensor:
+        return self.unary_minus().add(other)
 
     def __mul__(self, other: Tensor | float) -> Tensor:
         return self.multiply(other)
@@ -246,3 +252,6 @@ class Tensor:
 
     def __matmul__(self, other: Tensor) -> Tensor:
         return self.matmul(other)
+
+    def __neg__(self) -> Tensor:
+        return self.unary_minus()
