@@ -12,7 +12,7 @@ class CTensor(ctypes.Structure):
     ]
 
 
-def init_tensor_c_lib() -> ctypes.CDLL:
+def _init_tensor_c_lib() -> ctypes.CDLL:
     lib = ctypes.CDLL('/content/libtensor.so')
 
     lib.print_tensor_info.argtypes = [ctypes.POINTER(CTensor)]
@@ -77,7 +77,7 @@ def init_tensor_c_lib() -> ctypes.CDLL:
 
 
 class Tensor:
-    _C = init_tensor_c_lib()
+    _C = _init_tensor_c_lib()
 
     def __init__(
         self,
@@ -155,7 +155,7 @@ class Tensor:
         c_tensor = Tensor._C.divide_tensors(self.c_tensor, other.c_tensor)
         return Tensor(None, None, c_tensor)
 
-    def dot(self, other: 'Tensor') -> 'Tensor':
+    def matmul(self, other: 'Tensor') -> 'Tensor':
         c_tensor = Tensor._C.matmul_tensors(self.c_tensor, other.c_tensor)
         return Tensor(None, None, c_tensor)
 
@@ -181,4 +181,4 @@ class Tensor:
         return self.divide(other)
 
     def __matmul__(self, other: 'Tensor') -> 'Tensor':
-        return self.dot(other)
+        return self.matmul(other)
