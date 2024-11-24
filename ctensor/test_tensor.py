@@ -68,6 +68,17 @@ class TestTensor(unittest.TestCase):
 
         self.assertEqual(x.data, [1, 1, 1, 1, 1, 1])
 
+    def test_reshape(self):
+        x = Tensor([1, 2, 3, 4, 5, 6], (6, ))
+
+        x.reshape((3, 2))
+
+        self.assertEqual(x.size, 6)
+        self.assertEqual(x.dims, 2)
+        self.assertEqual(x.shape, (3, 2))
+        self.assertEqual(x.device, 0)
+        self.assertEqual(x.data, [1, 2, 3, 4, 5, 6])
+
     def test_add_cpu(self):
         a = Tensor([1, 2, 3, 4, 5, 6], (3, 2))
         b = Tensor([1, 2, 3, 4, 5, 6], (3, 2))
