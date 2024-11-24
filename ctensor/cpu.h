@@ -15,5 +15,6 @@ void broadcast_add_tensor_cpu(Tensor *a, float value, float *result);
 void broadcast_subtract_tensor_cpu(Tensor *a, float value, float *result);
 void broadcast_multiply_tensor_cpu(Tensor *a, float value, float *result);
 void broadcast_divide_tensor_cpu(Tensor *a, float value, float *result);
+void broadcast_right_divide_tensor_cpu(Tensor *a, float value, float *result);
 
 #endif // CPU

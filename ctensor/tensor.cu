@@ -196,7 +196,7 @@ Tensor *add_tensors(Tensor *a, Tensor *b)
     {
         cudaMalloc(&data, sizeof(float) * a->size);
         add_tensors_gpu(a, b, data);
-        return _create_tensor(data, shape, a->dims, /* device=*/1);
+        return _create_tensor(data, shape, a->dims, a->device);
     }
 }
 
@@ -216,7 +216,7 @@ Tensor *subtract_tensors(Tensor *a, Tensor *b)
     {
         cudaMalloc(&data, sizeof(float) * a->size);
         subtract_tensors_gpu(a, b, data);
-        return _create_tensor(data, shape, a->dims, /* device=*/1);
+        return _create_tensor(data, shape, a->dims, a->device);
     }
 }
 
@@ -236,7 +236,7 @@ Tensor *multiply_tensors(Tensor *a, Tensor *b)
     {
         cudaMalloc(&data, sizeof(float) * a->size);
         multiply_tensors_gpu(a, b, data);
-        return _create_tensor(data, shape, a->dims, /* device=*/1);
+        return _create_tensor(data, shape, a->dims, a->device);
     }
 }
 
@@ -256,7 +256,7 @@ Tensor *divide_tensors(Tensor *a, Tensor *b)
     {
         cudaMalloc(&data, sizeof(float) * a->size);
         divide_tensors_gpu(a, b, data);
-        return _create_tensor(data, shape, a->dims, /* device=*/1);
+        return _create_tensor(data, shape, a->dims, a->device);
     }
 }
 
@@ -278,7 +278,7 @@ Tensor *matmul_tensors(Tensor *a, Tensor *b)
     {
         cudaMalloc(&data, sizeof(float) * size);
         matmul_tensors_gpu(a, b, data);
-        return _create_tensor(data, shape, /* dims=*/2, /* device=*/1);
+        return _create_tensor(data, shape, /* dims=*/2, a->device);
     }
 }
 
@@ -298,7 +298,7 @@ Tensor *broadcast_add_tensor(Tensor *a, float value)
     {
         cudaMalloc(&data, sizeof(float) * a->size);
         broadcast_add_tensor_gpu(a, value, data);
-        return _create_tensor(data, shape, a->dims, /* device=*/1);
+        return _create_tensor(data, shape, a->dims, a->device);
     }
 }
 
@@ -318,7 +318,7 @@ Tensor *broadcast_subtract_tensor(Tensor *a, float value)
     {
         cudaMalloc(&data, sizeof(float) * a->size);
         broadcast_subtract_tensor_gpu(a, value, data);
-        return _create_tensor(data, shape, a->dims, /* device=*/1);
+        return _create_tensor(data, shape, a->dims, a->device);
     }
 }
 
@@ -338,7 +338,7 @@ Tensor *broadcast_multiply_tensor(Tensor *a, float value)
     {
         cudaMalloc(&data, sizeof(float) * a->size);
         broadcast_multiply_tensor_gpu(a, value, data);
-        return _create_tensor(data, shape, a->dims, /* device=*/1);
+        return _create_tensor(data, shape, a->dims, a->device);
     }
 }
 
@@ -358,6 +358,26 @@ Tensor *broadcast_divide_tensor(Tensor *a, float value)
     {
         cudaMalloc(&data, sizeof(float) * a->size);
         broadcast_divide_tensor_gpu(a, value, data);
-        return _create_tensor(data, shape, a->dims, /* device=*/1);
+        return _create_tensor(data, shape, a->dims, a->device);
+    }
+}
+
+Tensor *broadcast_right_divide_tensor(Tensor *a, float value)
+{
+    uint32_t *shape = (uint32_t *)malloc(sizeof(uint32_t) * a->dims);
+    memcpy(shape, a->shape, sizeof(uint32_t) * a->dims);
+    float *data;
+
+    if (a->device == 0)
+    {
+        data = (float *)malloc(sizeof(float) * a->size);
+        broadcast_right_divide_tensor_cpu(a, value, data);
+        return _create_tensor(data, shape, a->dims, /* device=*/0);
+    }
+    else
+    {
+        cudaMalloc(&data, sizeof(float) * a->size);
+        broadcast_right_divide_tensor_gpu(a, value, data);
+        return _create_tensor(data, shape, a->dims, a->device);
     }
 }

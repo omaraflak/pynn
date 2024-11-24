@@ -87,3 +87,11 @@ void broadcast_divide_tensor_cpu(Tensor *a, float value, float *result)
         result[i] = a->data[i] / value;
     }
 }
+
+void broadcast_right_divide_tensor_cpu(Tensor *a, float value, float *result)
+{
+    for (uint32_t i = 0; i < a->size; i++)
+    {
+        result[i] = value / a->data[i];
+    }
+}

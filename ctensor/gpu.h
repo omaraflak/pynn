@@ -33,4 +33,7 @@ void broadcast_multiply_tensor_gpu(Tensor *a, float value, float *result);
 __global__ void broadcast_divide_tensor_kernel(float *a, float value, uint32_t n, float *result);
 void broadcast_divide_tensor_gpu(Tensor *a, float value, float *result);
 
+__global__ void broadcast_right_divide_tensor_kernel(float *a, float value, uint32_t n, float *result);
+void broadcast_right_divide_tensor_gpu(Tensor *a, float value, float *result);
+
 #endif // GPU

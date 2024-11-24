@@ -94,6 +94,11 @@ def _init_tensor_c_lib() -> ctypes.CDLL:
         ctypes.c_float
     ]
     lib.broadcast_divide_tensor.restype = ctypes.POINTER(CTensor)
+    lib.broadcast_right_divide_tensor.argtypes = [
+        ctypes.POINTER(CTensor),
+        ctypes.c_float
+    ]
+    lib.broadcast_right_divide_tensor.restype = ctypes.POINTER(CTensor)
     return lib
 
 
@@ -197,6 +202,11 @@ class Tensor:
                 self.c_tensor, ctypes.c_float(other))
         return Tensor(None, None, c_tensor)
 
+    def right_divide(self, other: float) -> Tensor:
+        c_tensor = Tensor._C.broadcast_right_divide_tensor(
+            self.c_tensor, ctypes.c_float(other))
+        return Tensor(None, None, c_tensor)
+
     def matmul(self, other: Tensor) -> Tensor:
         c_tensor = Tensor._C.matmul_tensors(self.c_tensor, other.c_tensor)
         return Tensor(None, None, c_tensor)
@@ -231,9 +241,8 @@ class Tensor:
     def __truediv__(self, other: Tensor | float) -> Tensor:
         return self.divide(other)
 
-    # def __rtruediv__(self, other: Tensor | float) -> Tensor:
-    #     other / self
-    #     return (self).divide(other)
+    def __rtruediv__(self, other: float) -> Tensor:
+        return self.right_divide(other)
 
     def __matmul__(self, other: Tensor) -> Tensor:
         return self.matmul(other)

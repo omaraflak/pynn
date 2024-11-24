@@ -355,29 +355,29 @@ class TestTensor(unittest.TestCase):
         self.assertEqual(c.device, 0)
         self.assertEqual(c.data, [3, 2, 1.5])
 
-    # def test_broadcast_right_divide_cpu(self):
-    #     a = Tensor([6, 4, 3], (3,))
+    def test_broadcast_right_divide_cpu(self):
+        a = Tensor([6, 4, 3], (3,))
 
-    #     c = 12 / a
+        c = 12 / a
 
-    #     self.assertEqual(c.size, 3)
-    #     self.assertEqual(c.dims, 1)
-    #     self.assertEqual(c.shape, (3,))
-    #     self.assertEqual(c.device, 0)
-    #     self.assertEqual(c.data, [2, 3, 4])
+        self.assertEqual(c.size, 3)
+        self.assertEqual(c.dims, 1)
+        self.assertEqual(c.shape, (3,))
+        self.assertEqual(c.device, 0)
+        self.assertEqual(c.data, [2, 3, 4])
 
-    # def test_broadcast_right_divide_gpu(self):
-    #     a = Tensor([1, 2, 3, 4, 5, 6], (3, 2))
-    #     a.to_gpu()
+    def test_broadcast_right_divide_gpu(self):
+        a = Tensor([6, 4, 3], (3,))
+        a.to_gpu()
 
-    #     c = 2 / a
-    #     c.to_cpu()
+        c = 12 / a
+        c.to_cpu()
 
-    #     self.assertEqual(c.size, 3)
-    #     self.assertEqual(c.dims, 1)
-    #     self.assertEqual(c.shape, (3,))
-    #     self.assertEqual(c.device, 0)
-    #     self.assertEqual(c.data, [2, 3, 4])
+        self.assertEqual(c.size, 3)
+        self.assertEqual(c.dims, 1)
+        self.assertEqual(c.shape, (3,))
+        self.assertEqual(c.device, 0)
+        self.assertEqual(c.data, [2, 3, 4])
 
     def test_dot_cpu(self):
         a = Tensor([1, 2, 3, 4, 5, 6], (2, 3))

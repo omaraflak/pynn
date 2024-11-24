@@ -240,3 +240,22 @@ void broadcast_divide_tensor_gpu(Tensor *a, float value, float *result)
     broadcast_divide_tensor_kernel<<<grid_dim, block_dim>>>(a->data, value, a->size, result);
     cudaDeviceSynchronize();
 }
+
+__global__ void broadcast_right_divide_tensor_kernel(float *a, float value, uint32_t n, float *result)
+{
+    uint32_t index = blockDim.x * blockIdx.x + threadIdx.x;
+    uint32_t stride = gridDim.x * blockDim.x;
+
+    for (uint32_t i = index; i < n; i += stride)
+    {
+        result[i] = value / a[i];
+    }
+}
+
+void broadcast_right_divide_tensor_gpu(Tensor *a, float value, float *result)
+{
+    uint32_t grid_dim, block_dim;
+    _get_1d_gpu_config(&grid_dim, &block_dim, a->size);
+    broadcast_right_divide_tensor_kernel<<<grid_dim, block_dim>>>(a->data, value, a->size, result);
+    cudaDeviceSynchronize();
+}
