@@ -75,7 +75,7 @@ class Tensor:
             return
 
         if not data or not shape:
-            raise ValueError("Must provide data and shape, or c_tensor.")
+            raise ValueError("Must provide data and shape.")
 
         self.c_tensor = Tensor._C.create_tensor(
             (ctypes.c_float * len(data))(*data),
