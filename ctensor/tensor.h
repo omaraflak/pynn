@@ -18,6 +18,7 @@ typedef struct
 extern "C"
 {
 #endif
+    void print_tensor_info(Tensor *tensor);
 
     Tensor *create_tensor(float *data, uint32_t *shape, uint32_t dims);
     Tensor *copy_tensor(Tensor *tensor);

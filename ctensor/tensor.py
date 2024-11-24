@@ -15,8 +15,13 @@ class CTensor(ctypes.Structure):
 def init_tensor_c_lib() -> ctypes.CDLL:
     lib = ctypes.CDLL('/content/libtensor.so')
 
+    lib.print_tensor_info.argtypes = [ctypes.POINTER(CTensor)]
+    lib.print_tensor_info.restype = None
     lib.create_tensor.argtypes = [
-        ctypes.POINTER(ctypes.c_float), ctypes.POINTER(ctypes.c_uint32), ctypes.c_uint32]
+        ctypes.POINTER(ctypes.c_float),
+        ctypes.POINTER(ctypes.c_uint32),
+        ctypes.c_uint32
+    ]
     lib.create_tensor.restype = ctypes.POINTER(CTensor)
     lib.copy_tensor.argtypes = [ctypes.POINTER(CTensor)]
     lib.copy_tensor.restype = ctypes.POINTER(CTensor)
@@ -30,18 +35,27 @@ def init_tensor_c_lib() -> ctypes.CDLL:
 
     lib.fill_tensor_data.argtypes = [ctypes.POINTER(CTensor), ctypes.c_float]
     lib.fill_tensor_data.restype = None
-    lib.reshape_tensor.argtypes = [ctypes.POINTER(
-        CTensor), ctypes.POINTER(ctypes.c_uint32), ctypes.c_uint32]
+    lib.reshape_tensor.argtypes = [
+        ctypes.POINTER(CTensor),
+        ctypes.POINTER(ctypes.c_uint32),
+        ctypes.c_uint32
+    ]
     lib.reshape_tensor.restype = None
-    lib.get_tensor_item.argtypes = [ctypes.POINTER(
-        CTensor), ctypes.POINTER(ctypes.c_uint32)]
+    lib.get_tensor_item.argtypes = [
+        ctypes.POINTER(CTensor),
+        ctypes.POINTER(ctypes.c_uint32)
+    ]
     lib.get_tensor_item.restype = ctypes.c_float
 
     lib.add_tensors.argtypes = [
-        ctypes.POINTER(CTensor), ctypes.POINTER(CTensor)]
+        ctypes.POINTER(CTensor),
+        ctypes.POINTER(CTensor)
+    ]
     lib.add_tensors.restype = ctypes.POINTER(CTensor)
     lib.matmul_tensors.argtypes = [
-        ctypes.POINTER(CTensor), ctypes.POINTER(CTensor)]
+        ctypes.POINTER(CTensor),
+        ctypes.POINTER(CTensor)
+    ]
     lib.matmul_tensors.restype = ctypes.POINTER(CTensor)
 
     return lib
@@ -50,16 +64,22 @@ def init_tensor_c_lib() -> ctypes.CDLL:
 class Tensor:
     _C = init_tensor_c_lib()
 
-    def __init__(self, data: list[float], shape: tuple[int, ...], c_tensor=None):
+    def __init__(
+        self,
+        data: list[float] | None,
+        shape: tuple[int, ...] | None,
+        c_tensor=None
+    ):
         if c_tensor:
             self.c_tensor = c_tensor
             return
 
-        self.c_data = (ctypes.c_float * len(data))(*data)
-        self.c_shape = (ctypes.c_uint32 * len(data))(*shape)
+        if not data or not shape:
+            raise ValueError("Must provide data and shape, or c_tensor.")
+
         self.c_tensor = Tensor._C.create_tensor(
-            self.c_data,
-            self.c_shape,
+            (ctypes.c_float * len(data))(*data),
+            (ctypes.c_uint32 * len(data))(*shape),
             ctypes.c_uint32(len(shape)),
         )
 
@@ -111,19 +131,18 @@ class Tensor:
     def get(self, *key: tuple[int, ...]) -> float:
         return Tensor._C.get_tensor_item(self.c_tensor, (ctypes.c_uint32 * len(key))(*key))
 
+    def print_info(self):
+        Tensor._C.print_tensor_info(self.c_tensor)
+
     def __del__(self):
         Tensor._C.delete_tensor(self.c_tensor)
 
 
 a = Tensor([1, 2, 3, 4, 5, 6], (1, 3))
 b = Tensor([1, 2, 3, 4, 5, 6], (3, 1))
+a.to_gpu()
+b.to_gpu()
 c = a.dot(b)
+c.to_cpu()
 
-print(a.shape, a.stride, a.size)
-print(b.shape, b.stride, b.size)
-print(c.shape, c.stride, c.size)
-
-for i in range(c.shape[0]):
-    for j in range(c.shape[1]):
-        print(c.get(i, j), end=' ')
-    print()
+print(c.get(0, 0))

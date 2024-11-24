@@ -2,8 +2,9 @@
 #include "cpu.h"
 #include "gpu.h"
 #include <cstring>
+#include <stdio.h>
 
-uint32_t get_size_from_shape(uint32_t *shape, uint32_t dims)
+uint32_t _get_size_from_shape(uint32_t *shape, uint32_t dims)
 {
     uint32_t size = 1;
     for (uint32_t i = 0; i < dims; i++)
@@ -13,17 +14,63 @@ uint32_t get_size_from_shape(uint32_t *shape, uint32_t dims)
     return size;
 }
 
-Tensor *create_tensor(float *data, uint32_t *shape, uint32_t dims)
+Tensor *_create_tensor(float *data, uint32_t *shape, uint32_t dims)
 {
     Tensor *tensor = (Tensor *)malloc(sizeof(Tensor));
     tensor->data = data;
     tensor->shape = shape;
     tensor->stride = (uint32_t *)malloc(sizeof(uint32_t) * dims);
-    tensor->size = get_size_from_shape(shape, dims);
+    tensor->size = _get_size_from_shape(shape, dims);
     tensor->dims = dims;
     tensor->device = 0;
     for (uint32_t i = 0; i < dims; i++)
     {
+        tensor->stride[i] = 1;
+        for (uint32_t j = i + 1; j < dims; j++)
+        {
+            tensor->stride[i] *= shape[j];
+        }
+    }
+    return tensor;
+}
+
+void print_tensor_info(Tensor *tensor)
+{
+    printf("Tensor shape: (");
+    for (uint32_t i = 0; i < tensor->dims; i++)
+    {
+        const char *format = i == tensor->dims - 1 ? "%d" : "%d, ";
+        printf(format, tensor->shape[i]);
+    }
+    printf(")\\n");
+    printf("Tensor stride: (");
+    for (uint32_t i = 0; i < tensor->dims; i++)
+    {
+        const char *format = i == tensor->dims - 1 ? "%d" : "%d, ";
+        printf(format, tensor->stride[i]);
+    }
+    printf(")\\n");
+    printf("Tensor size: %d\\n", tensor->size);
+    printf("Tensor device: %d\\n", tensor->device);
+}
+
+Tensor *create_tensor(float *data, uint32_t *shape, uint32_t dims)
+{
+    uint32_t size = _get_size_from_shape(shape, dims);
+    Tensor *tensor = (Tensor *)malloc(sizeof(Tensor));
+    tensor->data = (float *)malloc(sizeof(float) * size);
+    tensor->shape = (uint32_t *)malloc(sizeof(uint32_t) * dims);
+    tensor->stride = (uint32_t *)malloc(sizeof(uint32_t) * dims);
+    tensor->size = size;
+    tensor->dims = dims;
+    tensor->device = 0;
+    for (uint32_t i = 0; i < size; i++)
+    {
+        tensor->data[i] = data[i];
+    }
+    for (uint32_t i = 0; i < dims; i++)
+    {
+        tensor->shape[i] = shape[i];
         tensor->stride[i] = 1;
         for (uint32_t j = i + 1; j < dims; j++)
         {
@@ -39,7 +86,7 @@ Tensor *copy_tensor(Tensor *tensor)
     uint32_t *shape = (uint32_t *)malloc(sizeof(uint32_t) * tensor->dims);
     memcpy(data, tensor->data, sizeof(float) * tensor->size);
     memcpy(shape, tensor->shape, sizeof(uint32_t) * tensor->dims);
-    return create_tensor(data, shape, tensor->dims);
+    return _create_tensor(data, shape, tensor->dims);
 }
 
 void delete_tensor(Tensor *tensor)
@@ -128,13 +175,13 @@ Tensor *add_tensors(Tensor *a, Tensor *b)
     {
         data = (float *)malloc(sizeof(float) * a->size);
         add_tensors_cpu(a, b, data);
-        return create_tensor(data, shape, a->dims);
+        return _create_tensor(data, shape, a->dims);
     }
     else
     {
         cudaMalloc(&data, sizeof(float) * a->size);
         add_tensors_gpu(a, b, data);
-        Tensor *result = create_tensor(data, shape, a->dims);
+        Tensor *result = _create_tensor(data, shape, a->dims);
         result->device = 1;
         return result;
     }
@@ -152,13 +199,13 @@ Tensor *matmul_tensors(Tensor *a, Tensor *b)
     {
         data = (float *)malloc(sizeof(float) * size);
         matmul_tensors_cpu(a, b, data);
-        return create_tensor(data, shape, 2);
+        return _create_tensor(data, shape, 2);
     }
     else
     {
         cudaMalloc(&data, sizeof(float) * size);
         matmul_tensors_gpu(a, b, data);
-        Tensor *result = create_tensor(data, shape, 2);
+        Tensor *result = _create_tensor(data, shape, 2);
         result->device = 1;
         return result;
     }
