@@ -4,6 +4,8 @@
 #include "tensor.h"
 
 void tensor_fill_cpu(Tensor *a, float value);
+void tensor_fill_random_uniform_cpu(Tensor *a, float min, float max);
+
 void tensor_unary_minus_cpu(Tensor *a, float *result);
 
 void tensor_add_cpu(Tensor *a, Tensor *b, float *result);

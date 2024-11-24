@@ -1,10 +1,21 @@
 #include "cpu.h"
+#include <time.h>
 
 void tensor_fill_cpu(Tensor *a, float value)
 {
     for (uint32_t i = 0; i < a->size; i++)
     {
         a->data[i] = value;
+    }
+}
+
+void tensor_fill_random_uniform_cpu(Tensor *a, float min, float max)
+{
+    srand(time(NULL));
+    for (uint32_t i = 0; i < a->size; i++)
+    {
+        float r = (double)rand() / (double)RAND_MAX;
+        a->data[i] = min + r * (max - min);
     }
 }
 

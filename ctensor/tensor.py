@@ -24,6 +24,13 @@ def _init_tensor_c_lib() -> ctypes.CDLL:
         ctypes.c_uint32
     ]
     lib.tensor_create.restype = ctypes.POINTER(CTensor)
+    lib.tensor_create_random_uniform.argtypes = [
+        ctypes.POINTER(ctypes.c_uint32),
+        ctypes.c_uint32,
+        ctypes.c_float,
+        ctypes.c_float,
+    ]
+    lib.tensor_create_random_uniform.restype = ctypes.POINTER(CTensor)
     lib.tensor_copy.argtypes = [ctypes.POINTER(CTensor)]
     lib.tensor_copy.restype = ctypes.POINTER(CTensor)
     lib.tensor_delete.argtypes = [ctypes.POINTER(CTensor)]
@@ -122,9 +129,19 @@ class Tensor:
 
         self.c_tensor = Tensor._C.tensor_create(
             (ctypes.c_float * len(data))(*data),
-            (ctypes.c_uint32 * len(data))(*shape),
+            (ctypes.c_uint32 * len(shape))(*shape),
             ctypes.c_uint32(len(shape)),
         )
+
+    @classmethod
+    def uniform(cls, shape: tuple[int, ...], lower: float = 0, upper: float = 1) -> Tensor:
+        c_tensor = Tensor._C.tensor_create_random_uniform(
+            (ctypes.c_uint32 * len(shape))(*shape),
+            ctypes.c_uint32(len(shape)),
+            ctypes.c_float(lower),
+            ctypes.c_float(upper),
+        )
+        return Tensor(None, None, c_tensor)
 
     @property
     def dims(self) -> int:

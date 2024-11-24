@@ -19,6 +19,8 @@ extern "C"
     void tensor_print_info(Tensor *tensor);
 
     Tensor *tensor_create(float *data, uint32_t *shape, uint32_t dims);
+    Tensor *tensor_create_random_uniform(uint32_t *shape, uint32_t dims, float min, float max);
+
     Tensor *tensor_copy(Tensor *tensor);
     void tensor_delete(Tensor *tensor);
 

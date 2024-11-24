@@ -80,6 +80,17 @@ Tensor *tensor_create(float *data, uint32_t *shape, uint32_t dims)
     return tensor;
 }
 
+Tensor *tensor_create_random_uniform(uint32_t *shape, uint32_t dims, float min, float max)
+{
+    uint32_t size = _get_size_from_shape(shape, dims);
+    float *data = (float *)malloc(sizeof(float) * size);
+    uint32_t *shape_ = (uint32_t *)malloc(sizeof(uint32_t) * dims);
+    memcpy(shape_, shape, sizeof(uint32_t) * dims);
+    Tensor *result = _tensor_create(data, shape_, dims, /* device=*/0);
+    tensor_fill_random_uniform_cpu(result, min, max);
+    return result;
+}
+
 Tensor *tensor_copy(Tensor *tensor)
 {
     uint32_t *shape = (uint32_t *)malloc(sizeof(uint32_t) * tensor->dims);
