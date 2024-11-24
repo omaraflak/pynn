@@ -134,11 +134,15 @@ void tensor_gpu_to_cpu(Tensor *tensor)
     tensor->device = 0;
 }
 
-void fill_tensor_data(Tensor *tensor, float value)
+void fill_tensor(Tensor *tensor, float value)
 {
-    for (uint32_t i = 0; i < tensor->size; i++)
+    if (tensor->device == 0)
     {
-        tensor->data[i] = value;
+        fill_tensor_cpu(tensor, value);
+    }
+    else
+    {
+        fill_tensor_gpu(tensor, value);
     }
 }
 

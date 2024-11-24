@@ -25,7 +25,7 @@ extern "C"
     void tensor_cpu_to_gpu(Tensor *tensor);
     void tensor_gpu_to_cpu(Tensor *tensor);
 
-    void fill_tensor_data(Tensor *tensor, float value);
+    void fill_tensor(Tensor *tensor, float value);
     void reshape_tensor(Tensor *tensor, uint32_t *shape, uint32_t dims);
     float get_tensor_item(Tensor *tensor, uint32_t *indices);
 

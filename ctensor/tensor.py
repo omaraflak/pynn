@@ -34,8 +34,8 @@ def _init_tensor_c_lib() -> ctypes.CDLL:
     lib.tensor_gpu_to_cpu.argtypes = [ctypes.POINTER(CTensor)]
     lib.tensor_gpu_to_cpu.restype = None
 
-    lib.fill_tensor_data.argtypes = [ctypes.POINTER(CTensor), ctypes.c_float]
-    lib.fill_tensor_data.restype = None
+    lib.fill_tensor.argtypes = [ctypes.POINTER(CTensor), ctypes.c_float]
+    lib.fill_tensor.restype = None
     lib.reshape_tensor.argtypes = [
         ctypes.POINTER(CTensor),
         ctypes.POINTER(ctypes.c_uint32),
@@ -159,6 +159,9 @@ class Tensor:
             (ctypes.c_uint32 * len(shape))(*shape),
             ctypes.c_uint32(len(shape))
         )
+
+    def fill(self, value: float):
+        Tensor._C.fill_tensor(self.c_tensor, ctypes.c_float(value))
 
     def add(self, other: Tensor | float) -> Tensor:
         if isinstance(other, Tensor):
