@@ -82,11 +82,22 @@ Tensor *create_tensor(float *data, uint32_t *shape, uint32_t dims)
 
 Tensor *copy_tensor(Tensor *tensor)
 {
-    float *data = (float *)malloc(sizeof(float) * tensor->size);
     uint32_t *shape = (uint32_t *)malloc(sizeof(uint32_t) * tensor->dims);
-    memcpy(data, tensor->data, sizeof(float) * tensor->size);
     memcpy(shape, tensor->shape, sizeof(uint32_t) * tensor->dims);
-    return _create_tensor(data, shape, tensor->dims, /* device=*/0);
+
+    float *data;
+    if (tensor->device == 0)
+    {
+        data = (float *)malloc(sizeof(float) * tensor->size);
+        memcpy(data, tensor->data, sizeof(float) * tensor->size);
+    }
+    else
+    {
+        cudaMalloc(&data, sizeof(float) * tensor->size);
+        cudaMemcpy(data, tensor->data, sizeof(float) * tensor->size, cudaMemcpyDeviceToDevice);
+    }
+
+    return _create_tensor(data, shape, tensor->dims, tensor->device);
 }
 
 void delete_tensor(Tensor *tensor)

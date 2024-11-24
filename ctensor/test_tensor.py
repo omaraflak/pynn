@@ -11,6 +11,7 @@ class TestTensor(unittest.TestCase):
         self.assertEqual(x.dims, 2)
         self.assertEqual(x.shape, (3, 2))
         self.assertEqual(x.device, 0)
+        self.assertEqual(x.data, [1, 2, 3, 4, 5, 6])
 
     def test_to_gpu_changes_device(self):
         x = Tensor([1, 2, 3], (3,))
@@ -26,6 +27,30 @@ class TestTensor(unittest.TestCase):
         x.to_cpu()
 
         self.assertEqual(x.device, 0)
+
+    def test_copy_in_cpu(self):
+        x = Tensor([1, 2, 3, 4, 5, 6], (3, 2))
+
+        y = x.copy()
+
+        self.assertEqual(y.size, 6)
+        self.assertEqual(y.dims, 2)
+        self.assertEqual(y.shape, (3, 2))
+        self.assertEqual(y.device, 0)
+        self.assertEqual(y.data, [1, 2, 3, 4, 5, 6])
+
+    def test_copy_in_gpu(self):
+        x = Tensor([1, 2, 3, 4, 5, 6], (3, 2))
+        x.to_gpu()
+
+        y = x.copy()
+        y.to_cpu()
+
+        self.assertEqual(y.size, 6)
+        self.assertEqual(y.dims, 2)
+        self.assertEqual(y.shape, (3, 2))
+        self.assertEqual(y.device, 0)
+        self.assertEqual(y.data, [1, 2, 3, 4, 5, 6])
 
     def test_add_cpu(self):
         a = Tensor([1, 2, 3, 4, 5, 6], (3, 2))

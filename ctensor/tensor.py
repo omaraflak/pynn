@@ -144,7 +144,7 @@ class Tensor:
         return self.c_tensor.contents.device
 
     def copy(self) -> Tensor:
-        c_tensor = Tensor._C.tensor_copy(self.c_tensor)
+        c_tensor = Tensor._C.copy_tensor(self.c_tensor)
         return Tensor(None, None, c_tensor)
 
     def to_gpu(self):
