@@ -103,12 +103,16 @@ class Tensor:
         return self.c_tensor.contents.dims
 
     @property
-    def shape(self) -> tuple[int, ...]:
-        return tuple(self.c_tensor.contents.shape[i] for i in range(self.dims))
-
-    @property
     def size(self) -> int:
         return self.c_tensor.contents.size
+
+    @property
+    def data(self) -> list[float]:
+        return [self.c_tensor.contents.data[i] for i in range(self.size)]
+
+    @property
+    def shape(self) -> tuple[int, ...]:
+        return tuple(self.c_tensor.contents.shape[i] for i in range(self.dims))
 
     @property
     def stride(self) -> tuple[int, ...]:
@@ -175,3 +179,6 @@ class Tensor:
 
     def __truediv__(self, other: 'Tensor') -> 'Tensor':
         return self.divide(other)
+
+    def __matmul__(self, other: 'Tensor') -> 'Tensor':
+        return self.dot(other)
