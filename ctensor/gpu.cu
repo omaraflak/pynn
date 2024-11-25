@@ -1,20 +1,7 @@
 #include "gpu.h"
 #include <stdio.h>
 #include <stdlib.h>
-
-#define gpuErrorCheck(ans)                    \
-    {                                         \
-        gpuAssert((ans), __FILE__, __LINE__); \
-    }
-inline void gpuAssert(cudaError_t code, const char *file, int line, bool abort = true)
-{
-    if (code != cudaSuccess)
-    {
-        fprintf(stderr, "GPUassert: %s %s %d\n", cudaGetErrorString(code), file, line);
-        if (abort)
-            exit(code);
-    }
-}
+#include <curand_kernel.h>
 
 uint32_t MAX_BLOCK_DIM = 1024;
 uint32_t MAX_BLOCK_DIM_1D = 1024;
@@ -68,6 +55,28 @@ void tensor_fill_gpu(Tensor *a, float value)
     uint32_t grid_dim, block_dim;
     _get_1d_gpu_config(&grid_dim, &block_dim, a->size);
     tensor_fill_kernel<<<grid_dim, block_dim>>>(a->data, a->size, value);
+    cudaDeviceSynchronize();
+}
+
+__global__ void tensor_fill_random_uniform_kernel(float *a, uint32_t n, float min, float max)
+{
+    curandState_t state;
+    curand_init(clock64(), 0, 0, &state);
+
+    uint32_t index = blockDim.x * blockIdx.x + threadIdx.x;
+    uint32_t stride = gridDim.x * blockDim.x;
+
+    for (uint32_t i = index; i < n; i += stride)
+    {
+        a[i] = min + curand_uniform(&state) * (max - min);
+    }
+}
+
+void tensor_fill_random_uniform_gpu(Tensor *a, float min, float max)
+{
+    uint32_t grid_dim, block_dim;
+    _get_1d_gpu_config(&grid_dim, &block_dim, a->size);
+    tensor_fill_random_uniform_kernel<<<grid_dim, block_dim>>>(a->data, a->size, min, max);
     cudaDeviceSynchronize();
 }
 
@@ -329,8 +338,7 @@ void tensor_exp_gpu(Tensor *a, float *result)
     uint32_t grid_dim, block_dim;
     _get_1d_gpu_config(&grid_dim, &block_dim, a->size);
     tensor_exp_kernel<<<grid_dim, block_dim>>>(a->data, a->size, result);
-    gpuErrorCheck(cudaPeekAtLastError());
-    gpuErrorCheck(cudaDeviceSynchronize());
+    cudaDeviceSynchronize();
 }
 
 __global__ void tensor_log_kernel(float *a, uint32_t n, float *result)

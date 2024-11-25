@@ -431,8 +431,20 @@ class TestTensor(unittest.TestCase):
         self.assertEqual(c.device, 0)
         self.assertEqual(c.data, [33, 26, 81, 62])
 
-    def test_random_uniform(self):
-        x = Tensor.random_uniform((3, 3), lower=37, upper=38)
+    def test_fill_random_uniform_cpu(self):
+        x = Tensor.zeros((30,))
+
+        x.fill_random_uniform(lower=37, upper=38)
+
+        for i in x.data:
+            self.assertTrue(37 <= i <= 38)
+
+    def test_fill_random_uniform_gpu(self):
+        x = Tensor.zeros((30,))
+        x.to_gpu()
+
+        x.fill_random_uniform(lower=37, upper=38)
+        x.to_cpu()
 
         for i in x.data:
             self.assertTrue(37 <= i <= 38)

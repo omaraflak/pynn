@@ -6,6 +6,9 @@
 __global__ void tensor_fill_kernel(float *a, uint32_t n, float value);
 void tensor_fill_gpu(Tensor *a, float value);
 
+__global__ void tensor_fill_random_uniform_kernel(float *a, uint32_t n, float min, float max);
+void tensor_fill_random_uniform_gpu(Tensor *a, float min, float max);
+
 __global__ void tensor_unary_minus_kernel(float *a, uint32_t n, float *result);
 void tensor_unary_minus_gpu(Tensor *a, float *result);
 

@@ -139,7 +139,14 @@ void tensor_fill(Tensor *tensor, float value)
 
 void tensor_fill_random_uniform(Tensor *tensor, float min, float max)
 {
-    tensor_fill_random_uniform_cpu(tensor, min, max);
+    if (tensor->device == 0)
+    {
+        tensor_fill_random_uniform_cpu(tensor, min, max);
+    }
+    else
+    {
+        tensor_fill_random_uniform_gpu(tensor, min, max);
+    }
 }
 
 void tensor_fill_random_normal(Tensor *tensor, float mean, float std)
