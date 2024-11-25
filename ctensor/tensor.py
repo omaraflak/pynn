@@ -73,6 +73,26 @@ def _init_tensor_c_lib() -> ctypes.CDLL:
 
     lib.tensor_unary_minus.argtypes = [ctypes.POINTER(CTensor)]
     lib.tensor_unary_minus.restype = ctypes.POINTER(CTensor)
+    lib.tensor_add_into.argtypes = [
+        ctypes.POINTER(CTensor),
+        ctypes.POINTER(CTensor)
+    ]
+    lib.tensor_add_into.restype = None
+    lib.tensor_subtract_into.argtypes = [
+        ctypes.POINTER(CTensor),
+        ctypes.POINTER(CTensor)
+    ]
+    lib.tensor_subtract_into.restype = None
+    lib.tensor_multiply_into.argtypes = [
+        ctypes.POINTER(CTensor),
+        ctypes.POINTER(CTensor)
+    ]
+    lib.tensor_multiply_into.restype = None
+    lib.tensor_divide_into.argtypes = [
+        ctypes.POINTER(CTensor),
+        ctypes.POINTER(CTensor)
+    ]
+    lib.tensor_divide_into.restype = None
     lib.tensor_add.argtypes = [
         ctypes.POINTER(CTensor),
         ctypes.POINTER(CTensor)
@@ -261,6 +281,18 @@ class Tensor:
         c_tensor = Tensor._C.tensor_unary_minus(self.c_tensor)
         return Tensor(None, None, c_tensor)
 
+    def add_into(self, other: Tensor):
+        Tensor._C.tensor_add_into(self.c_tensor, other.c_tensor)
+
+    def subtract_into(self, other: Tensor):
+        Tensor._C.tensor_subtract_into(self.c_tensor, other.c_tensor)
+
+    def multiply_into(self, other: Tensor):
+        Tensor._C.tensor_multiply_into(self.c_tensor, other.c_tensor)
+
+    def divide_into(self, other: Tensor):
+        Tensor._C.tensor_divide_into(self.c_tensor, other.c_tensor)
+
     def add(self, other: Tensor | float) -> Tensor:
         if isinstance(other, Tensor):
             c_tensor = Tensor._C.tensor_add(self.c_tensor, other.c_tensor)
@@ -349,6 +381,22 @@ class Tensor:
 
     def __del__(self):
         Tensor._C.tensor_delete(self.c_tensor)
+
+    def __iadd__(self, other: Tensor) -> Tensor:
+        self.add_into(other)
+        return self
+
+    def __isub__(self, other: Tensor) -> Tensor:
+        self.subtract_into(other)
+        return self
+
+    def __imul__(self, other: Tensor) -> Tensor:
+        self.multiply_into(other)
+        return self
+
+    def __itruediv__(self, other: Tensor) -> Tensor:
+        self.divide_into(other)
+        return self
 
     def __add__(self, other: Tensor | float) -> Tensor:
         return self.add(other)

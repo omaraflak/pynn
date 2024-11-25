@@ -36,6 +36,11 @@ extern "C"
 
     Tensor *tensor_unary_minus(Tensor *tensor);
 
+    void tensor_add_into(Tensor *a, Tensor *b);
+    void tensor_subtract_into(Tensor *a, Tensor *b);
+    void tensor_multiply_into(Tensor *a, Tensor *b);
+    void tensor_divide_into(Tensor *a, Tensor *b);
+
     Tensor *tensor_add(Tensor *a, Tensor *b);
     Tensor *tensor_subtract(Tensor *a, Tensor *b);
     Tensor *tensor_multiply(Tensor *a, Tensor *b);

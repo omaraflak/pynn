@@ -201,7 +201,7 @@ float tensor_sum(Tensor *tensor)
 {
     if (tensor->device > 0)
     {
-        fprintf(stderr, "tensor_sum is not supported on GPU\n");
+        fprintf(stderr, "tensor_sum is not supported on GPU.\n");
         exit(1);
     }
     return tensor_sum_cpu(tensor);
@@ -211,7 +211,7 @@ float tensor_mean(Tensor *tensor)
 {
     if (tensor->device > 0)
     {
-        fprintf(stderr, "tensor_mean is not supported on GPU\n");
+        fprintf(stderr, "tensor_mean is not supported on GPU.\n");
         exit(1);
     }
     return tensor_mean_cpu(tensor);
@@ -221,7 +221,7 @@ float tensor_min(Tensor *tensor)
 {
     if (tensor->device > 0)
     {
-        fprintf(stderr, "tensor_min is not supported on GPU\n");
+        fprintf(stderr, "tensor_min is not supported on GPU.\n");
         exit(1);
     }
     return tensor_min_cpu(tensor);
@@ -231,7 +231,7 @@ float tensor_max(Tensor *tensor)
 {
     if (tensor->device > 0)
     {
-        fprintf(stderr, "tensor_max is not supported on GPU\n");
+        fprintf(stderr, "tensor_max is not supported on GPU.\n");
         exit(1);
     }
     return tensor_max_cpu(tensor);
@@ -255,6 +255,74 @@ Tensor *tensor_unary_minus(Tensor *tensor)
     return _tensor_create(data, shape, tensor->dims, tensor->device);
 }
 
+void tensor_add_into(Tensor *a, Tensor *b)
+{
+    if (a->device == 0 && b->device == 0)
+    {
+        tensor_add_cpu(a, b, a->data);
+    }
+    else if (a->device == b->device)
+    {
+        tensor_add_gpu(a, b, a->data);
+    }
+    else
+    {
+        fprintf(stderr, "Both tensors must be on the same device.\n");
+        exit(1);
+    }
+}
+
+void tensor_subtract_into(Tensor *a, Tensor *b)
+{
+    if (a->device == 0 && b->device == 0)
+    {
+        tensor_subtract_cpu(a, b, a->data);
+    }
+    else if (a->device == b->device)
+    {
+        tensor_subtract_gpu(a, b, a->data);
+    }
+    else
+    {
+        fprintf(stderr, "Both tensors must be on the same device.\n");
+        exit(1);
+    }
+}
+
+void tensor_multiply_into(Tensor *a, Tensor *b)
+{
+    if (a->device == 0 && b->device == 0)
+    {
+        tensor_multiply_cpu(a, b, a->data);
+    }
+    else if (a->device == b->device)
+    {
+        tensor_multiply_gpu(a, b, a->data);
+    }
+    else
+    {
+        fprintf(stderr, "Both tensors must be on the same device.\n");
+        exit(1);
+    }
+}
+
+void tensor_divide_into(Tensor *a, Tensor *b)
+{
+    if (a->device == 0 && b->device == 0)
+    {
+        tensor_divide_cpu(a, b, a->data);
+    }
+    else if (a->device == b->device)
+    {
+        tensor_divide_gpu(a, b, a->data);
+    }
+    else
+    {
+        fprintf(stderr, "Both tensors must be on the same device.\n");
+        exit(1);
+    }
+}
+
 Tensor *tensor_add(Tensor *a, Tensor *b)
 {
     uint32_t *shape = _copy_shape(a);
@@ -265,10 +333,15 @@ Tensor *tensor_add(Tensor *a, Tensor *b)
         data = (float *)malloc(sizeof(float) * a->size);
         tensor_add_cpu(a, b, data);
     }
-    else
+    else if (a->device == b->device)
     {
         cudaMalloc(&data, sizeof(float) * a->size);
         tensor_add_gpu(a, b, data);
+    }
+    else
+    {
+        fprintf(stderr, "Both tensors must be on the same device.\n");
+        exit(1);
     }
     return _tensor_create(data, shape, a->dims, a->device);
 }
@@ -283,10 +356,15 @@ Tensor *tensor_subtract(Tensor *a, Tensor *b)
         data = (float *)malloc(sizeof(float) * a->size);
         tensor_subtract_cpu(a, b, data);
     }
-    else
+    else if (a->device == b->device)
     {
         cudaMalloc(&data, sizeof(float) * a->size);
         tensor_subtract_gpu(a, b, data);
+    }
+    else
+    {
+        fprintf(stderr, "Both tensors must be on the same device.\n");
+        exit(1);
     }
     return _tensor_create(data, shape, a->dims, a->device);
 }
@@ -301,10 +379,15 @@ Tensor *tensor_multiply(Tensor *a, Tensor *b)
         data = (float *)malloc(sizeof(float) * a->size);
         tensor_multiply_cpu(a, b, data);
     }
-    else
+    else if (a->device == b->device)
     {
         cudaMalloc(&data, sizeof(float) * a->size);
         tensor_multiply_gpu(a, b, data);
+    }
+    else
+    {
+        fprintf(stderr, "Both tensors must be on the same device.\n");
+        exit(1);
     }
     return _tensor_create(data, shape, a->dims, a->device);
 }
@@ -319,10 +402,15 @@ Tensor *tensor_divide(Tensor *a, Tensor *b)
         data = (float *)malloc(sizeof(float) * a->size);
         tensor_divide_cpu(a, b, data);
     }
-    else
+    else if (a->device == b->device)
     {
         cudaMalloc(&data, sizeof(float) * a->size);
         tensor_divide_gpu(a, b, data);
+    }
+    else
+    {
+        fprintf(stderr, "Both tensors must be on the same device.\n");
+        exit(1);
     }
     return _tensor_create(data, shape, a->dims, a->device);
 }
@@ -340,10 +428,15 @@ Tensor *tensor_matmul(Tensor *a, Tensor *b)
         data = (float *)malloc(sizeof(float) * size);
         tensor_matmul_cpu(a, b, data);
     }
-    else
+    else if (a->device == b->device)
     {
         cudaMalloc(&data, sizeof(float) * size);
         tensor_matmul_gpu(a, b, data);
+    }
+    else
+    {
+        fprintf(stderr, "Both tensors must be on the same device.\n");
+        exit(1);
     }
     return _tensor_create(data, shape, /* dims=*/2, a->device);
 }

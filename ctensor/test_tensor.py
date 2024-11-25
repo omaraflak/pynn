@@ -703,6 +703,114 @@ class TestTensor(unittest.TestCase):
         for i, j in zip(x.data, y.data):
             self.assertAlmostEqual(j, math.log2(i), delta=1e-3)
 
+    def test_add_into_cpu(self):
+        x = Tensor([1, 2, 3, 4], (2, 2))
+        y = Tensor([1, 0, 1, 1], (2, 2))
+
+        x += y
+
+        self.assertEqual(x.size, 4)
+        self.assertEqual(x.dims, 2)
+        self.assertEqual(x.shape, (2, 2))
+        self.assertEqual(x.device, 0)
+        self.assertEqual(x.data, [2, 2, 4, 5])
+
+    def test_add_into_gpu(self):
+        x = Tensor([1, 2, 3, 4], (2, 2))
+        y = Tensor([1, 0, 1, 1], (2, 2))
+        x.to_gpu()
+        y.to_gpu()
+
+        x += y
+        x.to_cpu()
+
+        self.assertEqual(x.size, 4)
+        self.assertEqual(x.dims, 2)
+        self.assertEqual(x.shape, (2, 2))
+        self.assertEqual(x.device, 0)
+        self.assertEqual(x.data, [2, 2, 4, 5])
+
+    def test_subtract_into_cpu(self):
+        x = Tensor([1, 2, 3, 4], (2, 2))
+        y = Tensor([1, 0, 1, 1], (2, 2))
+
+        x -= y
+
+        self.assertEqual(x.size, 4)
+        self.assertEqual(x.dims, 2)
+        self.assertEqual(x.shape, (2, 2))
+        self.assertEqual(x.device, 0)
+        self.assertEqual(x.data, [0, 2, 2, 3])
+
+    def test_subtract_into_gpu(self):
+        x = Tensor([1, 2, 3, 4], (2, 2))
+        y = Tensor([1, 0, 1, 1], (2, 2))
+        x.to_gpu()
+        y.to_gpu()
+
+        x -= y
+        x.to_cpu()
+
+        self.assertEqual(x.size, 4)
+        self.assertEqual(x.dims, 2)
+        self.assertEqual(x.shape, (2, 2))
+        self.assertEqual(x.device, 0)
+        self.assertEqual(x.data, [0, 2, 2, 3])
+
+    def test_multiply_into_cpu(self):
+        x = Tensor([1, 2, 3, 4], (2, 2))
+        y = Tensor([1, 0, 1, 1], (2, 2))
+
+        x *= y
+
+        self.assertEqual(x.size, 4)
+        self.assertEqual(x.dims, 2)
+        self.assertEqual(x.shape, (2, 2))
+        self.assertEqual(x.device, 0)
+        self.assertEqual(x.data, [1, 0, 3, 4])
+
+    def test_multiply_into_gpu(self):
+        x = Tensor([1, 2, 3, 4], (2, 2))
+        y = Tensor([1, 0, 1, 1], (2, 2))
+        x.to_gpu()
+        y.to_gpu()
+
+        x *= y
+        x.to_cpu()
+
+        self.assertEqual(x.size, 4)
+        self.assertEqual(x.dims, 2)
+        self.assertEqual(x.shape, (2, 2))
+        self.assertEqual(x.device, 0)
+        self.assertEqual(x.data, [1, 0, 3, 4])
+
+    def test_divide_into_cpu(self):
+        x = Tensor([1, 2, 3, 4], (2, 2))
+        y = Tensor([2, 1, 2, 2], (2, 2))
+
+        x /= y
+
+        self.assertEqual(x.size, 4)
+        self.assertEqual(x.dims, 2)
+        self.assertEqual(x.shape, (2, 2))
+        self.assertEqual(x.device, 0)
+        self.assertEqual(x.data, [0.5, 2, 1.5, 2])
+
+    def test_divide_into_gpu(self):
+        x = Tensor([1, 2, 3, 4], (2, 2))
+        y = Tensor([2, 1, 2, 2], (2, 2))
+        x.to_gpu()
+        y.to_gpu()
+
+        x /= y
+        x.to_cpu()
+
+        self.assertEqual(x.size, 4)
+        self.assertEqual(x.dims, 2)
+        self.assertEqual(x.shape, (2, 2))
+        self.assertEqual(x.device, 0)
+        self.assertEqual(x.data, [0.5, 2, 1.5, 2])
+
 
 if __name__ == "__main__":
     unittest.main()
