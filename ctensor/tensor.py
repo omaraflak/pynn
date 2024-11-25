@@ -191,7 +191,7 @@ class Tensor:
             self.c_tensor = c_tensor
             return
 
-        if not data or not shape:
+        if data is None or shape is None:
             raise ValueError("Must provide data and shape.")
 
         self.c_tensor = Tensor._C.tensor_create(
