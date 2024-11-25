@@ -4,6 +4,7 @@ from pynn import trainer
 from pynn import modules
 from pynn import losses
 from pynn import optimizers
+from pynn import Tensor
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -29,6 +30,8 @@ def plot_decision_boundary(model: modules.Module):
 def main():
     x_train = np.array([[0, 0], [0, 1], [1, 0], [1, 1]]).reshape((4, 2, 1))
     y_train = np.array([[0], [1], [1], [0]]).reshape((4, 1, 1))
+    x_train = [Tensor.array(x) for x in x_train]
+    y_train = [Tensor.array(y) for y in y_train]
 
     model = modules.Sequential([
         modules.Linear(2, 3),
@@ -47,7 +50,7 @@ def main():
     )
 
     for x in x_train:
-        print(x.tolist(), model.forward(x).tolist())
+        print(x.data, model.forward(x).data)
 
     plot_decision_boundary(model)
 
