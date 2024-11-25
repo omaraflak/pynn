@@ -158,9 +158,10 @@ void tensor_log10_cpu(Tensor *a, float *result)
 }
 void tensor_logb_cpu(Tensor *a, float base, float *result)
 {
+    float inverse_log_base = 1.0 / log(base);
     for (uint32_t i = 0; i < a->size; i++)
     {
-        result[i] = log(a->data[i]) / log(base);
+        result[i] = log(a->data[i]) * inverse_log_base;
     }
 }
 

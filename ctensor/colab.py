@@ -23,6 +23,7 @@ writes = "\n".join(
     for file, name in zip(files, names)
 )
 all = code + "\n" + writes
+all = all.replace("\\n", "\\\\n")
 
 subprocess.run("pbcopy", text=True, input=all)
 print("copied!")

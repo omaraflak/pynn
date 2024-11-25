@@ -496,10 +496,39 @@ class TestTensor(unittest.TestCase):
         self.assertEqual(y.device, 0)
         self.assertEqual(y.data, [1, 4, 9])
 
+    def test_power_gpu(self):
+        x = Tensor([1, 2, 3], (3,))
+        x.to_gpu()
+
+        y = x.power(2)
+        y.to_cpu()
+
+        self.assertEqual(y.size, 3)
+        self.assertEqual(y.dims, 1)
+        self.assertEqual(y.shape, (3,))
+        self.assertEqual(y.device, 0)
+        self.assertEqual(y.data, [1, 4, 9])
+
     def test_cos_cpu(self):
         x = Tensor([0, math.pi / 2, math.pi, 3 * math.pi / 2], (4,))
 
         y = x.cos()
+
+        self.assertEqual(y.size, 4)
+        self.assertEqual(y.dims, 1)
+        self.assertEqual(y.shape, (4,))
+        self.assertEqual(y.device, 0)
+        self.assertAlmostEqual(y.data[0], 1, delta=1e-3)
+        self.assertAlmostEqual(y.data[1], 0, delta=1e-3)
+        self.assertAlmostEqual(y.data[2], -1, delta=1e-3)
+        self.assertAlmostEqual(y.data[3], 0, delta=1e-3)
+
+    def test_cos_gpu(self):
+        x = Tensor([0, math.pi / 2, math.pi, 3 * math.pi / 2], (4,))
+        x.to_gpu()
+
+        y = x.cos()
+        y.to_cpu()
 
         self.assertEqual(y.size, 4)
         self.assertEqual(y.dims, 1)
@@ -524,10 +553,41 @@ class TestTensor(unittest.TestCase):
         self.assertAlmostEqual(y.data[2], 0, delta=1e-3)
         self.assertAlmostEqual(y.data[3], -1, delta=1e-3)
 
+    def test_sin_gpu(self):
+        x = Tensor([0, math.pi / 2, math.pi, 3 * math.pi / 2], (4,))
+        x.to_gpu()
+
+        y = x.sin()
+        y.to_cpu()
+
+        self.assertEqual(y.size, 4)
+        self.assertEqual(y.dims, 1)
+        self.assertEqual(y.shape, (4,))
+        self.assertEqual(y.device, 0)
+        self.assertAlmostEqual(y.data[0], 0, delta=1e-3)
+        self.assertAlmostEqual(y.data[1], 1, delta=1e-3)
+        self.assertAlmostEqual(y.data[2], 0, delta=1e-3)
+        self.assertAlmostEqual(y.data[3], -1, delta=1e-3)
+
     def test_exp_cpu(self):
         x = Tensor.random_uniform((10,))
 
         y = x.exp()
+
+        self.assertEqual(y.size, 10)
+        self.assertEqual(y.dims, 1)
+        self.assertEqual(y.shape, (10,))
+        self.assertEqual(y.device, 0)
+        for i, j in zip(x.data, y.data):
+            self.assertAlmostEqual(j, math.exp(i), delta=1e-3)
+
+    def test_exp_gpu(self):
+        x = Tensor.random_uniform((10,))
+        x.to_gpu()
+
+        y = x.exp()
+        x.to_cpu()
+        y.to_cpu()
 
         self.assertEqual(y.size, 10)
         self.assertEqual(y.dims, 1)
@@ -548,6 +608,21 @@ class TestTensor(unittest.TestCase):
         for i, j in zip(x.data, y.data):
             self.assertAlmostEqual(j, math.log(i), delta=1e-3)
 
+    def test_log_gpu(self):
+        x = Tensor.random_uniform((10,), lower=1, upper=10)
+        x.to_gpu()
+
+        y = x.log()
+        x.to_cpu()
+        y.to_cpu()
+
+        self.assertEqual(y.size, 10)
+        self.assertEqual(y.dims, 1)
+        self.assertEqual(y.shape, (10,))
+        self.assertEqual(y.device, 0)
+        for i, j in zip(x.data, y.data):
+            self.assertAlmostEqual(j, math.log(i), delta=1e-3)
+
     def test_log10_cpu(self):
         x = Tensor.random_uniform((10,), lower=1, upper=10)
 
@@ -560,10 +635,40 @@ class TestTensor(unittest.TestCase):
         for i, j in zip(x.data, y.data):
             self.assertAlmostEqual(j, math.log10(i), delta=1e-3)
 
+    def test_log10_gpu(self):
+        x = Tensor.random_uniform((10,), lower=1, upper=10)
+        x.to_gpu()
+
+        y = x.log10()
+        x.to_cpu()
+        y.to_cpu()
+
+        self.assertEqual(y.size, 10)
+        self.assertEqual(y.dims, 1)
+        self.assertEqual(y.shape, (10,))
+        self.assertEqual(y.device, 0)
+        for i, j in zip(x.data, y.data):
+            self.assertAlmostEqual(j, math.log10(i), delta=1e-3)
+
     def test_logb_cpu(self):
         x = Tensor.random_uniform((10,), lower=1, upper=10)
 
         y = x.logb(2)
+
+        self.assertEqual(y.size, 10)
+        self.assertEqual(y.dims, 1)
+        self.assertEqual(y.shape, (10,))
+        self.assertEqual(y.device, 0)
+        for i, j in zip(x.data, y.data):
+            self.assertAlmostEqual(j, math.log2(i), delta=1e-3)
+
+    def test_logb_gpu(self):
+        x = Tensor.random_uniform((10,), lower=1, upper=10)
+        x.to_gpu()
+
+        y = x.logb(2)
+        x.to_cpu()
+        y.to_cpu()
 
         self.assertEqual(y.size, 10)
         self.assertEqual(y.dims, 1)

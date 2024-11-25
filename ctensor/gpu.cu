@@ -1,4 +1,20 @@
 #include "gpu.h"
+#include <stdio.h>
+#include <stdlib.h>
+
+#define gpuErrorCheck(ans)                    \
+    {                                         \
+        gpuAssert((ans), __FILE__, __LINE__); \
+    }
+inline void gpuAssert(cudaError_t code, const char *file, int line, bool abort = true)
+{
+    if (code != cudaSuccess)
+    {
+        fprintf(stderr, "GPUassert: %s %s %d\n", cudaGetErrorString(code), file, line);
+        if (abort)
+            exit(code);
+    }
+}
 
 uint32_t MAX_BLOCK_DIM = 1024;
 uint32_t MAX_BLOCK_DIM_1D = 1024;
@@ -183,7 +199,7 @@ void tensor_matmul_gpu(Tensor *a, Tensor *b, float *result)
     cudaDeviceSynchronize();
 }
 
-__global__ void tensor_broadcast_add_kernel(float *a, float value, uint32_t n, float *result)
+__global__ void tensor_broadcast_add_kernel(float *a, uint32_t n, float value, float *result)
 {
     uint32_t index = blockDim.x * blockIdx.x + threadIdx.x;
     uint32_t stride = gridDim.x * blockDim.x;
@@ -198,11 +214,11 @@ void tensor_broadcast_add_gpu(Tensor *a, float value, float *result)
 {
     uint32_t grid_dim, block_dim;
     _get_1d_gpu_config(&grid_dim, &block_dim, a->size);
-    tensor_broadcast_add_kernel<<<grid_dim, block_dim>>>(a->data, value, a->size, result);
+    tensor_broadcast_add_kernel<<<grid_dim, block_dim>>>(a->data, a->size, value, result);
     cudaDeviceSynchronize();
 }
 
-__global__ void tensor_broadcast_subtract_kernel(float *a, float value, uint32_t n, float *result)
+__global__ void tensor_broadcast_subtract_kernel(float *a, uint32_t n, float value, float *result)
 {
     uint32_t index = blockDim.x * blockIdx.x + threadIdx.x;
     uint32_t stride = gridDim.x * blockDim.x;
@@ -217,11 +233,11 @@ void tensor_broadcast_subtract_gpu(Tensor *a, float value, float *result)
 {
     uint32_t grid_dim, block_dim;
     _get_1d_gpu_config(&grid_dim, &block_dim, a->size);
-    tensor_broadcast_subtract_kernel<<<grid_dim, block_dim>>>(a->data, value, a->size, result);
+    tensor_broadcast_subtract_kernel<<<grid_dim, block_dim>>>(a->data, a->size, value, result);
     cudaDeviceSynchronize();
 }
 
-__global__ void tensor_broadcast_multiply_kernel(float *a, float value, uint32_t n, float *result)
+__global__ void tensor_broadcast_multiply_kernel(float *a, uint32_t n, float value, float *result)
 {
     uint32_t index = blockDim.x * blockIdx.x + threadIdx.x;
     uint32_t stride = gridDim.x * blockDim.x;
@@ -236,11 +252,11 @@ void tensor_broadcast_multiply_gpu(Tensor *a, float value, float *result)
 {
     uint32_t grid_dim, block_dim;
     _get_1d_gpu_config(&grid_dim, &block_dim, a->size);
-    tensor_broadcast_multiply_kernel<<<grid_dim, block_dim>>>(a->data, value, a->size, result);
+    tensor_broadcast_multiply_kernel<<<grid_dim, block_dim>>>(a->data, a->size, value, result);
     cudaDeviceSynchronize();
 }
 
-__global__ void tensor_broadcast_divide_kernel(float *a, float value, uint32_t n, float *result)
+__global__ void tensor_broadcast_divide_kernel(float *a, uint32_t n, float value, float *result)
 {
     uint32_t index = blockDim.x * blockIdx.x + threadIdx.x;
     uint32_t stride = gridDim.x * blockDim.x;
@@ -255,11 +271,11 @@ void tensor_broadcast_divide_gpu(Tensor *a, float value, float *result)
 {
     uint32_t grid_dim, block_dim;
     _get_1d_gpu_config(&grid_dim, &block_dim, a->size);
-    tensor_broadcast_divide_kernel<<<grid_dim, block_dim>>>(a->data, value, a->size, result);
+    tensor_broadcast_divide_kernel<<<grid_dim, block_dim>>>(a->data, a->size, value, result);
     cudaDeviceSynchronize();
 }
 
-__global__ void tensor_broadcast_right_divide_kernel(float *a, float value, uint32_t n, float *result)
+__global__ void tensor_broadcast_right_divide_kernel(float *a, uint32_t n, float value, float *result)
 {
     uint32_t index = blockDim.x * blockIdx.x + threadIdx.x;
     uint32_t stride = gridDim.x * blockDim.x;
@@ -274,6 +290,141 @@ void tensor_broadcast_right_divide_gpu(Tensor *a, float value, float *result)
 {
     uint32_t grid_dim, block_dim;
     _get_1d_gpu_config(&grid_dim, &block_dim, a->size);
-    tensor_broadcast_right_divide_kernel<<<grid_dim, block_dim>>>(a->data, value, a->size, result);
+    tensor_broadcast_right_divide_kernel<<<grid_dim, block_dim>>>(a->data, a->size, value, result);
+    cudaDeviceSynchronize();
+}
+
+__global__ void tensor_power_kernel(float *a, uint32_t n, float power, float *result)
+{
+    uint32_t index = blockDim.x * blockIdx.x + threadIdx.x;
+    uint32_t stride = gridDim.x * blockDim.x;
+
+    for (uint32_t i = index; i < n; i += stride)
+    {
+        result[i] = pow(a[i], power);
+    }
+}
+
+void tensor_power_gpu(Tensor *a, float power, float *result)
+{
+    uint32_t grid_dim, block_dim;
+    _get_1d_gpu_config(&grid_dim, &block_dim, a->size);
+    tensor_power_kernel<<<grid_dim, block_dim>>>(a->data, a->size, power, result);
+    cudaDeviceSynchronize();
+}
+
+__global__ void tensor_exp_kernel(float *a, uint32_t n, float *result)
+{
+    uint32_t index = blockDim.x * blockIdx.x + threadIdx.x;
+    uint32_t stride = gridDim.x * blockDim.x;
+
+    for (uint32_t i = index; i < n; i += stride)
+    {
+        result[i] = exp(a[i]);
+    }
+}
+
+void tensor_exp_gpu(Tensor *a, float *result)
+{
+    uint32_t grid_dim, block_dim;
+    _get_1d_gpu_config(&grid_dim, &block_dim, a->size);
+    tensor_exp_kernel<<<grid_dim, block_dim>>>(a->data, a->size, result);
+    gpuErrorCheck(cudaPeekAtLastError());
+    gpuErrorCheck(cudaDeviceSynchronize());
+}
+
+__global__ void tensor_log_kernel(float *a, uint32_t n, float *result)
+{
+    uint32_t index = blockDim.x * blockIdx.x + threadIdx.x;
+    uint32_t stride = gridDim.x * blockDim.x;
+
+    for (uint32_t i = index; i < n; i += stride)
+    {
+        result[i] = log(a[i]);
+    }
+}
+
+void tensor_log_gpu(Tensor *a, float *result)
+{
+    uint32_t grid_dim, block_dim;
+    _get_1d_gpu_config(&grid_dim, &block_dim, a->size);
+    tensor_log_kernel<<<grid_dim, block_dim>>>(a->data, a->size, result);
+    cudaDeviceSynchronize();
+}
+
+__global__ void tensor_log10_kernel(float *a, uint32_t n, float *result)
+{
+    uint32_t index = blockDim.x * blockIdx.x + threadIdx.x;
+    uint32_t stride = gridDim.x * blockDim.x;
+
+    for (uint32_t i = index; i < n; i += stride)
+    {
+        result[i] = log10(a[i]);
+    }
+}
+
+void tensor_log10_gpu(Tensor *a, float *result)
+{
+    uint32_t grid_dim, block_dim;
+    _get_1d_gpu_config(&grid_dim, &block_dim, a->size);
+    tensor_log10_kernel<<<grid_dim, block_dim>>>(a->data, a->size, result);
+    cudaDeviceSynchronize();
+}
+
+__global__ void tensor_logb_kernel(float *a, uint32_t n, float base, float *result)
+{
+    uint32_t index = blockDim.x * blockIdx.x + threadIdx.x;
+    uint32_t stride = gridDim.x * blockDim.x;
+
+    float inverse_log_base = 1.0 / log(base);
+    for (uint32_t i = index; i < n; i += stride)
+    {
+        result[i] = log(a[i]) * inverse_log_base;
+    }
+}
+
+void tensor_logb_gpu(Tensor *a, float base, float *result)
+{
+    uint32_t grid_dim, block_dim;
+    _get_1d_gpu_config(&grid_dim, &block_dim, a->size);
+    tensor_logb_kernel<<<grid_dim, block_dim>>>(a->data, a->size, base, result);
+    cudaDeviceSynchronize();
+}
+
+__global__ void tensor_sin_kernel(float *a, uint32_t n, float *result)
+{
+    uint32_t index = blockDim.x * blockIdx.x + threadIdx.x;
+    uint32_t stride = gridDim.x * blockDim.x;
+
+    for (uint32_t i = index; i < n; i += stride)
+    {
+        result[i] = sin(a[i]);
+    }
+}
+
+void tensor_sin_gpu(Tensor *a, float *result)
+{
+    uint32_t grid_dim, block_dim;
+    _get_1d_gpu_config(&grid_dim, &block_dim, a->size);
+    tensor_sin_kernel<<<grid_dim, block_dim>>>(a->data, a->size, result);
+    cudaDeviceSynchronize();
+}
+
+__global__ void tensor_cos_kernel(float *a, uint32_t n, float *result)
+{
+    uint32_t index = blockDim.x * blockIdx.x + threadIdx.x;
+    uint32_t stride = gridDim.x * blockDim.x;
+
+    for (uint32_t i = index; i < n; i += stride)
+    {
+        result[i] = cos(a[i]);
+    }
+}
+
+void tensor_cos_gpu(Tensor *a, float *result)
+{
+    uint32_t grid_dim, block_dim;
+    _get_1d_gpu_config(&grid_dim, &block_dim, a->size);
+    tensor_cos_kernel<<<grid_dim, block_dim>>>(a->data, a->size, result);
     cudaDeviceSynchronize();
 }
