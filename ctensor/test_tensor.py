@@ -449,10 +449,24 @@ class TestTensor(unittest.TestCase):
         for i in x.data:
             self.assertTrue(37 <= i <= 38)
 
-    def test_random_normal(self):
+    def test_fill_random_normal_cpu(self):
         n = 10000
+        x = Tensor.zeros((n,))
 
-        x = Tensor.random_normal((n,), mean=5, std=2)
+        x.fill_random_normal(mean=5, std=2)
+
+        mean = sum(x.data) / n
+        std = (sum((i - mean) ** 2 for i in x.data) / n) ** 0.5
+        self.assertAlmostEqual(mean, 5, delta=0.3)
+        self.assertAlmostEqual(std, 2, delta=0.3)
+
+    def test_fill_random_normal_gpu(self):
+        n = 10000
+        x = Tensor.zeros((n,))
+        x.to_gpu()
+
+        x.fill_random_normal(mean=5, std=2)
+        x.to_cpu()
 
         mean = sum(x.data) / n
         std = (sum((i - mean) ** 2 for i in x.data) / n) ** 0.5

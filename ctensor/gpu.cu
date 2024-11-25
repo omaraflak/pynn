@@ -80,6 +80,28 @@ void tensor_fill_random_uniform_gpu(Tensor *a, float min, float max)
     cudaDeviceSynchronize();
 }
 
+__global__ void tensor_fill_random_normal_kernel(float *a, uint32_t n, float mean, float std)
+{
+    curandState_t state;
+    curand_init(clock64(), 0, 0, &state);
+
+    uint32_t index = blockDim.x * blockIdx.x + threadIdx.x;
+    uint32_t stride = gridDim.x * blockDim.x;
+
+    for (uint32_t i = index; i < n; i += stride)
+    {
+        a[i] = mean + curand_normal(&state) * std;
+    }
+}
+
+void tensor_fill_random_normal_gpu(Tensor *a, float mean, float std)
+{
+    uint32_t grid_dim, block_dim;
+    _get_1d_gpu_config(&grid_dim, &block_dim, a->size);
+    tensor_fill_random_normal_kernel<<<grid_dim, block_dim>>>(a->data, a->size, mean, std);
+    cudaDeviceSynchronize();
+}
+
 __global__ void tensor_unary_minus_kernel(float *a, uint32_t n, float *result)
 {
     uint32_t index = blockDim.x * blockIdx.x + threadIdx.x;
