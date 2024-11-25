@@ -31,6 +31,8 @@ extern "C"
     float tensor_get_item(Tensor *tensor, uint32_t *indices);
     float tensor_sum(Tensor *tensor);
     float tensor_mean(Tensor *tensor);
+    float tensor_min(Tensor *tensor);
+    float tensor_max(Tensor *tensor);
 
     Tensor *tensor_unary_minus(Tensor *a);
 
@@ -45,6 +47,10 @@ extern "C"
     Tensor *tensor_broadcast_multiply(Tensor *a, float value);
     Tensor *tensor_broadcast_divide(Tensor *a, float value);
     Tensor *tensor_broadcast_right_divide(Tensor *a, float value);
+
+    Tensor *tensor_power(Tensor *tensor, float power);
+    Tensor *tensor_sin(Tensor *tensor);
+    Tensor *tensor_cos(Tensor *tensor);
 }
 
 #endif // TENSOR

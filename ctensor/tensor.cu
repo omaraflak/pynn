@@ -3,6 +3,13 @@
 #include "gpu.h"
 #include <cstring>
 
+uint32_t *_copy_shape(Tensor *tensor)
+{
+    uint32_t *shape = (uint32_t *)malloc(sizeof(uint32_t) * tensor->dims);
+    memcpy(shape, tensor->shape, sizeof(uint32_t) * tensor->dims);
+    return shape;
+}
+
 uint32_t _get_size_from_shape(uint32_t *shape, uint32_t dims)
 {
     uint32_t size = 1;
@@ -67,8 +74,7 @@ Tensor *tensor_create_empty(uint32_t *shape, uint32_t dims)
 
 Tensor *tensor_copy(Tensor *tensor)
 {
-    uint32_t *shape = (uint32_t *)malloc(sizeof(uint32_t) * tensor->dims);
-    memcpy(shape, tensor->shape, sizeof(uint32_t) * tensor->dims);
+    uint32_t *shape = _copy_shape(tensor);
 
     float *data;
     if (tensor->device == 0)
@@ -185,10 +191,19 @@ float tensor_mean(Tensor *tensor)
     return tensor_mean_cpu(tensor);
 }
 
+float tensor_min(Tensor *tensor)
+{
+    return tensor_min_cpu(tensor);
+}
+
+float tensor_max(Tensor *tensor)
+{
+    return tensor_max_cpu(tensor);
+}
+
 Tensor *tensor_unary_minus(Tensor *a)
 {
-    uint32_t *shape = (uint32_t *)malloc(sizeof(uint32_t) * a->dims);
-    memcpy(shape, a->shape, sizeof(uint32_t) * a->dims);
+    uint32_t *shape = _copy_shape(a);
     float *data;
 
     if (a->device == 0)
@@ -207,8 +222,7 @@ Tensor *tensor_unary_minus(Tensor *a)
 
 Tensor *tensor_add(Tensor *a, Tensor *b)
 {
-    uint32_t *shape = (uint32_t *)malloc(sizeof(uint32_t) * a->dims);
-    memcpy(shape, a->shape, sizeof(uint32_t) * a->dims);
+    uint32_t *shape = _copy_shape(a);
     float *data;
 
     if (a->device == 0 && b->device == 0)
@@ -227,8 +241,7 @@ Tensor *tensor_add(Tensor *a, Tensor *b)
 
 Tensor *tensor_subtract(Tensor *a, Tensor *b)
 {
-    uint32_t *shape = (uint32_t *)malloc(sizeof(uint32_t) * a->dims);
-    memcpy(shape, a->shape, sizeof(uint32_t) * a->dims);
+    uint32_t *shape = _copy_shape(a);
     float *data;
 
     if (a->device == 0 && b->device == 0)
@@ -247,8 +260,7 @@ Tensor *tensor_subtract(Tensor *a, Tensor *b)
 
 Tensor *tensor_multiply(Tensor *a, Tensor *b)
 {
-    uint32_t *shape = (uint32_t *)malloc(sizeof(uint32_t) * a->dims);
-    memcpy(shape, a->shape, sizeof(uint32_t) * a->dims);
+    uint32_t *shape = _copy_shape(a);
     float *data;
 
     if (a->device == 0 && b->device == 0)
@@ -267,8 +279,7 @@ Tensor *tensor_multiply(Tensor *a, Tensor *b)
 
 Tensor *tensor_divide(Tensor *a, Tensor *b)
 {
-    uint32_t *shape = (uint32_t *)malloc(sizeof(uint32_t) * a->dims);
-    memcpy(shape, a->shape, sizeof(uint32_t) * a->dims);
+    uint32_t *shape = _copy_shape(a);
     float *data;
 
     if (a->device == 0 && b->device == 0)
@@ -309,8 +320,7 @@ Tensor *tensor_matmul(Tensor *a, Tensor *b)
 
 Tensor *tensor_broadcast_add(Tensor *a, float value)
 {
-    uint32_t *shape = (uint32_t *)malloc(sizeof(uint32_t) * a->dims);
-    memcpy(shape, a->shape, sizeof(uint32_t) * a->dims);
+    uint32_t *shape = _copy_shape(a);
     float *data;
 
     if (a->device == 0)
@@ -329,8 +339,7 @@ Tensor *tensor_broadcast_add(Tensor *a, float value)
 
 Tensor *tensor_broadcast_subtract(Tensor *a, float value)
 {
-    uint32_t *shape = (uint32_t *)malloc(sizeof(uint32_t) * a->dims);
-    memcpy(shape, a->shape, sizeof(uint32_t) * a->dims);
+    uint32_t *shape = _copy_shape(a);
     float *data;
 
     if (a->device == 0)
@@ -349,8 +358,7 @@ Tensor *tensor_broadcast_subtract(Tensor *a, float value)
 
 Tensor *tensor_broadcast_multiply(Tensor *a, float value)
 {
-    uint32_t *shape = (uint32_t *)malloc(sizeof(uint32_t) * a->dims);
-    memcpy(shape, a->shape, sizeof(uint32_t) * a->dims);
+    uint32_t *shape = _copy_shape(a);
     float *data;
 
     if (a->device == 0)
@@ -369,8 +377,7 @@ Tensor *tensor_broadcast_multiply(Tensor *a, float value)
 
 Tensor *tensor_broadcast_divide(Tensor *a, float value)
 {
-    uint32_t *shape = (uint32_t *)malloc(sizeof(uint32_t) * a->dims);
-    memcpy(shape, a->shape, sizeof(uint32_t) * a->dims);
+    uint32_t *shape = _copy_shape(a);
     float *data;
 
     if (a->device == 0)
@@ -389,8 +396,7 @@ Tensor *tensor_broadcast_divide(Tensor *a, float value)
 
 Tensor *tensor_broadcast_right_divide(Tensor *a, float value)
 {
-    uint32_t *shape = (uint32_t *)malloc(sizeof(uint32_t) * a->dims);
-    memcpy(shape, a->shape, sizeof(uint32_t) * a->dims);
+    uint32_t *shape = _copy_shape(a);
     float *data;
 
     if (a->device == 0)
@@ -405,4 +411,28 @@ Tensor *tensor_broadcast_right_divide(Tensor *a, float value)
         tensor_broadcast_right_divide_gpu(a, value, data);
         return _tensor_create(data, shape, a->dims, a->device);
     }
+}
+
+Tensor *tensor_power(Tensor *tensor, float power)
+{
+    uint32_t *shape = _copy_shape(tensor);
+    float *data = (float *)malloc(sizeof(float) * tensor->size);
+    tensor_power_cpu(tensor, power, data);
+    return _tensor_create(data, shape, tensor->dims, tensor->device);
+}
+
+Tensor *tensor_sin(Tensor *tensor)
+{
+    uint32_t *shape = _copy_shape(tensor);
+    float *data = (float *)malloc(sizeof(float) * tensor->size);
+    tensor_sin_cpu(tensor, data);
+    return _tensor_create(data, shape, tensor->dims, tensor->device);
+}
+
+Tensor *tensor_cos(Tensor *tensor)
+{
+    uint32_t *shape = _copy_shape(tensor);
+    float *data = (float *)malloc(sizeof(float) * tensor->size);
+    tensor_cos_cpu(tensor, data);
+    return _tensor_create(data, shape, tensor->dims, tensor->device);
 }

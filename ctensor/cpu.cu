@@ -125,6 +125,30 @@ void tensor_broadcast_right_divide_cpu(Tensor *a, float value, float *result)
     }
 }
 
+void tensor_power_cpu(Tensor *a, float power, float *result)
+{
+    for (uint32_t i = 0; i < a->size; i++)
+    {
+        result[i] = pow(a->data[i], power);
+    }
+}
+
+void tensor_sin_cpu(Tensor *a, float *result)
+{
+    for (uint32_t i = 0; i < a->size; i++)
+    {
+        result[i] = sin(a->data[i]);
+    }
+}
+
+void tensor_cos_cpu(Tensor *a, float *result)
+{
+    for (uint32_t i = 0; i < a->size; i++)
+    {
+        result[i] = cos(a->data[i]);
+    }
+}
+
 float tensor_sum_cpu(Tensor *a)
 {
     float result = 0;
@@ -138,4 +162,30 @@ float tensor_sum_cpu(Tensor *a)
 float tensor_mean_cpu(Tensor *a)
 {
     return tensor_sum_cpu(a) / a->size;
+}
+
+float tensor_min_cpu(Tensor *a)
+{
+    float result = a->data[0];
+    for (uint32_t i = 0; i < a->size; i++)
+    {
+        if (a->data[i] < result)
+        {
+            result = a->data[i];
+        }
+    }
+    return result;
+}
+
+float tensor_max_cpu(Tensor *a)
+{
+    float result = a->data[0];
+    for (uint32_t i = 0; i < a->size; i++)
+    {
+        if (a->data[i] > result)
+        {
+            result = a->data[i];
+        }
+    }
+    return result;
 }

@@ -66,6 +66,10 @@ def _init_tensor_c_lib() -> ctypes.CDLL:
     lib.tensor_sum.restype = ctypes.c_float
     lib.tensor_mean.argtypes = [ctypes.POINTER(CTensor)]
     lib.tensor_mean.restype = ctypes.c_float
+    lib.tensor_min.argtypes = [ctypes.POINTER(CTensor)]
+    lib.tensor_min.restype = ctypes.c_float
+    lib.tensor_max.argtypes = [ctypes.POINTER(CTensor)]
+    lib.tensor_max.restype = ctypes.c_float
 
     lib.tensor_unary_minus.argtypes = [ctypes.POINTER(CTensor)]
     lib.tensor_unary_minus.restype = ctypes.POINTER(CTensor)
@@ -120,6 +124,16 @@ def _init_tensor_c_lib() -> ctypes.CDLL:
         ctypes.c_float
     ]
     lib.tensor_broadcast_right_divide.restype = ctypes.POINTER(CTensor)
+
+    lib.tensor_power.argtypes = [
+        ctypes.POINTER(CTensor),
+        ctypes.c_float
+    ]
+    lib.tensor_power.restype = ctypes.POINTER(CTensor)
+    lib.tensor_sin.argtypes = [ctypes.POINTER(CTensor)]
+    lib.tensor_sin.restype = ctypes.POINTER(CTensor)
+    lib.tensor_cos.argtypes = [ctypes.POINTER(CTensor)]
+    lib.tensor_cos.restype = ctypes.POINTER(CTensor)
     return lib
 
 
@@ -282,6 +296,18 @@ class Tensor:
         c_tensor = Tensor._C.tensor_matmul(self.c_tensor, other.c_tensor)
         return Tensor(None, None, c_tensor)
 
+    def power(self, pow: float) -> Tensor:
+        c_tensor = Tensor._C.tensor_power(self.c_tensor, ctypes.c_float(pow))
+        return Tensor(None, None, c_tensor)
+
+    def sin(self) -> Tensor:
+        c_tensor = Tensor._C.tensor_sin(self.c_tensor)
+        return Tensor(None, None, c_tensor)
+
+    def cos(self) -> Tensor:
+        c_tensor = Tensor._C.tensor_cos(self.c_tensor)
+        return Tensor(None, None, c_tensor)
+
     def get(self, *key: tuple[int, ...]) -> float:
         return Tensor._C.tensor_get_item(self.c_tensor, (ctypes.c_uint32 * len(key))(*key))
 
@@ -290,6 +316,12 @@ class Tensor:
 
     def mean(self) -> float:
         return Tensor._C.tensor_mean(self.c_tensor)
+
+    def min(self) -> float:
+        return Tensor._C.tensor_min(self.c_tensor)
+
+    def max(self) -> float:
+        return Tensor._C.tensor_max(self.c_tensor)
 
     def __del__(self):
         Tensor._C.tensor_delete(self.c_tensor)

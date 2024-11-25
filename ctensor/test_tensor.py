@@ -1,3 +1,4 @@
+import math
 import unittest
 from tensor import Tensor
 
@@ -469,6 +470,59 @@ class TestTensor(unittest.TestCase):
         m = x.mean()
 
         self.assertEqual(m, 2)
+
+    def test_min(self):
+        x = Tensor([8, 2, 1, -7, 3], (5,))
+
+        m = x.min()
+
+        self.assertEqual(m, -7)
+
+    def test_max(self):
+        x = Tensor([8, 2, 1, 11, 3], (5,))
+
+        m = x.max()
+
+        self.assertEqual(m, 11)
+
+    def test_power(self):
+        x = Tensor([1, 2, 3], (3,))
+
+        y = x.power(2)
+
+        self.assertEqual(y.size, 3)
+        self.assertEqual(y.dims, 1)
+        self.assertEqual(y.shape, (3,))
+        self.assertEqual(y.device, 0)
+        self.assertEqual(y.data, [1, 4, 9])
+
+    def test_cos(self):
+        x = Tensor([0, math.pi / 2, math.pi, 3 * math.pi / 2], (4,))
+
+        y = x.cos()
+
+        self.assertEqual(y.size, 4)
+        self.assertEqual(y.dims, 1)
+        self.assertEqual(y.shape, (4,))
+        self.assertEqual(y.device, 0)
+        self.assertAlmostEqual(y.data[0], 1, delta=1e-3)
+        self.assertAlmostEqual(y.data[1], 0, delta=1e-3)
+        self.assertAlmostEqual(y.data[2], -1, delta=1e-3)
+        self.assertAlmostEqual(y.data[3], 0, delta=1e-3)
+
+    def test_sin(self):
+        x = Tensor([0, math.pi / 2, math.pi, 3 * math.pi / 2], (4,))
+
+        y = x.sin()
+
+        self.assertEqual(y.size, 4)
+        self.assertEqual(y.dims, 1)
+        self.assertEqual(y.shape, (4,))
+        self.assertEqual(y.device, 0)
+        self.assertAlmostEqual(y.data[0], 0, delta=1e-3)
+        self.assertAlmostEqual(y.data[1], 1, delta=1e-3)
+        self.assertAlmostEqual(y.data[2], 0, delta=1e-3)
+        self.assertAlmostEqual(y.data[3], -1, delta=1e-3)
 
 
 if __name__ == "__main__":
