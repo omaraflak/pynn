@@ -51,6 +51,8 @@ def _init_tensor_c_lib() -> ctypes.CDLL:
         ctypes.c_float,
     ]
     lib.tensor_fill_random_normal.restype = None
+    lib.tensor_fill_identity.argtypes = [ctypes.POINTER(CTensor)]
+    lib.tensor_fill_identity.restype = None
     lib.tensor_reshape.argtypes = [
         ctypes.POINTER(CTensor),
         ctypes.POINTER(ctypes.c_uint32),
@@ -227,6 +229,12 @@ class Tensor:
         tensor.fill(1)
         return tensor
 
+    @classmethod
+    def identity(cls, size: int) -> Tensor:
+        tensor = Tensor._empty((size, size))
+        tensor.fill_identity()
+        return tensor
+
     @property
     def dims(self) -> int:
         return self.c_tensor.contents.dims
@@ -284,6 +292,9 @@ class Tensor:
             ctypes.c_float(mean),
             ctypes.c_float(std)
         )
+
+    def fill_identity(self):
+        Tensor._C.tensor_fill_identity(self.c_tensor)
 
     def unary_minus(self) -> Tensor:
         c_tensor = Tensor._C.tensor_unary_minus(self.c_tensor)

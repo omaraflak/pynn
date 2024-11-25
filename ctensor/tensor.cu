@@ -173,6 +173,18 @@ void tensor_fill_random_normal(Tensor *tensor, float mean, float std)
     }
 }
 
+void tensor_fill_identity(Tensor *tensor)
+{
+    if (tensor->device == 0)
+    {
+        tensor_fill_identity_cpu(tensor);
+    }
+    else
+    {
+        tensor_fill_identity_gpu(tensor);
+    }
+}
+
 void tensor_reshape(Tensor *tensor, uint32_t *shape, uint32_t dims)
 {
     if (tensor->dims != dims)

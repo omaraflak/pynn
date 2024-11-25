@@ -29,6 +29,14 @@ void tensor_fill_random_normal_cpu(Tensor *a, float mean, float std)
     }
 }
 
+void tensor_fill_identity_cpu(Tensor *a)
+{
+    for (uint32_t i = 0; i < a->size; i++)
+    {
+        a->data[i] = i % (a->shape[1] + 1) == 0 ? 1 : 0;
+    }
+}
+
 void tensor_unary_minus_cpu(Tensor *a, float *result)
 {
     for (uint32_t i = 0; i < a->size; i++)

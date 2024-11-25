@@ -852,6 +852,22 @@ class TestTensor(unittest.TestCase):
 
         self.assertEqual(x[1, 0], 20)
 
+    def test_fill_identity_cpu(self):
+        x = Tensor.zeros((3, 3))
+
+        x.fill_identity()
+
+        self.assertEqual(x.data, [1, 0, 0, 0, 1, 0, 0, 0, 1])
+
+    def test_fill_identity_gpu(self):
+        x = Tensor.zeros((3, 3))
+        x.to_gpu()
+
+        x.fill_identity()
+        x.to_cpu()
+
+        self.assertEqual(x.data, [1, 0, 0, 0, 1, 0, 0, 0, 1])
+
 
 if __name__ == "__main__":
     unittest.main()

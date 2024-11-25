@@ -102,6 +102,25 @@ void tensor_fill_random_normal_gpu(Tensor *a, float mean, float std)
     cudaDeviceSynchronize();
 }
 
+__global__ void tensor_fill_identity_kernel(float *a, uint32_t n, uint32_t width)
+{
+    uint32_t index = blockDim.x * blockIdx.x + threadIdx.x;
+    uint32_t stride = gridDim.x * blockDim.x;
+
+    for (uint32_t i = index; i < n; i += stride)
+    {
+        a[i] = i % (width + 1) == 0 ? 1 : 0;
+    }
+}
+
+void tensor_fill_identity_gpu(Tensor *a)
+{
+    uint32_t grid_dim, block_dim;
+    _get_1d_gpu_config(&grid_dim, &block_dim, a->size);
+    tensor_fill_identity_kernel<<<grid_dim, block_dim>>>(a->data, a->size, a->shape[1]);
+    cudaDeviceSynchronize();
+}
+
 __global__ void tensor_unary_minus_kernel(float *a, uint32_t n, float *result)
 {
     uint32_t index = blockDim.x * blockIdx.x + threadIdx.x;
