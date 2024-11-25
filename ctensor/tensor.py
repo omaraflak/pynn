@@ -130,6 +130,14 @@ def _init_tensor_c_lib() -> ctypes.CDLL:
         ctypes.c_float
     ]
     lib.tensor_power.restype = ctypes.POINTER(CTensor)
+    lib.tensor_exp.argtypes = [ctypes.POINTER(CTensor)]
+    lib.tensor_exp.restype = ctypes.POINTER(CTensor)
+    lib.tensor_log.argtypes = [ctypes.POINTER(CTensor)]
+    lib.tensor_log.restype = ctypes.POINTER(CTensor)
+    lib.tensor_log10.argtypes = [ctypes.POINTER(CTensor)]
+    lib.tensor_log10.restype = ctypes.POINTER(CTensor)
+    lib.tensor_logb.argtypes = [ctypes.POINTER(CTensor), ctypes.c_float]
+    lib.tensor_logb.restype = ctypes.POINTER(CTensor)
     lib.tensor_sin.argtypes = [ctypes.POINTER(CTensor)]
     lib.tensor_sin.restype = ctypes.POINTER(CTensor)
     lib.tensor_cos.argtypes = [ctypes.POINTER(CTensor)]
@@ -298,6 +306,22 @@ class Tensor:
 
     def power(self, pow: float) -> Tensor:
         c_tensor = Tensor._C.tensor_power(self.c_tensor, ctypes.c_float(pow))
+        return Tensor(None, None, c_tensor)
+
+    def exp(self) -> Tensor:
+        c_tensor = Tensor._C.tensor_exp(self.c_tensor)
+        return Tensor(None, None, c_tensor)
+
+    def log(self) -> Tensor:
+        c_tensor = Tensor._C.tensor_log(self.c_tensor)
+        return Tensor(None, None, c_tensor)
+
+    def log10(self) -> Tensor:
+        c_tensor = Tensor._C.tensor_log10(self.c_tensor)
+        return Tensor(None, None, c_tensor)
+
+    def logb(self, base: float) -> Tensor:
+        c_tensor = Tensor._C.tensor_logb(self.c_tensor, ctypes.c_float(base))
         return Tensor(None, None, c_tensor)
 
     def sin(self) -> Tensor:

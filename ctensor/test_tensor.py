@@ -524,6 +524,54 @@ class TestTensor(unittest.TestCase):
         self.assertAlmostEqual(y.data[2], 0, delta=1e-3)
         self.assertAlmostEqual(y.data[3], -1, delta=1e-3)
 
+    def test_exp(self):
+        x = Tensor.random_uniform((10,))
+
+        y = x.exp()
+
+        self.assertEqual(y.size, 10)
+        self.assertEqual(y.dims, 1)
+        self.assertEqual(y.shape, (10,))
+        self.assertEqual(y.device, 0)
+        for i, j in zip(x.data, y.data):
+            self.assertAlmostEqual(j, math.exp(i), delta=1e-3)
+
+    def test_log(self):
+        x = Tensor.random_uniform((10,), lower=1, upper=10)
+
+        y = x.log()
+
+        self.assertEqual(y.size, 10)
+        self.assertEqual(y.dims, 1)
+        self.assertEqual(y.shape, (10,))
+        self.assertEqual(y.device, 0)
+        for i, j in zip(x.data, y.data):
+            self.assertAlmostEqual(j, math.log(i), delta=1e-3)
+
+    def test_log10(self):
+        x = Tensor.random_uniform((10,), lower=1, upper=10)
+
+        y = x.log10()
+
+        self.assertEqual(y.size, 10)
+        self.assertEqual(y.dims, 1)
+        self.assertEqual(y.shape, (10,))
+        self.assertEqual(y.device, 0)
+        for i, j in zip(x.data, y.data):
+            self.assertAlmostEqual(j, math.log10(i), delta=1e-3)
+
+    def test_logb(self):
+        x = Tensor.random_uniform((10,), lower=1, upper=10)
+
+        y = x.logb(2)
+
+        self.assertEqual(y.size, 10)
+        self.assertEqual(y.dims, 1)
+        self.assertEqual(y.shape, (10,))
+        self.assertEqual(y.device, 0)
+        for i, j in zip(x.data, y.data):
+            self.assertAlmostEqual(j, math.log2(i), delta=1e-3)
+
 
 if __name__ == "__main__":
     unittest.main()

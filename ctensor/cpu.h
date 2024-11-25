@@ -22,6 +22,10 @@ void tensor_broadcast_divide_cpu(Tensor *a, float value, float *result);
 void tensor_broadcast_right_divide_cpu(Tensor *a, float value, float *result);
 
 void tensor_power_cpu(Tensor *a, float power, float *result);
+void tensor_exp_cpu(Tensor *a, float *result);
+void tensor_log_cpu(Tensor *a, float *result);
+void tensor_log10_cpu(Tensor *a, float *result);
+void tensor_logb_cpu(Tensor *a, float base, float *result);
 void tensor_sin_cpu(Tensor *a, float *result);
 void tensor_cos_cpu(Tensor *a, float *result);
 

@@ -421,6 +421,38 @@ Tensor *tensor_power(Tensor *tensor, float power)
     return _tensor_create(data, shape, tensor->dims, tensor->device);
 }
 
+Tensor *tensor_exp(Tensor *tensor)
+{
+    uint32_t *shape = _copy_shape(tensor);
+    float *data = (float *)malloc(sizeof(float) * tensor->size);
+    tensor_exp_cpu(tensor, data);
+    return _tensor_create(data, shape, tensor->dims, tensor->device);
+}
+
+Tensor *tensor_log(Tensor *tensor)
+{
+    uint32_t *shape = _copy_shape(tensor);
+    float *data = (float *)malloc(sizeof(float) * tensor->size);
+    tensor_log_cpu(tensor, data);
+    return _tensor_create(data, shape, tensor->dims, tensor->device);
+}
+
+Tensor *tensor_log10(Tensor *tensor)
+{
+    uint32_t *shape = _copy_shape(tensor);
+    float *data = (float *)malloc(sizeof(float) * tensor->size);
+    tensor_log10_cpu(tensor, data);
+    return _tensor_create(data, shape, tensor->dims, tensor->device);
+}
+
+Tensor *tensor_logb(Tensor *tensor, float base)
+{
+    uint32_t *shape = _copy_shape(tensor);
+    float *data = (float *)malloc(sizeof(float) * tensor->size);
+    tensor_logb_cpu(tensor, base, data);
+    return _tensor_create(data, shape, tensor->dims, tensor->device);
+}
+
 Tensor *tensor_sin(Tensor *tensor)
 {
     uint32_t *shape = _copy_shape(tensor);

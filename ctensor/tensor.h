@@ -49,6 +49,10 @@ extern "C"
     Tensor *tensor_broadcast_right_divide(Tensor *a, float value);
 
     Tensor *tensor_power(Tensor *tensor, float power);
+    Tensor *tensor_exp(Tensor *tensor);
+    Tensor *tensor_log(Tensor *tensor);
+    Tensor *tensor_log10(Tensor *tensor);
+    Tensor *tensor_logb(Tensor *tensor, float base);
     Tensor *tensor_sin(Tensor *tensor);
     Tensor *tensor_cos(Tensor *tensor);
 }

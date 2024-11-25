@@ -133,6 +133,37 @@ void tensor_power_cpu(Tensor *a, float power, float *result)
     }
 }
 
+void tensor_exp_cpu(Tensor *a, float *result)
+{
+    for (uint32_t i = 0; i < a->size; i++)
+    {
+        result[i] = exp(a->data[i]);
+    }
+}
+
+void tensor_log_cpu(Tensor *a, float *result)
+{
+    for (uint32_t i = 0; i < a->size; i++)
+    {
+        result[i] = log(a->data[i]);
+    }
+}
+
+void tensor_log10_cpu(Tensor *a, float *result)
+{
+    for (uint32_t i = 0; i < a->size; i++)
+    {
+        result[i] = log10(a->data[i]);
+    }
+}
+void tensor_logb_cpu(Tensor *a, float base, float *result)
+{
+    for (uint32_t i = 0; i < a->size; i++)
+    {
+        result[i] = log(a->data[i]) / log(base);
+    }
+}
+
 void tensor_sin_cpu(Tensor *a, float *result)
 {
     for (uint32_t i = 0; i < a->size; i++)
