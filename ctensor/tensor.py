@@ -16,8 +16,6 @@ class CTensor(ctypes.Structure):
 def _init_tensor_c_lib() -> ctypes.CDLL:
     lib = ctypes.CDLL('/content/libtensor.so')
 
-    lib.tensor_print_info.argtypes = [ctypes.POINTER(CTensor)]
-    lib.tensor_print_info.restype = None
     lib.tensor_create.argtypes = [
         ctypes.POINTER(ctypes.c_float),
         ctypes.POINTER(ctypes.c_uint32),
@@ -282,9 +280,6 @@ class Tensor:
 
     def get(self, *key: tuple[int, ...]) -> float:
         return Tensor._C.tensor_get_item(self.c_tensor, (ctypes.c_uint32 * len(key))(*key))
-
-    def print_info(self):
-        Tensor._C.tensor_print_info(self.c_tensor)
 
     def __del__(self):
         Tensor._C.tensor_delete(self.c_tensor)

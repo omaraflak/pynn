@@ -2,7 +2,6 @@
 #include "cpu.h"
 #include "gpu.h"
 #include <cstring>
-#include <stdio.h>
 
 uint32_t _get_size_from_shape(uint32_t *shape, uint32_t dims)
 {
@@ -32,26 +31,6 @@ Tensor *_tensor_create(float *data, uint32_t *shape, uint32_t dims, uint32_t dev
         }
     }
     return tensor;
-}
-
-void tensor_print_info(Tensor *tensor)
-{
-    printf("Tensor shape: (");
-    for (uint32_t i = 0; i < tensor->dims; i++)
-    {
-        const char *format = i == tensor->dims - 1 ? "%d" : "%d, ";
-        printf(format, tensor->shape[i]);
-    }
-    printf(")\\n");
-    printf("Tensor stride: (");
-    for (uint32_t i = 0; i < tensor->dims; i++)
-    {
-        const char *format = i == tensor->dims - 1 ? "%d" : "%d, ";
-        printf(format, tensor->stride[i]);
-    }
-    printf(")\\n");
-    printf("Tensor size: %d\\n", tensor->size);
-    printf("Tensor device: %d\\n", tensor->device);
 }
 
 Tensor *tensor_create(float *data, uint32_t *shape, uint32_t dims)
