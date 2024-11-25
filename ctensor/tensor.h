@@ -27,7 +27,10 @@ extern "C"
     void tensor_fill_random_uniform(Tensor *tensor, float min, float max);
     void tensor_fill_random_normal(Tensor *tensor, float mean, float std);
     void tensor_reshape(Tensor *tensor, uint32_t *shape, uint32_t dims);
+
     float tensor_get_item(Tensor *tensor, uint32_t *indices);
+    float tensor_sum(Tensor *tensor);
+    float tensor_mean(Tensor *tensor);
 
     Tensor *tensor_unary_minus(Tensor *a);
 

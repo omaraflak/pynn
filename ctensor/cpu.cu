@@ -124,3 +124,18 @@ void tensor_broadcast_right_divide_cpu(Tensor *a, float value, float *result)
         result[i] = value / a->data[i];
     }
 }
+
+float tensor_sum_cpu(Tensor *a)
+{
+    float result = 0;
+    for (uint32_t i = 0; i < a->size; i++)
+    {
+        result += a->data[i];
+    }
+    return result;
+}
+
+float tensor_mean_cpu(Tensor *a)
+{
+    return tensor_sum_cpu(a) / a->size;
+}

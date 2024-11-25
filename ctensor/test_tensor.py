@@ -456,6 +456,20 @@ class TestTensor(unittest.TestCase):
 
         self.assertListEqual(x.data, [1] * 9)
 
+    def test_sum(self):
+        x = Tensor([1, 2, 3, 4, 5, 6], (2, 3))
+
+        s = x.sum()
+
+        self.assertEqual(s, 21)
+
+    def test_mean(self):
+        x = Tensor([1, 2, 3], (3,))
+
+        m = x.mean()
+
+        self.assertEqual(m, 2)
+
 
 if __name__ == "__main__":
     unittest.main()

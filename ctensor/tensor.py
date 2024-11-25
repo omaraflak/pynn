@@ -62,6 +62,10 @@ def _init_tensor_c_lib() -> ctypes.CDLL:
         ctypes.POINTER(ctypes.c_uint32)
     ]
     lib.tensor_get_item.restype = ctypes.c_float
+    lib.tensor_sum.argtypes = [ctypes.POINTER(CTensor)]
+    lib.tensor_sum.restype = ctypes.c_float
+    lib.tensor_mean.argtypes = [ctypes.POINTER(CTensor)]
+    lib.tensor_mean.restype = ctypes.c_float
 
     lib.tensor_unary_minus.argtypes = [ctypes.POINTER(CTensor)]
     lib.tensor_unary_minus.restype = ctypes.POINTER(CTensor)
@@ -280,6 +284,12 @@ class Tensor:
 
     def get(self, *key: tuple[int, ...]) -> float:
         return Tensor._C.tensor_get_item(self.c_tensor, (ctypes.c_uint32 * len(key))(*key))
+
+    def sum(self) -> float:
+        return Tensor._C.tensor_sum(self.c_tensor)
+
+    def mean(self) -> float:
+        return Tensor._C.tensor_mean(self.c_tensor)
 
     def __del__(self):
         Tensor._C.tensor_delete(self.c_tensor)

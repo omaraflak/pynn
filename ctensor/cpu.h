@@ -21,4 +21,7 @@ void tensor_broadcast_multiply_cpu(Tensor *a, float value, float *result);
 void tensor_broadcast_divide_cpu(Tensor *a, float value, float *result);
 void tensor_broadcast_right_divide_cpu(Tensor *a, float value, float *result);
 
+float tensor_sum_cpu(Tensor *a);
+float tensor_mean_cpu(Tensor *a);
+
 #endif // CPU

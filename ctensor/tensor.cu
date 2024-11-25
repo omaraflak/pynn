@@ -175,6 +175,16 @@ float tensor_get_item(Tensor *tensor, uint32_t *indices)
     return tensor->data[index];
 }
 
+float tensor_sum(Tensor *tensor)
+{
+    return tensor_sum_cpu(tensor);
+}
+
+float tensor_mean(Tensor *tensor)
+{
+    return tensor_mean_cpu(tensor);
+}
+
 Tensor *tensor_unary_minus(Tensor *a)
 {
     uint32_t *shape = (uint32_t *)malloc(sizeof(uint32_t) * a->dims);
