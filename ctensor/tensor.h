@@ -1,7 +1,6 @@
 #if !defined(TENSOR)
 #define TENSOR
 
-#include <stdlib.h>
 #include <stdint.h>
 
 typedef struct
