@@ -19,7 +19,7 @@ def plot_decision_boundary(model: modules.Module):
         for y in np.linspace(0, 1, 20):
             x_vals.append(x)
             y_vals.append(y)
-            z_vals.append(model.forward(np.array([[x], [y]]))[0][0])
+            z_vals.append(model.forward(Tensor([x, y], (2, 1))).data[0])
 
     fig = plt.figure()
     ax = fig.add_subplot(projection="3d")
