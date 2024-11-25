@@ -430,11 +430,21 @@ class TestTensor(unittest.TestCase):
         self.assertEqual(c.device, 0)
         self.assertEqual(c.data, [33, 26, 81, 62])
 
-    def test_uniform(self):
-        x = Tensor.uniform((3, 3))
+    def test_random_uniform(self):
+        x = Tensor.random_uniform((3, 3), lower=37, upper=38)
 
         for i in x.data:
-            self.assertTrue(0 <= i <= 1)
+            self.assertTrue(37 <= i <= 38)
+
+    def test_ones(self):
+        x = Tensor.ones((3, 3))
+
+        self.assertListEqual(x.data, [0] * 9)
+
+    def test_ones(self):
+        x = Tensor.ones((3, 3))
+
+        self.assertListEqual(x.data, [1] * 9)
 
 
 if __name__ == "__main__":

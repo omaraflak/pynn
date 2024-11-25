@@ -24,13 +24,11 @@ def _init_tensor_c_lib() -> ctypes.CDLL:
         ctypes.c_uint32
     ]
     lib.tensor_create.restype = ctypes.POINTER(CTensor)
-    lib.tensor_create_random_uniform.argtypes = [
+    lib.tensor_create_empty.argtypes = [
         ctypes.POINTER(ctypes.c_uint32),
-        ctypes.c_uint32,
-        ctypes.c_float,
-        ctypes.c_float,
+        ctypes.c_uint32
     ]
-    lib.tensor_create_random_uniform.restype = ctypes.POINTER(CTensor)
+    lib.tensor_create_empty.restype = ctypes.POINTER(CTensor)
     lib.tensor_copy.argtypes = [ctypes.POINTER(CTensor)]
     lib.tensor_copy.restype = ctypes.POINTER(CTensor)
     lib.tensor_delete.argtypes = [ctypes.POINTER(CTensor)]
@@ -43,6 +41,12 @@ def _init_tensor_c_lib() -> ctypes.CDLL:
 
     lib.tensor_fill.argtypes = [ctypes.POINTER(CTensor), ctypes.c_float]
     lib.tensor_fill.restype = None
+    lib.tensor_fill_random_uniform.argtypes = [
+        ctypes.POINTER(CTensor),
+        ctypes.c_float,
+        ctypes.c_float,
+    ]
+    lib.tensor_fill_random_uniform.restype = None
     lib.tensor_reshape.argtypes = [
         ctypes.POINTER(CTensor),
         ctypes.POINTER(ctypes.c_uint32),
@@ -134,14 +138,30 @@ class Tensor:
         )
 
     @classmethod
-    def uniform(cls, shape: tuple[int, ...], lower: float = 0, upper: float = 1) -> Tensor:
-        c_tensor = Tensor._C.tensor_create_random_uniform(
+    def _empty(cls, shape: tuple[int, ...]) -> Tensor:
+        c_tensor = Tensor._C.tensor_create_empty(
             (ctypes.c_uint32 * len(shape))(*shape),
             ctypes.c_uint32(len(shape)),
-            ctypes.c_float(lower),
-            ctypes.c_float(upper),
         )
         return Tensor(None, None, c_tensor)
+
+    @classmethod
+    def random_uniform(cls, shape: tuple[int, ...], lower: float = 0, upper: float = 1) -> Tensor:
+        tensor = Tensor._empty(shape)
+        tensor.fill_random_uniform(lower, upper)
+        return tensor
+
+    @classmethod
+    def zeros(cls, shape: tuple[int, ...]) -> Tensor:
+        tensor = Tensor._empty(shape)
+        tensor.fill(0)
+        return tensor
+
+    @classmethod
+    def ones(cls, shape: tuple[int, ...]) -> Tensor:
+        tensor = Tensor._empty(shape)
+        tensor.fill(1)
+        return tensor
 
     @property
     def dims(self) -> int:
@@ -186,6 +206,13 @@ class Tensor:
 
     def fill(self, value: float):
         Tensor._C.tensor_fill(self.c_tensor, ctypes.c_float(value))
+
+    def fill_random_uniform(self, lower: float = 0, upper: float = 1):
+        Tensor._C.tensor_fill_random_uniform(
+            self.c_tensor,
+            ctypes.c_float(lower),
+            ctypes.c_float(upper)
+        )
 
     def unary_minus(self) -> Tensor:
         c_tensor = Tensor._C.tensor_unary_minus(self.c_tensor)

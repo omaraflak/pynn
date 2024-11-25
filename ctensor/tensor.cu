@@ -56,6 +56,16 @@ void tensor_print_info(Tensor *tensor)
 
 Tensor *tensor_create(float *data, uint32_t *shape, uint32_t dims)
 {
+    Tensor *tensor = tensor_create_empty(shape, dims);
+    for (uint32_t i = 0; i < tensor->size; i++)
+    {
+        tensor->data[i] = data[i];
+    }
+    return tensor;
+}
+
+Tensor *tensor_create_empty(uint32_t *shape, uint32_t dims)
+{
     uint32_t size = _get_size_from_shape(shape, dims);
     Tensor *tensor = (Tensor *)malloc(sizeof(Tensor));
     tensor->data = (float *)malloc(sizeof(float) * size);
@@ -64,10 +74,6 @@ Tensor *tensor_create(float *data, uint32_t *shape, uint32_t dims)
     tensor->size = size;
     tensor->dims = dims;
     tensor->device = 0;
-    for (uint32_t i = 0; i < size; i++)
-    {
-        tensor->data[i] = data[i];
-    }
     for (uint32_t i = 0; i < dims; i++)
     {
         tensor->shape[i] = shape[i];
@@ -78,17 +84,6 @@ Tensor *tensor_create(float *data, uint32_t *shape, uint32_t dims)
         }
     }
     return tensor;
-}
-
-Tensor *tensor_create_random_uniform(uint32_t *shape, uint32_t dims, float min, float max)
-{
-    uint32_t size = _get_size_from_shape(shape, dims);
-    float *data = (float *)malloc(sizeof(float) * size);
-    uint32_t *shape_ = (uint32_t *)malloc(sizeof(uint32_t) * dims);
-    memcpy(shape_, shape, sizeof(uint32_t) * dims);
-    Tensor *result = _tensor_create(data, shape_, dims, /* device=*/0);
-    tensor_fill_random_uniform_cpu(result, min, max);
-    return result;
 }
 
 Tensor *tensor_copy(Tensor *tensor)
@@ -155,6 +150,11 @@ void tensor_fill(Tensor *tensor, float value)
     {
         tensor_fill_gpu(tensor, value);
     }
+}
+
+void tensor_fill_random_uniform(Tensor *tensor, float min, float max)
+{
+    tensor_fill_random_uniform_cpu(tensor, min, max);
 }
 
 void tensor_reshape(Tensor *tensor, uint32_t *shape, uint32_t dims)

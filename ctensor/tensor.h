@@ -19,8 +19,7 @@ extern "C"
     void tensor_print_info(Tensor *tensor);
 
     Tensor *tensor_create(float *data, uint32_t *shape, uint32_t dims);
-    Tensor *tensor_create_random_uniform(uint32_t *shape, uint32_t dims, float min, float max);
-
+    Tensor *tensor_create_empty(uint32_t *shape, uint32_t dims);
     Tensor *tensor_copy(Tensor *tensor);
     void tensor_delete(Tensor *tensor);
 
@@ -28,6 +27,7 @@ extern "C"
     void tensor_gpu_to_cpu(Tensor *tensor);
 
     void tensor_fill(Tensor *tensor, float value);
+    void tensor_fill_random_uniform(Tensor *tensor, float min, float max);
     void tensor_reshape(Tensor *tensor, uint32_t *shape, uint32_t dims);
     float tensor_get_item(Tensor *tensor, uint32_t *indices);
 
