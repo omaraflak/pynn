@@ -47,6 +47,12 @@ def _init_tensor_c_lib() -> ctypes.CDLL:
         ctypes.c_float,
     ]
     lib.tensor_fill_random_uniform.restype = None
+    lib.tensor_fill_random_normal.argtypes = [
+        ctypes.POINTER(CTensor),
+        ctypes.c_float,
+        ctypes.c_float,
+    ]
+    lib.tensor_fill_random_normal.restype = None
     lib.tensor_reshape.argtypes = [
         ctypes.POINTER(CTensor),
         ctypes.POINTER(ctypes.c_uint32),
@@ -152,6 +158,12 @@ class Tensor:
         return tensor
 
     @classmethod
+    def random_normal(cls, shape: tuple[int, ...], mean: float = 0, std: float = 1) -> Tensor:
+        tensor = Tensor._empty(shape)
+        tensor.fill_random_normal(mean, std)
+        return tensor
+
+    @classmethod
     def zeros(cls, shape: tuple[int, ...]) -> Tensor:
         tensor = Tensor._empty(shape)
         tensor.fill(0)
@@ -212,6 +224,13 @@ class Tensor:
             self.c_tensor,
             ctypes.c_float(lower),
             ctypes.c_float(upper)
+        )
+
+    def fill_random_normal(self, mean: float = 0, std: float = 1):
+        Tensor._C.tensor_fill_random_normal(
+            self.c_tensor,
+            ctypes.c_float(mean),
+            ctypes.c_float(std)
         )
 
     def unary_minus(self) -> Tensor:

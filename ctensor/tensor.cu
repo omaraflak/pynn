@@ -157,6 +157,11 @@ void tensor_fill_random_uniform(Tensor *tensor, float min, float max)
     tensor_fill_random_uniform_cpu(tensor, min, max);
 }
 
+void tensor_fill_random_normal(Tensor *tensor, float mean, float std)
+{
+    tensor_fill_random_normal_cpu(tensor, mean, std);
+}
+
 void tensor_reshape(Tensor *tensor, uint32_t *shape, uint32_t dims)
 {
     if (tensor->dims != dims)

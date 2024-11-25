@@ -1,5 +1,5 @@
 #include "cpu.h"
-#include <time.h>
+#include <random>
 
 void tensor_fill_cpu(Tensor *a, float value)
 {
@@ -11,11 +11,21 @@ void tensor_fill_cpu(Tensor *a, float value)
 
 void tensor_fill_random_uniform_cpu(Tensor *a, float min, float max)
 {
-    srand(time(NULL));
+    std::mt19937 generator;
+    std::uniform_real_distribution<float> uniform(min, max);
     for (uint32_t i = 0; i < a->size; i++)
     {
-        float r = (double)rand() / (double)RAND_MAX;
-        a->data[i] = min + r * (max - min);
+        a->data[i] = uniform(generator);
+    }
+}
+
+void tensor_fill_random_normal_cpu(Tensor *a, float mean, float std)
+{
+    std::mt19937 generator;
+    std::normal_distribution<float> normal(mean, std);
+    for (uint32_t i = 0; i < a->size; i++)
+    {
+        a->data[i] = normal(generator);
     }
 }
 

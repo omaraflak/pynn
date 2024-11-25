@@ -5,6 +5,7 @@
 
 void tensor_fill_cpu(Tensor *a, float value);
 void tensor_fill_random_uniform_cpu(Tensor *a, float min, float max);
+void tensor_fill_random_normal_cpu(Tensor *a, float mean, float std);
 
 void tensor_unary_minus_cpu(Tensor *a, float *result);
 
