@@ -81,6 +81,8 @@ def _init_tensor_c_lib() -> ctypes.CDLL:
 
     lib.tensor_unary_minus.argtypes = [ctypes.POINTER(CTensor)]
     lib.tensor_unary_minus.restype = ctypes.POINTER(CTensor)
+    lib.tensor_transpose.argtypes = [ctypes.POINTER(CTensor)]
+    lib.tensor_transpose.restype = ctypes.POINTER(CTensor)
     lib.tensor_add_into.argtypes = [
         ctypes.POINTER(CTensor),
         ctypes.POINTER(CTensor)
@@ -259,6 +261,10 @@ class Tensor:
     def device(self) -> int:
         return self.c_tensor.contents.device
 
+    @property
+    def T(self) -> Tensor:
+        return self.transpose()
+
     def copy(self) -> Tensor:
         c_tensor = Tensor._C.tensor_copy(self.c_tensor)
         return Tensor(None, None, c_tensor)
@@ -298,6 +304,10 @@ class Tensor:
 
     def unary_minus(self) -> Tensor:
         c_tensor = Tensor._C.tensor_unary_minus(self.c_tensor)
+        return Tensor(None, None, c_tensor)
+
+    def transpose(self) -> Tensor:
+        c_tensor = Tensor._C.tensor_transpose(self.c_tensor)
         return Tensor(None, None, c_tensor)
 
     def add_into(self, other: Tensor):

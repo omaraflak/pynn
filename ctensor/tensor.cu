@@ -277,6 +277,37 @@ Tensor *tensor_unary_minus(Tensor *tensor)
     return _tensor_create(data, shape, tensor->dims, tensor->device);
 }
 
+Tensor *tensor_transpose(Tensor *tensor)
+{
+    uint32_t *shape = _copy_shape(tensor);
+    uint32_t tmp = shape[0];
+    shape[0] = shape[1];
+    shape[1] = tmp;
+
+    float *data = (float *)malloc(sizeof(float) * tensor->size);
+
+    for (uint32_t i = 0; i < tensor->shape[0]; i++)
+    {
+        for (uint32_t j = 0; j < tensor->shape[1]; j++)
+        {
+            data[j * tensor->shape[0] + i] = tensor->data[i * tensor->shape[1] + j];
+        }
+    }
+
+    if (tensor->device == 0)
+    {
+        return _tensor_create(data, shape, tensor->dims, tensor->device);
+    }
+    else
+    {
+        float *c_data;
+        cudaMalloc(&c_data, sizeof(float) * tensor->size);
+        cudaMemcpy(c_data, data, sizeof(float) * tensor->size, cudaMemcpyHostToDevice);
+        free(data);
+        return _tensor_create(c_data, shape, tensor->dims, tensor->device);
+    }
+}
+
 void tensor_add_into(Tensor *a, Tensor *b)
 {
     if (a->device == 0 && b->device == 0)

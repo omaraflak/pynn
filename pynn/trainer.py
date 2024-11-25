@@ -1,15 +1,15 @@
 """Helper to train a neural network and make evaluations."""
 
-import numpy as np
 from pynn import losses
 from pynn import modules
 from pynn import optimizers
+from pynn import Tensor
 
 
 def train(
     module: modules.Module,
-    x_train: np.ndarray,
-    y_train: np.ndarray,
+    x_train: list[Tensor],
+    y_train: list[Tensor],
     loss: losses.Loss,
     optimizer: optimizers.Optimizer,
     epochs: int,
@@ -33,8 +33,8 @@ def train(
 
 def evaluate(
     module: modules.Module,
-    x_test: np.ndarray,
-    y_test: np.ndarray,
+    x_test: list[Tensor],
+    y_test: list[Tensor],
     loss: losses.Loss,
 ) -> float:
     """Evaluates the network on the given data and loss."""

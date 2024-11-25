@@ -2,8 +2,8 @@
 
 
 import abc
-import numpy as np
 from pynn import modules
+from pynn import Tensor
 
 
 class Optimizer(abc.ABC):
@@ -28,7 +28,7 @@ class SGD(Optimizer):
         super().__init__(module)
         self.learning_rate = learning_rate
         self.momentum = momentum
-        self.v = [np.zeros_like(param) for param in module.parameters()]
+        self.v = [Tensor.zeros(param.shape) for param in module.parameters()]
 
     def step(self):
         parameters = self.module.parameters()
