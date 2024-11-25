@@ -62,6 +62,12 @@ def _init_tensor_c_lib() -> ctypes.CDLL:
         ctypes.POINTER(ctypes.c_uint32)
     ]
     lib.tensor_get_item.restype = ctypes.c_float
+    lib.tensor_set_item.argtypes = [
+        ctypes.POINTER(CTensor),
+        ctypes.POINTER(ctypes.c_uint32),
+        ctypes.c_float,
+    ]
+    lib.tensor_set_item.restype = None
     lib.tensor_sum.argtypes = [ctypes.POINTER(CTensor)]
     lib.tensor_sum.restype = ctypes.c_float
     lib.tensor_mean.argtypes = [ctypes.POINTER(CTensor)]
@@ -370,8 +376,15 @@ class Tensor:
         c_tensor = Tensor._C.tensor_tanh(self.c_tensor)
         return Tensor(None, None, c_tensor)
 
-    def get(self, *key: tuple[int, ...]) -> float:
+    def get(self, key: tuple[int, ...]) -> float:
         return Tensor._C.tensor_get_item(self.c_tensor, (ctypes.c_uint32 * len(key))(*key))
+
+    def set(self, key: tuple[int, ...], value: float):
+        Tensor._C.tensor_set_item(
+            self.c_tensor,
+            (ctypes.c_uint32 * len(key))(*key),
+            ctypes.c_float(value)
+        )
 
     def sum(self) -> float:
         return Tensor._C.tensor_sum(self.c_tensor)
@@ -433,3 +446,9 @@ class Tensor:
 
     def __neg__(self) -> Tensor:
         return self.unary_minus()
+
+    def __getitem__(self, key: tuple[int, ...]) -> float:
+        return self.get(key)
+
+    def __setitem__(self, key: tuple[int, ...], value: float):
+        self.set(key, value)

@@ -838,6 +838,20 @@ class TestTensor(unittest.TestCase):
         for i, j in zip(x.data, y.data):
             self.assertAlmostEqual(j, math.tanh(i))
 
+    def test_get_item(self):
+        x = Tensor([1, 2, 3, 4], (2, 2))
+
+        n = x[1, 0]
+
+        self.assertEqual(n, 3)
+
+    def test_set_item(self):
+        x = Tensor([1, 2, 3, 4], (2, 2))
+
+        x[1, 0] = 20
+
+        self.assertEqual(x[1, 0], 20)
+
 
 if __name__ == "__main__":
     unittest.main()

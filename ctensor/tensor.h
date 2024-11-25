@@ -29,6 +29,8 @@ extern "C"
     void tensor_reshape(Tensor *tensor, uint32_t *shape, uint32_t dims);
 
     float tensor_get_item(Tensor *tensor, uint32_t *indices);
+    void tensor_set_item(Tensor *tensor, uint32_t *indices, float value);
+
     float tensor_sum(Tensor *tensor);
     float tensor_mean(Tensor *tensor);
     float tensor_min(Tensor *tensor);

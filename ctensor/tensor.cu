@@ -22,6 +22,16 @@ uint32_t _get_size_from_shape(uint32_t *shape, uint32_t dims)
     return size;
 }
 
+uint32_t _get_index(Tensor *tensor, uint32_t *indices)
+{
+    uint32_t index = 0;
+    for (uint32_t i = 0; i < tensor->dims; i++)
+    {
+        index += tensor->stride[i] * indices[i];
+    }
+    return index;
+}
+
 Tensor *_tensor_create(float *data, uint32_t *shape, uint32_t dims, uint32_t device)
 {
     Tensor *tensor = (Tensor *)malloc(sizeof(Tensor));
@@ -189,12 +199,12 @@ void tensor_reshape(Tensor *tensor, uint32_t *shape, uint32_t dims)
 
 float tensor_get_item(Tensor *tensor, uint32_t *indices)
 {
-    uint32_t index = 0;
-    for (uint32_t i = 0; i < tensor->dims; i++)
-    {
-        index += tensor->stride[i] * indices[i];
-    }
-    return tensor->data[index];
+    return tensor->data[_get_index(tensor, indices)];
+}
+
+void tensor_set_item(Tensor *tensor, uint32_t *indices, float value)
+{
+    tensor->data[_get_index(tensor, indices)] = value;
 }
 
 float tensor_sum(Tensor *tensor)
