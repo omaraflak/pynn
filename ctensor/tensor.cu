@@ -2,6 +2,8 @@
 #include "cpu.h"
 #include "gpu.h"
 #include <cstring>
+#include <stdio.h>
+#include <stdlib.h>
 
 uint32_t *_copy_shape(Tensor *tensor)
 {
@@ -197,21 +199,41 @@ float tensor_get_item(Tensor *tensor, uint32_t *indices)
 
 float tensor_sum(Tensor *tensor)
 {
+    if (tensor->device > 0)
+    {
+        fprintf(stderr, "tensor_sum is not supported on GPU\n");
+        exit(1);
+    }
     return tensor_sum_cpu(tensor);
 }
 
 float tensor_mean(Tensor *tensor)
 {
+    if (tensor->device > 0)
+    {
+        fprintf(stderr, "tensor_mean is not supported on GPU\n");
+        exit(1);
+    }
     return tensor_mean_cpu(tensor);
 }
 
 float tensor_min(Tensor *tensor)
 {
+    if (tensor->device > 0)
+    {
+        fprintf(stderr, "tensor_min is not supported on GPU\n");
+        exit(1);
+    }
     return tensor_min_cpu(tensor);
 }
 
 float tensor_max(Tensor *tensor)
 {
+    if (tensor->device > 0)
+    {
+        fprintf(stderr, "tensor_max is not supported on GPU\n");
+        exit(1);
+    }
     return tensor_max_cpu(tensor);
 }
 
