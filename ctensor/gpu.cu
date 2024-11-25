@@ -1,5 +1,4 @@
 #include "gpu.h"
-#include <stdlib.h>
 
 uint32_t MAX_BLOCK_DIM = 1024;
 uint32_t MAX_BLOCK_DIM_1D = 1024;
