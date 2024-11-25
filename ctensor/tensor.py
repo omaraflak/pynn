@@ -1,5 +1,6 @@
 from __future__ import annotations
 import ctypes
+import numpy as np
 
 
 class CTensor(ctypes.Structure):
@@ -206,6 +207,10 @@ class Tensor:
             ctypes.c_uint32(len(shape)),
         )
         return Tensor(None, None, c_tensor)
+
+    @classmethod
+    def array(cls, array: np.ndarray) -> Tensor:
+        return Tensor(array.flatten(), array.shape)
 
     @classmethod
     def random_uniform(cls, shape: tuple[int, ...], lower: float = 0, upper: float = 1) -> Tensor:
