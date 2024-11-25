@@ -162,6 +162,8 @@ def _init_tensor_c_lib() -> ctypes.CDLL:
     lib.tensor_sin.restype = ctypes.POINTER(CTensor)
     lib.tensor_cos.argtypes = [ctypes.POINTER(CTensor)]
     lib.tensor_cos.restype = ctypes.POINTER(CTensor)
+    lib.tensor_tanh.argtypes = [ctypes.POINTER(CTensor)]
+    lib.tensor_tanh.restype = ctypes.POINTER(CTensor)
     return lib
 
 
@@ -362,6 +364,10 @@ class Tensor:
 
     def cos(self) -> Tensor:
         c_tensor = Tensor._C.tensor_cos(self.c_tensor)
+        return Tensor(None, None, c_tensor)
+
+    def tanh(self) -> Tensor:
+        c_tensor = Tensor._C.tensor_tanh(self.c_tensor)
         return Tensor(None, None, c_tensor)
 
     def get(self, *key: tuple[int, ...]) -> float:

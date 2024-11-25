@@ -811,6 +811,33 @@ class TestTensor(unittest.TestCase):
         self.assertEqual(x.device, 0)
         self.assertEqual(x.data, [0.5, 2, 1.5, 2])
 
+    def test_tanh_cpu(self):
+        x = Tensor([1, 2, 3, 4], (2, 2))
+
+        y = x.tanh()
+
+        self.assertEqual(x.size, 4)
+        self.assertEqual(x.dims, 2)
+        self.assertEqual(x.shape, (2, 2))
+        self.assertEqual(x.device, 0)
+        for i, j in zip(x.data, y.data):
+            self.assertAlmostEqual(j, math.tanh(i))
+
+    def test_tanh_gpu(self):
+        x = Tensor([1, 2, 3, 4], (2, 2))
+        x.to_gpu()
+
+        y = x.tanh()
+        x.to_cpu()
+        y.to_cpu()
+
+        self.assertEqual(x.size, 4)
+        self.assertEqual(x.dims, 2)
+        self.assertEqual(x.shape, (2, 2))
+        self.assertEqual(x.device, 0)
+        for i, j in zip(x.data, y.data):
+            self.assertAlmostEqual(j, math.tanh(i))
+
 
 if __name__ == "__main__":
     unittest.main()

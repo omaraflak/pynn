@@ -28,6 +28,7 @@ void tensor_log10_cpu(Tensor *a, float *result);
 void tensor_logb_cpu(Tensor *a, float base, float *result);
 void tensor_sin_cpu(Tensor *a, float *result);
 void tensor_cos_cpu(Tensor *a, float *result);
+void tensor_tanh_cpu(Tensor *a, float *result);
 
 float tensor_sum_cpu(Tensor *a);
 float tensor_mean_cpu(Tensor *a);

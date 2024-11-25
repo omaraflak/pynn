@@ -66,4 +66,7 @@ void tensor_sin_gpu(Tensor *a, float *result);
 __global__ void tensor_cos_kernel(float *a, uint32_t n, float *result);
 void tensor_cos_gpu(Tensor *a, float *result);
 
+__global__ void tensor_tanh_kernel(float *a, uint32_t n, float *result);
+void tensor_tanh_gpu(Tensor *a, float *result);
+
 #endif // GPU

@@ -649,3 +649,20 @@ Tensor *tensor_cos(Tensor *tensor)
     }
     return _tensor_create(data, shape, tensor->dims, tensor->device);
 }
+
+Tensor *tensor_tanh(Tensor *tensor)
+{
+    uint32_t *shape = _copy_shape(tensor);
+    float *data;
+    if (tensor->device == 0)
+    {
+        data = (float *)malloc(sizeof(float) * tensor->size);
+        tensor_tanh_cpu(tensor, data);
+    }
+    else
+    {
+        cudaMalloc(&data, sizeof(float) * tensor->size);
+        tensor_tanh_gpu(tensor, data);
+    }
+    return _tensor_create(data, shape, tensor->dims, tensor->device);
+}

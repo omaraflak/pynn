@@ -181,6 +181,14 @@ void tensor_cos_cpu(Tensor *a, float *result)
     }
 }
 
+void tensor_tanh_cpu(Tensor *a, float *result)
+{
+    for (uint32_t i = 0; i < a->size; i++)
+    {
+        result[i] = tanh(a->data[i]);
+    }
+}
+
 float tensor_sum_cpu(Tensor *a)
 {
     float result = 0;

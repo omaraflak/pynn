@@ -60,6 +60,7 @@ extern "C"
     Tensor *tensor_logb(Tensor *tensor, float base);
     Tensor *tensor_sin(Tensor *tensor);
     Tensor *tensor_cos(Tensor *tensor);
+    Tensor *tensor_tanh(Tensor *tensor);
 }
 
 #endif // TENSOR
