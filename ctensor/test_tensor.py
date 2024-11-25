@@ -457,35 +457,35 @@ class TestTensor(unittest.TestCase):
 
         self.assertListEqual(x.data, [1] * 9)
 
-    def test_sum(self):
+    def test_sum_cpu(self):
         x = Tensor([1, 2, 3, 4, 5, 6], (2, 3))
 
         s = x.sum()
 
         self.assertEqual(s, 21)
 
-    def test_mean(self):
+    def test_mean_cpu(self):
         x = Tensor([1, 2, 3], (3,))
 
         m = x.mean()
 
         self.assertEqual(m, 2)
 
-    def test_min(self):
+    def test_min_cpu(self):
         x = Tensor([8, 2, 1, -7, 3], (5,))
 
         m = x.min()
 
         self.assertEqual(m, -7)
 
-    def test_max(self):
+    def test_max_cpu(self):
         x = Tensor([8, 2, 1, 11, 3], (5,))
 
         m = x.max()
 
         self.assertEqual(m, 11)
 
-    def test_power(self):
+    def test_power_cpu(self):
         x = Tensor([1, 2, 3], (3,))
 
         y = x.power(2)
@@ -496,7 +496,7 @@ class TestTensor(unittest.TestCase):
         self.assertEqual(y.device, 0)
         self.assertEqual(y.data, [1, 4, 9])
 
-    def test_cos(self):
+    def test_cos_cpu(self):
         x = Tensor([0, math.pi / 2, math.pi, 3 * math.pi / 2], (4,))
 
         y = x.cos()
@@ -510,7 +510,7 @@ class TestTensor(unittest.TestCase):
         self.assertAlmostEqual(y.data[2], -1, delta=1e-3)
         self.assertAlmostEqual(y.data[3], 0, delta=1e-3)
 
-    def test_sin(self):
+    def test_sin_cpu(self):
         x = Tensor([0, math.pi / 2, math.pi, 3 * math.pi / 2], (4,))
 
         y = x.sin()
@@ -524,7 +524,7 @@ class TestTensor(unittest.TestCase):
         self.assertAlmostEqual(y.data[2], 0, delta=1e-3)
         self.assertAlmostEqual(y.data[3], -1, delta=1e-3)
 
-    def test_exp(self):
+    def test_exp_cpu(self):
         x = Tensor.random_uniform((10,))
 
         y = x.exp()
@@ -536,7 +536,7 @@ class TestTensor(unittest.TestCase):
         for i, j in zip(x.data, y.data):
             self.assertAlmostEqual(j, math.exp(i), delta=1e-3)
 
-    def test_log(self):
+    def test_log_cpu(self):
         x = Tensor.random_uniform((10,), lower=1, upper=10)
 
         y = x.log()
@@ -548,7 +548,7 @@ class TestTensor(unittest.TestCase):
         for i, j in zip(x.data, y.data):
             self.assertAlmostEqual(j, math.log(i), delta=1e-3)
 
-    def test_log10(self):
+    def test_log10_cpu(self):
         x = Tensor.random_uniform((10,), lower=1, upper=10)
 
         y = x.log10()
@@ -560,7 +560,7 @@ class TestTensor(unittest.TestCase):
         for i, j in zip(x.data, y.data):
             self.assertAlmostEqual(j, math.log10(i), delta=1e-3)
 
-    def test_logb(self):
+    def test_logb_cpu(self):
         x = Tensor.random_uniform((10,), lower=1, upper=10)
 
         y = x.logb(2)

@@ -34,7 +34,7 @@ extern "C"
     float tensor_min(Tensor *tensor);
     float tensor_max(Tensor *tensor);
 
-    Tensor *tensor_unary_minus(Tensor *a);
+    Tensor *tensor_unary_minus(Tensor *tensor);
 
     Tensor *tensor_add(Tensor *a, Tensor *b);
     Tensor *tensor_subtract(Tensor *a, Tensor *b);
@@ -42,11 +42,11 @@ extern "C"
     Tensor *tensor_divide(Tensor *a, Tensor *b);
     Tensor *tensor_matmul(Tensor *a, Tensor *b);
 
-    Tensor *tensor_broadcast_add(Tensor *a, float value);
-    Tensor *tensor_broadcast_subtract(Tensor *a, float value);
-    Tensor *tensor_broadcast_multiply(Tensor *a, float value);
-    Tensor *tensor_broadcast_divide(Tensor *a, float value);
-    Tensor *tensor_broadcast_right_divide(Tensor *a, float value);
+    Tensor *tensor_broadcast_add(Tensor *tensor, float value);
+    Tensor *tensor_broadcast_subtract(Tensor *tensor, float value);
+    Tensor *tensor_broadcast_multiply(Tensor *tensor, float value);
+    Tensor *tensor_broadcast_divide(Tensor *tensor, float value);
+    Tensor *tensor_broadcast_right_divide(Tensor *tensor, float value);
 
     Tensor *tensor_power(Tensor *tensor, float power);
     Tensor *tensor_exp(Tensor *tensor);
