@@ -38,7 +38,7 @@ extern "C"
     float tensor_max(Tensor *tensor);
 
     Tensor *tensor_unary_minus(Tensor *tensor);
-    Tensor *tensor_transpose(Tensor *tensor);
+    Tensor *tensor_transpose(Tensor *tensor, uint32_t axis1, uint32_t axis2);
 
     void tensor_add_into(Tensor *a, Tensor *b);
     void tensor_subtract_into(Tensor *a, Tensor *b);
