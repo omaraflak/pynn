@@ -31,9 +31,14 @@ void tensor_fill_random_normal_cpu(Tensor *a, float mean, float std)
 
 void tensor_fill_identity_cpu(Tensor *a)
 {
+    uint32_t stride_sum = 0;
+    for (uint32_t i = 0; i < a->dims; i++)
+    {
+        stride_sum += a->stride[i];
+    }
     for (uint32_t i = 0; i < a->size; i++)
     {
-        a->data[i] = i % (a->shape[1] + 1) == 0 ? 1 : 0;
+        a->data[i] = i % stride_sum == 0 ? 1 : 0;
     }
 }
 

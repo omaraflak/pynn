@@ -868,6 +868,22 @@ class TestTensor(unittest.TestCase):
 
         self.assertEqual(x.data, [1, 0, 0, 0, 1, 0, 0, 0, 1])
 
+    def test_fill_identity_3d_cpu(self):
+        x = Tensor.zeros((2, 2, 2))
+
+        x.fill_identity()
+
+        self.assertEqual(x.data, [1, 0, 0, 0, 0, 0, 0, 1])
+
+    def test_fill_identity_3d_gpu(self):
+        x = Tensor.zeros((2, 2, 2))
+        x.to_gpu()
+
+        x.fill_identity()
+        x.to_cpu()
+
+        self.assertEqual(x.data, [1, 0, 0, 0, 0, 0, 0, 1])
+
     def test_transpose(self):
         x = Tensor([1, 2, 3, 4, 5, 6], (1, 2, 3))
 

@@ -12,7 +12,7 @@ void tensor_fill_random_uniform_gpu(Tensor *a, float min, float max);
 __global__ void tensor_fill_random_normal_kernel(float *a, uint32_t n, float mean, float std);
 void tensor_fill_random_normal_gpu(Tensor *a, float mean, float std);
 
-__global__ void tensor_fill_identity_kernel(float *a, uint32_t n, uint32_t width);
+__global__ void tensor_fill_identity_kernel(float *a, uint32_t n, uint32_t stride_sum);
 void tensor_fill_identity_gpu(Tensor *a);
 
 __global__ void tensor_unary_minus_kernel(float *a, uint32_t n, float *result);
