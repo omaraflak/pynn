@@ -1,6 +1,5 @@
 from __future__ import annotations
 import ctypes
-import numpy as np
 
 
 class CTensor(ctypes.Structure):
@@ -182,6 +181,22 @@ def _init_tensor_c_lib() -> ctypes.CDLL:
     return lib
 
 
+def _get_array_and_shape(array: list[float | list]) -> tuple[list[float], tuple[int, ...]]:
+    def _flatten_array(array: list[float | list], shape: list[int]) -> list[float]:
+        shape.append(len(array))
+        if isinstance(array[0], (int, float)):
+            return array
+        return _flatten_array([x for arr in array for x in arr], shape)
+
+    shape = []
+    flattened = _flatten_array(array, shape)
+    shape = [
+        shape[i] // (1 if i == 0 else shape[i - 1])
+        for i in range(len(shape))
+    ]
+    return flattened, shape
+
+
 class Tensor:
     _C = _init_tensor_c_lib()
 
@@ -213,8 +228,9 @@ class Tensor:
         return Tensor(None, None, c_tensor)
 
     @classmethod
-    def array(cls, array: np.ndarray) -> Tensor:
-        return Tensor(array.flatten(), array.shape)
+    def array(cls, array: list[float | list]) -> Tensor:
+        data, shape = _get_array_and_shape(array)
+        return Tensor(data, shape)
 
     @classmethod
     def random_uniform(cls, shape: tuple[int, ...], lower: float = 0, upper: float = 1) -> Tensor:

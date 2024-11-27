@@ -978,6 +978,19 @@ class TestTensor(unittest.TestCase):
         self.assertEqual(y[1, 0], 2)
         self.assertEqual(y[1, 1], 4)
 
+    def test_create_from_array(self):
+        x = Tensor.array([
+            [[1, 2, 3], [4, 5, 6]],
+            [[7, 8, 9], [10, 11, 12]],
+            [[13, 14, 15], [16, 17, 18]],
+        ])
+
+        self.assertEqual(x.size, 18)
+        self.assertEqual(x.dims, 3)
+        self.assertEqual(x.shape, (3, 2, 3))
+        self.assertEqual(x.device, 0)
+        self.assertEqual(x.data, list(range(1, 19)))
+
 
 if __name__ == "__main__":
     unittest.main()
