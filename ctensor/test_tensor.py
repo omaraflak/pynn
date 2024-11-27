@@ -869,15 +869,36 @@ class TestTensor(unittest.TestCase):
         self.assertEqual(x.data, [1, 0, 0, 0, 1, 0, 0, 0, 1])
 
     def test_transpose(self):
-        x = Tensor([1, 2, 3, 4, 5, 6], (3, 2, 1))
+        x = Tensor([1, 2, 3, 4, 5, 6], (1, 2, 3))
 
         y = x.T
 
         self.assertEqual(y.size, 6)
         self.assertEqual(y.dims, 3)
-        self.assertEqual(y.shape, (3, 1, 2))
+        self.assertEqual(y.shape, (1, 3, 2))
         self.assertEqual(y.device, 0)
         self.assertEqual(y.data, [1, 2, 3, 4, 5, 6])
+        self.assertEqual(y[0, 0, 0], 1)
+        self.assertEqual(y[0, 0, 1], 4)
+        self.assertEqual(y[0, 1, 0], 2)
+        self.assertEqual(y[0, 1, 1], 5)
+        self.assertEqual(y[0, 2, 0], 3)
+        self.assertEqual(y[0, 2, 1], 6)
+
+    def test_transpose_square(self):
+        x = Tensor([1, 2, 3, 4], (2, 2))
+
+        y = x.T
+
+        self.assertEqual(y.size, 4)
+        self.assertEqual(y.dims, 2)
+        self.assertEqual(y.shape, (2, 2))
+        self.assertEqual(y.device, 0)
+        self.assertEqual(y.data, [1, 2, 3, 4])
+        self.assertEqual(y[0, 0], 1)
+        self.assertEqual(y[0, 1], 3)
+        self.assertEqual(y[1, 0], 2)
+        self.assertEqual(y[1, 1], 4)
 
 
 if __name__ == "__main__":
