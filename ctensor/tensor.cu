@@ -279,7 +279,7 @@ Tensor *tensor_unary_minus(Tensor *tensor)
 
 Tensor *tensor_transpose(Tensor *tensor, uint32_t axis1, uint32_t axis2)
 {
-    Tensor* copy = tensor_copy(tensor);
+    Tensor *copy = tensor_copy(tensor);
 
     uint32_t tmp = copy->shape[axis1];
     copy->shape[axis1] = copy->shape[axis2];
@@ -454,28 +454,35 @@ Tensor *tensor_divide(Tensor *a, Tensor *b)
 
 Tensor *tensor_matmul(Tensor *a, Tensor *b)
 {
-    uint32_t *shape = (uint32_t *)malloc(sizeof(uint32_t) * 2);
-    shape[0] = a->shape[0];
-    shape[1] = b->shape[1];
-    uint32_t size = shape[0] * shape[1];
+    uint32_t batch = 1;
+    uint32_t *shape = (uint32_t *)malloc(sizeof(uint32_t) * a->dims);
+    for (uint32_t i = 0; i < a->dims - 2; i++)
+    {
+        batch *= a->shape[i];
+        shape[i] = a->shape[i];
+    }
+    shape[a->dims - 2] = a->shape[a->dims - 2];
+    shape[a->dims - 1] = b->shape[b->dims - 1];
+
+    uint32_t size = batch * a->shape[a->dims - 2] * b->shape[b->dims - 1];
     float *data;
 
     if (a->device == 0 && b->device == 0)
     {
         data = (float *)malloc(sizeof(float) * size);
-        tensor_matmul_cpu(a, b, data);
+        tensor_matmul_cpu(a, b, batch, data);
     }
     else if (a->device == b->device)
     {
         cudaMalloc(&data, sizeof(float) * size);
-        tensor_matmul_gpu(a, b, data);
+        tensor_matmul_gpu(a, b, batch, data);
     }
     else
     {
         fprintf(stderr, "Both tensors must be on the same device.\n");
         exit(1);
     }
-    return _tensor_create(data, shape, /* dims=*/2, a->device);
+    return _tensor_create(data, shape, a->dims, a->device);
 }
 
 Tensor *tensor_broadcast_add(Tensor *tensor, float value)

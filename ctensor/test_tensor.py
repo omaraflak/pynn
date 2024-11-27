@@ -404,7 +404,7 @@ class TestTensor(unittest.TestCase):
         self.assertEqual(c.device, 0)
         self.assertEqual(c.data, [2, 3, 4])
 
-    def test_dot_cpu(self):
+    def test_matmul_cpu(self):
         a = Tensor([1, 2, 3, 4, 5, 6], (2, 3))
         b = Tensor([6, 4, 3, 2, 7, 6], (3, 2))
 
@@ -416,7 +416,7 @@ class TestTensor(unittest.TestCase):
         self.assertEqual(c.device, 0)
         self.assertEqual(c.data, [33, 26, 81, 62])
 
-    def test_dot_gpu(self):
+    def test_matmul_gpu(self):
         a = Tensor([1, 2, 3, 4, 5, 6], (2, 3))
         b = Tensor([6, 4, 3, 2, 7, 6], (3, 2))
         a.to_gpu()
@@ -430,6 +430,33 @@ class TestTensor(unittest.TestCase):
         self.assertEqual(c.shape, (2, 2))
         self.assertEqual(c.device, 0)
         self.assertEqual(c.data, [33, 26, 81, 62])
+
+    def test_matmul_batch_cpu(self):
+        a = Tensor([1, 2, 3, 4, 5, 6, 1, 0, 2, 3, 4, 1], (2, 2, 3))
+        b = Tensor([6, 4, 3, 2, 7, 6, 0, 5, 2, 1, 6, 0], (2, 3, 2))
+
+        c = a @ b
+
+        self.assertEqual(c.size, 8)
+        self.assertEqual(c.dims, 3)
+        self.assertEqual(c.shape, (2, 2, 2))
+        self.assertEqual(c.device, 0)
+        self.assertEqual(c.data, [33, 26, 81, 62, 12, 5, 14, 19])
+
+    def test_matmul_batch_gpu(self):
+        a = Tensor([1, 2, 3, 4, 5, 6, 1, 0, 2, 3, 4, 1], (2, 2, 3))
+        b = Tensor([6, 4, 3, 2, 7, 6, 0, 5, 2, 1, 6, 0], (2, 3, 2))
+        a.to_gpu()
+        b.to_gpu()
+
+        c = a @ b
+        c.to_cpu()
+
+        self.assertEqual(c.size, 8)
+        self.assertEqual(c.dims, 3)
+        self.assertEqual(c.shape, (2, 2, 2))
+        self.assertEqual(c.device, 0)
+        self.assertEqual(c.data, [33, 26, 81, 62, 12, 5, 14, 19])
 
     def test_fill_random_uniform_cpu(self):
         x = Tensor.zeros((30,))

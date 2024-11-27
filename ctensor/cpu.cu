@@ -82,18 +82,32 @@ void tensor_divide_cpu(Tensor *a, Tensor *b, float *result)
     }
 }
 
-void tensor_matmul_cpu(Tensor *a, Tensor *b, float *result)
+void tensor_matmul_cpu(Tensor *a, Tensor *b, uint32_t batch, float *result)
 {
-    for (int i = 0; i < a->shape[0]; i++)
+    uint32_t res_height = a->shape[a->dims - 2];
+    uint32_t res_width = b->shape[b->dims - 1];
+    uint32_t common_dim = a->shape[a->dims - 1];
+    uint32_t a_idx, b_idx;
+
+    uint32_t a_batch_stride = res_height * common_dim;
+    uint32_t b_batch_stride = common_dim * res_width;
+    uint32_t r_batch_stride = res_height * res_width;
+
+    for (uint32_t t = 0; t < batch; t++)
     {
-        for (int j = 0; j < b->shape[1]; j++)
+        for (uint32_t i = 0; i < res_height; i++)
         {
-            float tmp = 0;
-            for (int k = 0; k < b->shape[0]; k++)
+            for (uint32_t j = 0; j < res_width; j++)
             {
-                tmp += a->data[i * a->shape[1] + k] * b->data[k * b->shape[1] + j];
+                float tmp = 0;
+                for (uint32_t k = 0; k < common_dim; k++)
+                {
+                    a_idx = t * a_batch_stride + i * a->stride[a->dims - 2] + k * a->stride[a->dims - 1];
+                    b_idx = t * b_batch_stride + k * b->stride[b->dims - 2] + j * b->stride[b->dims - 1];
+                    tmp += a->data[a_idx] * b->data[b_idx];
+                }
+                result[t * r_batch_stride + i * res_width + j] = tmp;
             }
-            result[i * b->shape[1] + j] = tmp;
         }
     }
 }

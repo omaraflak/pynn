@@ -30,8 +30,8 @@ void tensor_multiply_gpu(Tensor *a, Tensor *b, float *result);
 __global__ void tensor_divide_kernel(float *a, float *b, uint32_t n, float *result);
 void tensor_divide_gpu(Tensor *a, Tensor *b, float *result);
 
-__global__ void tensor_matmul_kernel(float *a, float *b, uint32_t m, uint32_t p, uint32_t n, float *result);
-void tensor_matmul_gpu(Tensor *a, Tensor *b, float *result);
+__global__ void tensor_matmul_kernel(float *a, float *b, uint32_t *a_strides, uint32_t *b_strides, uint32_t dims, uint32_t t, uint32_t m, uint32_t p, uint32_t n, float *result);
+void tensor_matmul_gpu(Tensor *a, Tensor *b, uint32_t batch, float *result);
 
 __global__ void tensor_broadcast_add_kernel(float *a, uint32_t n, float value, float *result);
 void tensor_broadcast_add_gpu(Tensor *a, float value, float *result);

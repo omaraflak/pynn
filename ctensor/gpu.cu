@@ -6,6 +6,7 @@
 uint32_t MAX_BLOCK_DIM = 1024;
 uint32_t MAX_BLOCK_DIM_1D = 1024;
 uint32_t MAX_BLOCK_DIM_2D = 32;
+uint32_t MAX_BLOCK_DIM_3D = 10;
 
 void _get_1d_gpu_config(uint32_t *grid_dim, uint32_t *block_dim, uint32_t size)
 {
@@ -36,6 +37,28 @@ void _get_2d_gpu_config(dim3 *grid_dim, dim3 *block_dim, uint32_t rows, uint32_t
         block_dim->y = rows;
         grid_dim->x = 1;
         grid_dim->y = 1;
+    }
+}
+
+void _get_3d_gpu_config(dim3 *grid_dim, dim3 *block_dim, uint32_t batch, uint32_t rows, uint32_t cols)
+{
+    if (batch * rows * cols > MAX_BLOCK_DIM)
+    {
+        block_dim->x = MAX_BLOCK_DIM_3D;
+        block_dim->y = MAX_BLOCK_DIM_3D;
+        block_dim->z = MAX_BLOCK_DIM_3D;
+        grid_dim->x = (cols + block_dim->x - 1) / block_dim->x;
+        grid_dim->y = (rows + block_dim->y - 1) / block_dim->y;
+        grid_dim->z = (batch + block_dim->z - 1) / block_dim->z;
+    }
+    else
+    {
+        block_dim->x = cols;
+        block_dim->y = rows;
+        block_dim->z = batch;
+        grid_dim->x = 1;
+        grid_dim->y = 1;
+        grid_dim->z = 1;
     }
 }
 
@@ -221,37 +244,68 @@ void tensor_divide_gpu(Tensor *a, Tensor *b, float *result)
     cudaDeviceSynchronize();
 }
 
-// MxP @ PxN => MxN
-__global__ void tensor_matmul_kernel(float *a, float *b, uint32_t m, uint32_t p, uint32_t n, float *result)
+// TxMxP @ TxPxN => TxMxN
+__global__ void tensor_matmul_kernel(
+    float *a,
+    float *b,
+    uint32_t *a_stride,
+    uint32_t *b_stride,
+    uint32_t dims,
+    uint32_t t,
+    uint32_t m,
+    uint32_t p,
+    uint32_t n,
+    float *result)
 {
     uint32_t x_index = blockDim.x * blockIdx.x + threadIdx.x;
     uint32_t x_stride = gridDim.x * blockDim.x;
     uint32_t y_index = blockDim.y * blockIdx.y + threadIdx.y;
     uint32_t y_stride = gridDim.y * blockDim.y;
+    uint32_t z_index = blockDim.z * blockIdx.z + threadIdx.z;
+    uint32_t z_stride = gridDim.z * blockDim.z;
 
-    for (uint32_t i = y_index; i < m; i += y_stride)
+    uint32_t a_batch_stride = m * p;
+    uint32_t b_batch_stride = p * n;
+    uint32_t r_batch_stride = m * n;
+
+    uint32_t a_idx, b_idx;
+
+    for (uint32_t z = z_index; z < t; z += z_stride)
     {
-        for (uint32_t j = x_index; j < n; j += x_stride)
+        for (uint32_t i = y_index; i < m; i += y_stride)
         {
-            float tmp = 0;
-            for (int k = 0; k < p; k++)
+            for (uint32_t j = x_index; j < n; j += x_stride)
             {
-                tmp += a[i * p + k] * b[k * n + j];
+                float tmp = 0;
+                for (uint32_t k = 0; k < p; k++)
+                {
+                    a_idx = z * a_batch_stride + i * a_stride[dims - 2] + k * a_stride[dims - 1];
+                    b_idx = z * b_batch_stride + k * b_stride[dims - 2] + j * b_stride[dims - 1];
+                    tmp += a[a_idx] * b[b_idx];
+                }
+                result[z * r_batch_stride + i * n + j] = tmp;
             }
-            result[i * n + j] = tmp;
         }
     }
 }
 
-void tensor_matmul_gpu(Tensor *a, Tensor *b, float *result)
+void tensor_matmul_gpu(Tensor *a, Tensor *b, uint32_t batch, float *result)
 {
-    uint32_t m = a->shape[0];
-    uint32_t p = a->shape[1];
-    uint32_t n = b->shape[1];
+    uint32_t rows = a->shape[a->dims - 2];
+    uint32_t comm = a->shape[a->dims - 1];
+    uint32_t cols = b->shape[b->dims - 1];
+    uint32_t *a_stride;
+    uint32_t *b_stride;
+    cudaMalloc(&a_stride, sizeof(uint32_t) * a->dims);
+    cudaMalloc(&b_stride, sizeof(uint32_t) * b->dims);
+    cudaMemcpy(a_stride, a->stride, sizeof(uint32_t) * a->dims, cudaMemcpyHostToDevice);
+    cudaMemcpy(b_stride, b->stride, sizeof(uint32_t) * b->dims, cudaMemcpyHostToDevice);
     dim3 grid_dim, block_dim;
-    _get_2d_gpu_config(&grid_dim, &block_dim, m, n);
-    tensor_matmul_kernel<<<grid_dim, block_dim>>>(a->data, b->data, m, p, n, result);
+    _get_3d_gpu_config(&grid_dim, &block_dim, batch, rows, cols);
+    tensor_matmul_kernel<<<grid_dim, block_dim>>>(a->data, b->data, a_stride, b_stride, a->dims, batch, rows, comm, cols, result);
     cudaDeviceSynchronize();
+    cudaFree(a_stride);
+    cudaFree(b_stride);
 }
 
 __global__ void tensor_broadcast_add_kernel(float *a, uint32_t n, float value, float *result)

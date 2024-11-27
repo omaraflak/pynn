@@ -14,7 +14,7 @@ void tensor_add_cpu(Tensor *a, Tensor *b, float *result);
 void tensor_subtract_cpu(Tensor *a, Tensor *b, float *result);
 void tensor_multiply_cpu(Tensor *a, Tensor *b, float *result);
 void tensor_divide_cpu(Tensor *a, Tensor *b, float *result);
-void tensor_matmul_cpu(Tensor *a, Tensor *b, float *result);
+void tensor_matmul_cpu(Tensor *a, Tensor *b, uint32_t batch, float *result);
 
 void tensor_broadcast_add_cpu(Tensor *a, float value, float *result);
 void tensor_broadcast_subtract_cpu(Tensor *a, float value, float *result);
