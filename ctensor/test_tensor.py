@@ -458,6 +458,41 @@ class TestTensor(unittest.TestCase):
         self.assertEqual(c.device, 0)
         self.assertEqual(c.data, [33, 26, 81, 62, 12, 5, 14, 19])
 
+    def test_matmul_ultra_batch_cpu(self):
+        import numpy as np
+        na = np.random.randint(0, 100, (6, 5, 4, 3, 2))
+        nb = np.random.randint(0, 100, (6, 5, 4, 2, 7))
+        a = Tensor(na.flatten().tolist(), (6, 5, 4, 3, 2))
+        b = Tensor(nb.flatten().tolist(), (6, 5, 4, 2, 7))
+
+        c = a @ b
+
+        self.assertEqual(c.size, 6 * 5 * 4 * 3 * 7)
+        self.assertEqual(c.dims, 5)
+        self.assertEqual(c.shape, (6, 5, 4, 3, 7))
+        self.assertEqual(c.device, 0)
+        self.assertEqual(c.data, np.einsum(
+            'abcij,abcjk->abcik', na, nb).flatten().tolist())
+
+    def test_matmul_ultra_batch_gpu(self):
+        import numpy as np
+        na = np.random.randint(0, 100, (6, 5, 4, 3, 2))
+        nb = np.random.randint(0, 100, (6, 5, 4, 2, 7))
+        a = Tensor(na.flatten().tolist(), (6, 5, 4, 3, 2))
+        b = Tensor(nb.flatten().tolist(), (6, 5, 4, 2, 7))
+        a.to_gpu()
+        b.to_gpu()
+
+        c = a @ b
+        c.to_cpu()
+
+        self.assertEqual(c.size, 6 * 5 * 4 * 3 * 7)
+        self.assertEqual(c.dims, 5)
+        self.assertEqual(c.shape, (6, 5, 4, 3, 7))
+        self.assertEqual(c.device, 0)
+        self.assertEqual(c.data, np.einsum(
+            'abcij,abcjk->abcik', na, nb).flatten().tolist())
+
     def test_fill_random_uniform_cpu(self):
         x = Tensor.zeros((30,))
 
