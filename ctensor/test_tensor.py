@@ -72,7 +72,7 @@ class TestTensor(unittest.TestCase):
     def test_reshape(self):
         x = Tensor([1, 2, 3, 4, 5, 6], (6, ))
 
-        x.reshape((3, 2))
+        x.reshape(3, 2)
 
         self.assertEqual(x.size, 6)
         self.assertEqual(x.dims, 2)
@@ -1066,6 +1066,22 @@ class TestTensor(unittest.TestCase):
         self.assertEqual(y.shape, (2, 2, 1))
         self.assertEqual(y.device, 0)
         self.assertEqual(y.data, [25, 21, 7, 2])
+
+    def test_slice_with_index(self):
+        x = Tensor.array([
+            [[1, 2], [4, 5], [6, 7]],
+            [[8, 9], [10, 11], [12, 13]],
+            [[14, 15], [16, 17], [18, 19]],
+            [[20, 21], [22, 23], [24, 25]],
+        ])
+
+        y = x[0]
+
+        self.assertEqual(y.size, 6)
+        self.assertEqual(y.dims, 3)
+        self.assertEqual(y.shape, (1, 3, 2))
+        self.assertEqual(y.device, 0)
+        self.assertEqual(y.data, [1, 2, 4, 5, 6, 7])
 
 if __name__ == "__main__":
     unittest.main()

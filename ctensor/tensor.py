@@ -313,7 +313,7 @@ class Tensor:
     def to_cpu(self):
         Tensor._C.tensor_gpu_to_cpu(self.c_tensor)
 
-    def reshape(self, shape: tuple[int, ...]):
+    def reshape(self, *shape: int):
         Tensor._C.tensor_reshape(
             self.c_tensor,
             (ctypes.c_int32 * len(shape))(*shape),
@@ -439,7 +439,7 @@ class Tensor:
         c_tensor = Tensor._C.tensor_tanh(self.c_tensor)
         return Tensor(None, None, c_tensor)
 
-    def get(self, key: tuple[int, ...]) -> float:
+    def get(self, *key: int) -> float:
         return Tensor._C.tensor_get_item(self.c_tensor, (ctypes.c_int32 * len(key))(*key))
 
     def set(self, key: tuple[int, ...], value: float):
@@ -449,7 +449,7 @@ class Tensor:
             ctypes.c_float(value)
         )
 
-    def slice(self, slices: list[slice]) -> Tensor:
+    def slice(self, *slices: tuple[slice]) -> Tensor:
         c_ranges = []
         for i in range(len(self.shape)):
             d = self.shape[i]
@@ -527,15 +527,20 @@ class Tensor:
     def __neg__(self) -> Tensor:
         return self.unary_minus()
 
-    def __getitem__(self, key: tuple[int, ...] | tuple[slice, ...]) -> float | Tensor:
-        k = key[0] if isinstance(key, tuple) else key
-        v = key if isinstance(key, tuple) else [key]
-        if isinstance(k, int):
-            return self.get(v)
-        elif isinstance(k, slice):
-            return self.slice(v)
+    def __getitem__(self, key: tuple[int | slice, ...] | int | slice) -> float | Tensor:
+        if not isinstance(key, tuple):
+            key = (key,)
+
+        if isinstance(key[0], int):
+            if len(key) == self.dims:
+                return self.get(*key)
+            else:
+                slices = tuple(slice(k, k + 1, 1) for k in key)
+                return self.slice(*slices)
+        elif isinstance(key[0], slice):
+            return self.slice(*key)
         else:
-            raise NotImplementedError()
+            raise ValueError("Key must be a tuple of ints or slices")
 
     def __setitem__(self, key: tuple[int, ...], value: float):
         self.set(key, value)
