@@ -35,6 +35,7 @@ extern "C"
     void tensor_fill_random_normal(Tensor *tensor, float mean, float std);
     void tensor_fill_identity(Tensor *tensor);
     void tensor_reshape(Tensor *tensor, int32_t *shape, int32_t dims);
+    void tensor_squeeze(Tensor* tensor);
 
     float tensor_get_item(Tensor *tensor, int32_t *indices);
     void tensor_set_item(Tensor *tensor, int32_t *indices, float value);

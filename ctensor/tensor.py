@@ -67,6 +67,8 @@ def _init_tensor_c_lib() -> ctypes.CDLL:
         ctypes.c_int32
     ]
     lib.tensor_reshape.restype = None
+    lib.tensor_squeeze.argtypes = [ctypes.POINTER(CTensor)]
+    lib.tensor_squeeze.restype = None
     lib.tensor_get_item.argtypes = [
         ctypes.POINTER(CTensor),
         ctypes.POINTER(ctypes.c_int32)
@@ -320,6 +322,9 @@ class Tensor:
             ctypes.c_int32(len(shape))
         )
 
+    def squeeze(self):
+        Tensor._C.tensor_squeeze(self.c_tensor)
+
     def fill(self, value: float):
         Tensor._C.tensor_fill(self.c_tensor, ctypes.c_float(value))
 
@@ -536,9 +541,13 @@ class Tensor:
                 return self.get(*key)
             else:
                 slices = tuple(slice(k, k + 1, 1) for k in key)
-                return self.slice(*slices)
+                tmp = self.slice(*slices)
+                tmp.squeeze()
+                return tmp
         elif isinstance(key[0], slice):
-            return self.slice(*key)
+            tmp = self.slice(*key)
+            tmp.squeeze()
+            return tmp
         else:
             raise ValueError("Key must be a tuple of ints or slices")
 
