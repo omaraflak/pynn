@@ -242,7 +242,7 @@ Tensor *tensor_slice(Tensor *tensor, Range *ranges)
         if (ranges[i].stop < 0) {
             ranges[i].stop = mod(ranges[i].stop, tensor->shape[i]);
         }
-        shape[i] = ceil((float)(ranges[i].stop - ranges[i].start) / ranges[i].step);
+        shape[i] = ceil((float)(ranges[i].stop - ranges[i].start) / abs(ranges[i].step));
         size *= shape[i];
     }
 
@@ -263,11 +263,13 @@ Tensor *tensor_slice(Tensor *tensor, Range *ranges)
     int32_t indices[tensor->dims];
     for (int32_t i = 0; i < size; i++)
     {
+        // computes indices in sliced tensor
         int32_t rest = i;
         for (int32_t j = 0; j < tensor->dims; j++)
         {
+            uint32_t offset = ranges[j].step < 0 ? ranges[j].stop - 1 : 0;
             indices[j] = (int32_t)rest / stride[j];
-            indices[j] = ranges[j].start + indices[j] * ranges[j].step;
+            indices[j] = ranges[j].start + offset + indices[j] * ranges[j].step;
             rest %= stride[j];
         }
 
