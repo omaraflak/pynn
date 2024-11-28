@@ -1021,6 +1021,21 @@ class TestTensor(unittest.TestCase):
         self.assertEqual(y.device, 0)
         self.assertEqual(y.data, x.data)
 
+    def test_slice_negative(self):
+        x = Tensor.array([
+            [[1, 2, 3], [4, 5, 6]],
+            [[7, 8, 9], [10, 11, 12]],
+            [[13, 14, 15], [16, 17, 18]],
+        ])
+
+        y = x[-1:, :-1]
+
+        self.assertEqual(y.size, 3)
+        self.assertEqual(y.dims, 3)
+        self.assertEqual(y.shape, (1, 1, 3))
+        self.assertEqual(y.device, 0)
+        self.assertEqual(y.data, [13, 14, 15])
+
 
 if __name__ == "__main__":
     unittest.main()

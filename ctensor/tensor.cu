@@ -33,6 +33,14 @@ int32_t _get_index(Tensor *tensor, int32_t *indices)
     return index;
 }
 
+int32_t mod(int32_t a, int32_t b) {
+  int32_t m = a % b;
+  if (m < 0) {
+    m = (b < 0) ? m - b : m + b;
+  }
+  return m;
+}
+
 Tensor *_tensor_create(float *data, int32_t *shape, int32_t dims, int32_t device)
 {
     Tensor *tensor = (Tensor *)malloc(sizeof(Tensor));
@@ -225,8 +233,15 @@ Tensor *tensor_slice(Tensor *tensor, Range *ranges)
     int32_t size = 1;
     int32_t *shape = (int32_t *)malloc(sizeof(int32_t) * tensor->dims);
 
+    // compute new size given ranges
     for (int32_t i = 0; i < tensor->dims; i++)
     {
+        if (ranges[i].start < 0) {
+            ranges[i].start = mod(ranges[i].start, tensor->shape[i]);
+        }
+        if (ranges[i].stop < 0) {
+            ranges[i].stop = mod(ranges[i].stop, tensor->shape[i]);
+        }
         shape[i] = ceil((float)(ranges[i].stop - ranges[i].start) / ranges[i].step);
         size *= shape[i];
     }
