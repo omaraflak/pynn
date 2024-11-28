@@ -260,13 +260,13 @@ class Tensor:
         return tensor
 
     @classmethod
-    def zeros(cls, shape: tuple[int, ...]) -> Tensor:
+    def zeros(cls, *shape: int) -> Tensor:
         tensor = Tensor._empty(shape)
         tensor.fill(0)
         return tensor
 
     @classmethod
-    def ones(cls, shape: tuple[int, ...]) -> Tensor:
+    def ones(cls, *shape: int) -> Tensor:
         tensor = Tensor._empty(shape)
         tensor.fill(1)
         return tensor

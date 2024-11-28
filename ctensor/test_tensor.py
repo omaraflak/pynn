@@ -494,7 +494,7 @@ class TestTensor(unittest.TestCase):
             'abcij,abcjk->abcik', na, nb).flatten().tolist())
 
     def test_fill_random_uniform_cpu(self):
-        x = Tensor.zeros((30,))
+        x = Tensor.zeros(30)
 
         x.fill_random_uniform(lower=37, upper=38)
 
@@ -502,7 +502,7 @@ class TestTensor(unittest.TestCase):
             self.assertTrue(37 <= i <= 38)
 
     def test_fill_random_uniform_gpu(self):
-        x = Tensor.zeros((30,))
+        x = Tensor.zeros(30)
         x.to_gpu()
 
         x.fill_random_uniform(lower=37, upper=38)
@@ -513,7 +513,7 @@ class TestTensor(unittest.TestCase):
 
     def test_fill_random_normal_cpu(self):
         n = 10000
-        x = Tensor.zeros((n,))
+        x = Tensor.zeros(n)
 
         x.fill_random_normal(mean=5, std=2)
 
@@ -524,7 +524,7 @@ class TestTensor(unittest.TestCase):
 
     def test_fill_random_normal_gpu(self):
         n = 10000
-        x = Tensor.zeros((n,))
+        x = Tensor.zeros(n)
         x.to_gpu()
 
         x.fill_random_normal(mean=5, std=2)
@@ -536,12 +536,12 @@ class TestTensor(unittest.TestCase):
         self.assertAlmostEqual(std, 2, delta=0.3)
 
     def test_ones(self):
-        x = Tensor.ones((3, 3))
+        x = Tensor.ones(3, 3)
 
         self.assertListEqual(x.data, [0] * 9)
 
     def test_ones(self):
-        x = Tensor.ones((3, 3))
+        x = Tensor.ones(3, 3)
 
         self.assertListEqual(x.data, [1] * 9)
 
@@ -915,14 +915,14 @@ class TestTensor(unittest.TestCase):
         self.assertEqual(x[1, 0], 20)
 
     def test_fill_identity_cpu(self):
-        x = Tensor.zeros((3, 3))
+        x = Tensor.zeros(3, 3)
 
         x.fill_identity()
 
         self.assertEqual(x.data, [1, 0, 0, 0, 1, 0, 0, 0, 1])
 
     def test_fill_identity_gpu(self):
-        x = Tensor.zeros((3, 3))
+        x = Tensor.zeros(3, 3)
         x.to_gpu()
 
         x.fill_identity()
@@ -931,14 +931,14 @@ class TestTensor(unittest.TestCase):
         self.assertEqual(x.data, [1, 0, 0, 0, 1, 0, 0, 0, 1])
 
     def test_fill_identity_3d_cpu(self):
-        x = Tensor.zeros((2, 2, 2))
+        x = Tensor.zeros(2, 2, 2)
 
         x.fill_identity()
 
         self.assertEqual(x.data, [1, 0, 0, 0, 0, 0, 0, 1])
 
     def test_fill_identity_3d_gpu(self):
-        x = Tensor.zeros((2, 2, 2))
+        x = Tensor.zeros(2, 2, 2)
         x.to_gpu()
 
         x.fill_identity()
