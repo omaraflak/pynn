@@ -6,46 +6,46 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-uint32_t *_copy_shape(Tensor *tensor)
+int32_t *_copy_shape(Tensor *tensor)
 {
-    uint32_t *shape = (uint32_t *)malloc(sizeof(uint32_t) * tensor->dims);
-    memcpy(shape, tensor->shape, sizeof(uint32_t) * tensor->dims);
+    int32_t *shape = (int32_t *)malloc(sizeof(int32_t) * tensor->dims);
+    memcpy(shape, tensor->shape, sizeof(int32_t) * tensor->dims);
     return shape;
 }
 
-uint32_t _get_size_from_shape(uint32_t *shape, uint32_t dims)
+int32_t _get_size_from_shape(int32_t *shape, int32_t dims)
 {
-    uint32_t size = 1;
-    for (uint32_t i = 0; i < dims; i++)
+    int32_t size = 1;
+    for (int32_t i = 0; i < dims; i++)
     {
         size *= shape[i];
     }
     return size;
 }
 
-uint32_t _get_index(Tensor *tensor, uint32_t *indices)
+int32_t _get_index(Tensor *tensor, int32_t *indices)
 {
-    uint32_t index = 0;
-    for (uint32_t i = 0; i < tensor->dims; i++)
+    int32_t index = 0;
+    for (int32_t i = 0; i < tensor->dims; i++)
     {
         index += tensor->stride[i] * indices[i];
     }
     return index;
 }
 
-Tensor *_tensor_create(float *data, uint32_t *shape, uint32_t dims, uint32_t device)
+Tensor *_tensor_create(float *data, int32_t *shape, int32_t dims, int32_t device)
 {
     Tensor *tensor = (Tensor *)malloc(sizeof(Tensor));
     tensor->data = data;
     tensor->shape = shape;
-    tensor->stride = (uint32_t *)malloc(sizeof(uint32_t) * dims);
+    tensor->stride = (int32_t *)malloc(sizeof(int32_t) * dims);
     tensor->size = _get_size_from_shape(shape, dims);
     tensor->dims = dims;
     tensor->device = device;
-    for (uint32_t i = 0; i < dims; i++)
+    for (int32_t i = 0; i < dims; i++)
     {
         tensor->stride[i] = 1;
-        for (uint32_t j = i + 1; j < dims; j++)
+        for (int32_t j = i + 1; j < dims; j++)
         {
             tensor->stride[i] *= shape[j];
         }
@@ -53,31 +53,31 @@ Tensor *_tensor_create(float *data, uint32_t *shape, uint32_t dims, uint32_t dev
     return tensor;
 }
 
-Tensor *tensor_create(float *data, uint32_t *shape, uint32_t dims)
+Tensor *tensor_create(float *data, int32_t *shape, int32_t dims)
 {
     Tensor *tensor = tensor_create_empty(shape, dims);
-    for (uint32_t i = 0; i < tensor->size; i++)
+    for (int32_t i = 0; i < tensor->size; i++)
     {
         tensor->data[i] = data[i];
     }
     return tensor;
 }
 
-Tensor *tensor_create_empty(uint32_t *shape, uint32_t dims)
+Tensor *tensor_create_empty(int32_t *shape, int32_t dims)
 {
-    uint32_t size = _get_size_from_shape(shape, dims);
+    int32_t size = _get_size_from_shape(shape, dims);
     Tensor *tensor = (Tensor *)malloc(sizeof(Tensor));
     tensor->data = (float *)malloc(sizeof(float) * size);
-    tensor->shape = (uint32_t *)malloc(sizeof(uint32_t) * dims);
-    tensor->stride = (uint32_t *)malloc(sizeof(uint32_t) * dims);
+    tensor->shape = (int32_t *)malloc(sizeof(int32_t) * dims);
+    tensor->stride = (int32_t *)malloc(sizeof(int32_t) * dims);
     tensor->size = size;
     tensor->dims = dims;
     tensor->device = 0;
-    for (uint32_t i = 0; i < dims; i++)
+    for (int32_t i = 0; i < dims; i++)
     {
         tensor->shape[i] = shape[i];
         tensor->stride[i] = 1;
-        for (uint32_t j = i + 1; j < dims; j++)
+        for (int32_t j = i + 1; j < dims; j++)
         {
             tensor->stride[i] *= shape[j];
         }
@@ -87,7 +87,7 @@ Tensor *tensor_create_empty(uint32_t *shape, uint32_t dims)
 
 Tensor *tensor_copy(Tensor *tensor)
 {
-    uint32_t *shape = _copy_shape(tensor);
+    int32_t *shape = _copy_shape(tensor);
 
     float *data;
     if (tensor->device == 0)
@@ -186,46 +186,46 @@ void tensor_fill_identity(Tensor *tensor)
     }
 }
 
-void tensor_reshape(Tensor *tensor, uint32_t *shape, uint32_t dims)
+void tensor_reshape(Tensor *tensor, int32_t *shape, int32_t dims)
 {
     if (tensor->dims != dims)
     {
         free(tensor->shape);
         free(tensor->stride);
         tensor->dims = dims;
-        tensor->shape = (uint32_t *)malloc(sizeof(uint32_t) * dims);
-        tensor->stride = (uint32_t *)malloc(sizeof(uint32_t) * dims);
+        tensor->shape = (int32_t *)malloc(sizeof(int32_t) * dims);
+        tensor->stride = (int32_t *)malloc(sizeof(int32_t) * dims);
     }
-    for (uint32_t i = 0; i < dims; i++)
+    for (int32_t i = 0; i < dims; i++)
     {
         tensor->shape[i] = shape[i];
     }
-    for (uint32_t i = 0; i < dims; i++)
+    for (int32_t i = 0; i < dims; i++)
     {
         tensor->stride[i] = 1;
-        for (uint32_t j = i + 1; j < dims; j++)
+        for (int32_t j = i + 1; j < dims; j++)
         {
             tensor->stride[i] *= shape[j];
         }
     }
 }
 
-float tensor_get_item(Tensor *tensor, uint32_t *indices)
+float tensor_get_item(Tensor *tensor, int32_t *indices)
 {
     return tensor->data[_get_index(tensor, indices)];
 }
 
-void tensor_set_item(Tensor *tensor, uint32_t *indices, float value)
+void tensor_set_item(Tensor *tensor, int32_t *indices, float value)
 {
     tensor->data[_get_index(tensor, indices)] = value;
 }
 
 Tensor *tensor_slice(Tensor *tensor, Range *ranges)
 {
-    uint32_t size = 1;
-    uint32_t *shape = (uint32_t *)malloc(sizeof(uint32_t) * tensor->dims);
+    int32_t size = 1;
+    int32_t *shape = (int32_t *)malloc(sizeof(int32_t) * tensor->dims);
 
-    for (uint32_t i = 0; i < tensor->dims; i++)
+    for (int32_t i = 0; i < tensor->dims; i++)
     {
         shape[i] = ceil((float)(ranges[i].stop - ranges[i].start) / ranges[i].step);
         size *= shape[i];
@@ -234,24 +234,24 @@ Tensor *tensor_slice(Tensor *tensor, Range *ranges)
     float *data = (float *)malloc(sizeof(float) * size);
 
     // compute stride for new shape
-    uint32_t stride[tensor->dims];
-    for (uint32_t i = 0; i < tensor->dims; i++)
+    int32_t stride[tensor->dims];
+    for (int32_t i = 0; i < tensor->dims; i++)
     {
         stride[i] = 1;
-        for (uint32_t j = i + 1; j < tensor->dims; j++)
+        for (int32_t j = i + 1; j < tensor->dims; j++)
         {
             stride[i] *= shape[j];
         }
     }
 
     // slice
-    uint32_t indices[tensor->dims];
-    for (uint32_t i = 0; i < size; i++)
+    int32_t indices[tensor->dims];
+    for (int32_t i = 0; i < size; i++)
     {
-        uint32_t rest = i;
-        for (uint32_t j = 0; j < tensor->dims; j++)
+        int32_t rest = i;
+        for (int32_t j = 0; j < tensor->dims; j++)
         {
-            indices[j] = (uint32_t)rest / stride[j];
+            indices[j] = (int32_t)rest / stride[j];
             indices[j] = ranges[j].start + indices[j] * ranges[j].step;
             rest %= stride[j];
         }
@@ -304,7 +304,7 @@ float tensor_max(Tensor *tensor)
 
 Tensor *tensor_unary_minus(Tensor *tensor)
 {
-    uint32_t *shape = _copy_shape(tensor);
+    int32_t *shape = _copy_shape(tensor);
     float *data;
 
     if (tensor->device == 0)
@@ -320,11 +320,11 @@ Tensor *tensor_unary_minus(Tensor *tensor)
     return _tensor_create(data, shape, tensor->dims, tensor->device);
 }
 
-Tensor *tensor_transpose(Tensor *tensor, uint32_t axis1, uint32_t axis2)
+Tensor *tensor_transpose(Tensor *tensor, int32_t axis1, int32_t axis2)
 {
     Tensor *copy = tensor_copy(tensor);
 
-    uint32_t tmp = copy->shape[axis1];
+    int32_t tmp = copy->shape[axis1];
     copy->shape[axis1] = copy->shape[axis2];
     copy->shape[axis2] = tmp;
 
@@ -405,7 +405,7 @@ void tensor_divide_into(Tensor *a, Tensor *b)
 
 Tensor *tensor_add(Tensor *a, Tensor *b)
 {
-    uint32_t *shape = _copy_shape(a);
+    int32_t *shape = _copy_shape(a);
     float *data;
 
     if (a->device == 0 && b->device == 0)
@@ -428,7 +428,7 @@ Tensor *tensor_add(Tensor *a, Tensor *b)
 
 Tensor *tensor_subtract(Tensor *a, Tensor *b)
 {
-    uint32_t *shape = _copy_shape(a);
+    int32_t *shape = _copy_shape(a);
     float *data;
 
     if (a->device == 0 && b->device == 0)
@@ -451,7 +451,7 @@ Tensor *tensor_subtract(Tensor *a, Tensor *b)
 
 Tensor *tensor_multiply(Tensor *a, Tensor *b)
 {
-    uint32_t *shape = _copy_shape(a);
+    int32_t *shape = _copy_shape(a);
     float *data;
 
     if (a->device == 0 && b->device == 0)
@@ -474,7 +474,7 @@ Tensor *tensor_multiply(Tensor *a, Tensor *b)
 
 Tensor *tensor_divide(Tensor *a, Tensor *b)
 {
-    uint32_t *shape = _copy_shape(a);
+    int32_t *shape = _copy_shape(a);
     float *data;
 
     if (a->device == 0 && b->device == 0)
@@ -497,9 +497,9 @@ Tensor *tensor_divide(Tensor *a, Tensor *b)
 
 Tensor *tensor_matmul(Tensor *a, Tensor *b)
 {
-    uint32_t batch = 1;
-    uint32_t *shape = (uint32_t *)malloc(sizeof(uint32_t) * a->dims);
-    for (uint32_t i = 0; i < a->dims - 2; i++)
+    int32_t batch = 1;
+    int32_t *shape = (int32_t *)malloc(sizeof(int32_t) * a->dims);
+    for (int32_t i = 0; i < a->dims - 2; i++)
     {
         batch *= a->shape[i];
         shape[i] = a->shape[i];
@@ -507,7 +507,7 @@ Tensor *tensor_matmul(Tensor *a, Tensor *b)
     shape[a->dims - 2] = a->shape[a->dims - 2];
     shape[a->dims - 1] = b->shape[b->dims - 1];
 
-    uint32_t size = batch * a->shape[a->dims - 2] * b->shape[b->dims - 1];
+    int32_t size = batch * a->shape[a->dims - 2] * b->shape[b->dims - 1];
     float *data;
 
     if (a->device == 0 && b->device == 0)
@@ -530,7 +530,7 @@ Tensor *tensor_matmul(Tensor *a, Tensor *b)
 
 Tensor *tensor_broadcast_add(Tensor *tensor, float value)
 {
-    uint32_t *shape = _copy_shape(tensor);
+    int32_t *shape = _copy_shape(tensor);
     float *data;
 
     if (tensor->device == 0)
@@ -548,7 +548,7 @@ Tensor *tensor_broadcast_add(Tensor *tensor, float value)
 
 Tensor *tensor_broadcast_subtract(Tensor *tensor, float value)
 {
-    uint32_t *shape = _copy_shape(tensor);
+    int32_t *shape = _copy_shape(tensor);
     float *data;
 
     if (tensor->device == 0)
@@ -566,7 +566,7 @@ Tensor *tensor_broadcast_subtract(Tensor *tensor, float value)
 
 Tensor *tensor_broadcast_multiply(Tensor *tensor, float value)
 {
-    uint32_t *shape = _copy_shape(tensor);
+    int32_t *shape = _copy_shape(tensor);
     float *data;
 
     if (tensor->device == 0)
@@ -584,7 +584,7 @@ Tensor *tensor_broadcast_multiply(Tensor *tensor, float value)
 
 Tensor *tensor_broadcast_divide(Tensor *tensor, float value)
 {
-    uint32_t *shape = _copy_shape(tensor);
+    int32_t *shape = _copy_shape(tensor);
     float *data;
 
     if (tensor->device == 0)
@@ -602,7 +602,7 @@ Tensor *tensor_broadcast_divide(Tensor *tensor, float value)
 
 Tensor *tensor_broadcast_right_divide(Tensor *tensor, float value)
 {
-    uint32_t *shape = _copy_shape(tensor);
+    int32_t *shape = _copy_shape(tensor);
     float *data;
 
     if (tensor->device == 0)
@@ -620,7 +620,7 @@ Tensor *tensor_broadcast_right_divide(Tensor *tensor, float value)
 
 Tensor *tensor_power(Tensor *tensor, float power)
 {
-    uint32_t *shape = _copy_shape(tensor);
+    int32_t *shape = _copy_shape(tensor);
     float *data;
     if (tensor->device == 0)
     {
@@ -637,7 +637,7 @@ Tensor *tensor_power(Tensor *tensor, float power)
 
 Tensor *tensor_exp(Tensor *tensor)
 {
-    uint32_t *shape = _copy_shape(tensor);
+    int32_t *shape = _copy_shape(tensor);
     float *data;
     if (tensor->device == 0)
     {
@@ -654,7 +654,7 @@ Tensor *tensor_exp(Tensor *tensor)
 
 Tensor *tensor_log(Tensor *tensor)
 {
-    uint32_t *shape = _copy_shape(tensor);
+    int32_t *shape = _copy_shape(tensor);
     float *data;
     if (tensor->device == 0)
     {
@@ -671,7 +671,7 @@ Tensor *tensor_log(Tensor *tensor)
 
 Tensor *tensor_log10(Tensor *tensor)
 {
-    uint32_t *shape = _copy_shape(tensor);
+    int32_t *shape = _copy_shape(tensor);
     float *data;
     if (tensor->device == 0)
     {
@@ -688,7 +688,7 @@ Tensor *tensor_log10(Tensor *tensor)
 
 Tensor *tensor_logb(Tensor *tensor, float base)
 {
-    uint32_t *shape = _copy_shape(tensor);
+    int32_t *shape = _copy_shape(tensor);
     float *data;
     if (tensor->device == 0)
     {
@@ -705,7 +705,7 @@ Tensor *tensor_logb(Tensor *tensor, float base)
 
 Tensor *tensor_sin(Tensor *tensor)
 {
-    uint32_t *shape = _copy_shape(tensor);
+    int32_t *shape = _copy_shape(tensor);
     float *data;
     if (tensor->device == 0)
     {
@@ -722,7 +722,7 @@ Tensor *tensor_sin(Tensor *tensor)
 
 Tensor *tensor_cos(Tensor *tensor)
 {
-    uint32_t *shape = _copy_shape(tensor);
+    int32_t *shape = _copy_shape(tensor);
     float *data;
     if (tensor->device == 0)
     {
@@ -739,7 +739,7 @@ Tensor *tensor_cos(Tensor *tensor)
 
 Tensor *tensor_tanh(Tensor *tensor)
 {
-    uint32_t *shape = _copy_shape(tensor);
+    int32_t *shape = _copy_shape(tensor);
     float *data;
     if (tensor->device == 0)
     {

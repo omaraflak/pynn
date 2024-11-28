@@ -5,19 +5,19 @@ import ctypes
 class CTensor(ctypes.Structure):
     _fields_ = [
         ('data', ctypes.POINTER(ctypes.c_float)),
-        ('shape', ctypes.POINTER(ctypes.c_uint32)),
-        ('stride', ctypes.POINTER(ctypes.c_uint32)),
-        ('dims', ctypes.c_uint32),
-        ('size', ctypes.c_uint32),
-        ('device', ctypes.c_uint32),
+        ('shape', ctypes.POINTER(ctypes.c_int32)),
+        ('stride', ctypes.POINTER(ctypes.c_int32)),
+        ('dims', ctypes.c_int32),
+        ('size', ctypes.c_int32),
+        ('device', ctypes.c_int32),
     ]
 
 
 class CRange(ctypes.Structure):
     _fields_ = [
-        ('start', ctypes.c_uint32),
-        ('stop', ctypes.c_uint32),
-        ('step', ctypes.c_uint32),
+        ('start', ctypes.c_int32),
+        ('stop', ctypes.c_int32),
+        ('step', ctypes.c_int32),
     ]
 
 
@@ -26,13 +26,13 @@ def _init_tensor_c_lib() -> ctypes.CDLL:
 
     lib.tensor_create.argtypes = [
         ctypes.POINTER(ctypes.c_float),
-        ctypes.POINTER(ctypes.c_uint32),
-        ctypes.c_uint32
+        ctypes.POINTER(ctypes.c_int32),
+        ctypes.c_int32
     ]
     lib.tensor_create.restype = ctypes.POINTER(CTensor)
     lib.tensor_create_empty.argtypes = [
-        ctypes.POINTER(ctypes.c_uint32),
-        ctypes.c_uint32
+        ctypes.POINTER(ctypes.c_int32),
+        ctypes.c_int32
     ]
     lib.tensor_create_empty.restype = ctypes.POINTER(CTensor)
     lib.tensor_copy.argtypes = [ctypes.POINTER(CTensor)]
@@ -63,18 +63,18 @@ def _init_tensor_c_lib() -> ctypes.CDLL:
     lib.tensor_fill_identity.restype = None
     lib.tensor_reshape.argtypes = [
         ctypes.POINTER(CTensor),
-        ctypes.POINTER(ctypes.c_uint32),
-        ctypes.c_uint32
+        ctypes.POINTER(ctypes.c_int32),
+        ctypes.c_int32
     ]
     lib.tensor_reshape.restype = None
     lib.tensor_get_item.argtypes = [
         ctypes.POINTER(CTensor),
-        ctypes.POINTER(ctypes.c_uint32)
+        ctypes.POINTER(ctypes.c_int32)
     ]
     lib.tensor_get_item.restype = ctypes.c_float
     lib.tensor_set_item.argtypes = [
         ctypes.POINTER(CTensor),
-        ctypes.POINTER(ctypes.c_uint32),
+        ctypes.POINTER(ctypes.c_int32),
         ctypes.c_float,
     ]
     lib.tensor_set_item.restype = None
@@ -96,8 +96,8 @@ def _init_tensor_c_lib() -> ctypes.CDLL:
     lib.tensor_unary_minus.restype = ctypes.POINTER(CTensor)
     lib.tensor_transpose.argtypes = [
         ctypes.POINTER(CTensor),
-        ctypes.c_uint32,
-        ctypes.c_uint32,
+        ctypes.c_int32,
+        ctypes.c_int32,
     ]
     lib.tensor_transpose.restype = ctypes.POINTER(CTensor)
     lib.tensor_add_into.argtypes = [
@@ -228,15 +228,15 @@ class Tensor:
 
         self.c_tensor = Tensor._C.tensor_create(
             (ctypes.c_float * len(data))(*data),
-            (ctypes.c_uint32 * len(shape))(*shape),
-            ctypes.c_uint32(len(shape)),
+            (ctypes.c_int32 * len(shape))(*shape),
+            ctypes.c_int32(len(shape)),
         )
 
     @classmethod
     def _empty(cls, shape: tuple[int, ...]) -> Tensor:
         c_tensor = Tensor._C.tensor_create_empty(
-            (ctypes.c_uint32 * len(shape))(*shape),
-            ctypes.c_uint32(len(shape)),
+            (ctypes.c_int32 * len(shape))(*shape),
+            ctypes.c_int32(len(shape)),
         )
         return Tensor(None, None, c_tensor)
 
@@ -316,8 +316,8 @@ class Tensor:
     def reshape(self, shape: tuple[int, ...]):
         Tensor._C.tensor_reshape(
             self.c_tensor,
-            (ctypes.c_uint32 * len(shape))(*shape),
-            ctypes.c_uint32(len(shape))
+            (ctypes.c_int32 * len(shape))(*shape),
+            ctypes.c_int32(len(shape))
         )
 
     def fill(self, value: float):
@@ -349,7 +349,7 @@ class Tensor:
             axis1 = self.dims - 1
             axis2 = self.dims - 2
         c_tensor = Tensor._C.tensor_transpose(
-            self.c_tensor, ctypes.c_uint32(axis1), ctypes.c_uint32(axis2))
+            self.c_tensor, ctypes.c_int32(axis1), ctypes.c_int32(axis2))
         return Tensor(None, None, c_tensor)
 
     def add_into(self, other: Tensor):
@@ -440,12 +440,12 @@ class Tensor:
         return Tensor(None, None, c_tensor)
 
     def get(self, key: tuple[int, ...]) -> float:
-        return Tensor._C.tensor_get_item(self.c_tensor, (ctypes.c_uint32 * len(key))(*key))
+        return Tensor._C.tensor_get_item(self.c_tensor, (ctypes.c_int32 * len(key))(*key))
 
     def set(self, key: tuple[int, ...], value: float):
         Tensor._C.tensor_set_item(
             self.c_tensor,
-            (ctypes.c_uint32 * len(key))(*key),
+            (ctypes.c_int32 * len(key))(*key),
             ctypes.c_float(value)
         )
 

@@ -6,24 +6,24 @@
 typedef struct
 {
     float *data;
-    uint32_t *shape;
-    uint32_t *stride;
-    uint32_t dims;
-    uint32_t size;
-    uint32_t device;
+    int32_t *shape;
+    int32_t *stride;
+    int32_t dims;
+    int32_t size;
+    int32_t device;
 } Tensor;
 
 typedef struct
 {
-    uint32_t start;
-    uint32_t stop;
-    uint32_t step;
+    int32_t start;
+    int32_t stop;
+    int32_t step;
 } Range;
 
 extern "C"
 {
-    Tensor *tensor_create(float *data, uint32_t *shape, uint32_t dims);
-    Tensor *tensor_create_empty(uint32_t *shape, uint32_t dims);
+    Tensor *tensor_create(float *data, int32_t *shape, int32_t dims);
+    Tensor *tensor_create_empty(int32_t *shape, int32_t dims);
     Tensor *tensor_copy(Tensor *tensor);
     void tensor_delete(Tensor *tensor);
 
@@ -34,10 +34,10 @@ extern "C"
     void tensor_fill_random_uniform(Tensor *tensor, float min, float max);
     void tensor_fill_random_normal(Tensor *tensor, float mean, float std);
     void tensor_fill_identity(Tensor *tensor);
-    void tensor_reshape(Tensor *tensor, uint32_t *shape, uint32_t dims);
+    void tensor_reshape(Tensor *tensor, int32_t *shape, int32_t dims);
 
-    float tensor_get_item(Tensor *tensor, uint32_t *indices);
-    void tensor_set_item(Tensor *tensor, uint32_t *indices, float value);
+    float tensor_get_item(Tensor *tensor, int32_t *indices);
+    void tensor_set_item(Tensor *tensor, int32_t *indices, float value);
 
     Tensor *tensor_slice(Tensor *tensor, Range *ranges);
 
@@ -47,7 +47,7 @@ extern "C"
     float tensor_max(Tensor *tensor);
 
     Tensor *tensor_unary_minus(Tensor *tensor);
-    Tensor *tensor_transpose(Tensor *tensor, uint32_t axis1, uint32_t axis2);
+    Tensor *tensor_transpose(Tensor *tensor, int32_t axis1, int32_t axis2);
 
     void tensor_add_into(Tensor *a, Tensor *b);
     void tensor_subtract_into(Tensor *a, Tensor *b);
