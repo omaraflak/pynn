@@ -13,6 +13,13 @@ typedef struct
     uint32_t device;
 } Tensor;
 
+typedef struct
+{
+    uint32_t start;
+    uint32_t stop;
+    uint32_t step;
+} Range;
+
 extern "C"
 {
     Tensor *tensor_create(float *data, uint32_t *shape, uint32_t dims);
@@ -31,6 +38,8 @@ extern "C"
 
     float tensor_get_item(Tensor *tensor, uint32_t *indices);
     void tensor_set_item(Tensor *tensor, uint32_t *indices, float value);
+
+    Tensor *tensor_slice(Tensor *tensor, Range *ranges);
 
     float tensor_sum(Tensor *tensor);
     float tensor_mean(Tensor *tensor);

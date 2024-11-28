@@ -2,6 +2,7 @@
 #include "cpu.h"
 #include "gpu.h"
 #include <cstring>
+#include <cmath>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -217,6 +218,48 @@ float tensor_get_item(Tensor *tensor, uint32_t *indices)
 void tensor_set_item(Tensor *tensor, uint32_t *indices, float value)
 {
     tensor->data[_get_index(tensor, indices)] = value;
+}
+
+Tensor *tensor_slice(Tensor *tensor, Range *ranges)
+{
+    uint32_t size = 1;
+    uint32_t *shape = (uint32_t *)malloc(sizeof(uint32_t) * tensor->dims);
+
+    for (uint32_t i = 0; i < tensor->dims; i++)
+    {
+        shape[i] = ceil((float)(ranges[i].stop - ranges[i].start) / ranges[i].step);
+        size *= shape[i];
+    }
+
+    float *data = (float *)malloc(sizeof(float) * size);
+
+    // compute stride for new shape
+    uint32_t stride[tensor->dims];
+    for (uint32_t i = 0; i < tensor->dims; i++)
+    {
+        stride[i] = 1;
+        for (uint32_t j = i + 1; j < tensor->dims; j++)
+        {
+            stride[i] *= shape[j];
+        }
+    }
+
+    // slice
+    uint32_t indices[tensor->dims];
+    for (uint32_t i = 0; i < size; i++)
+    {
+        uint32_t rest = i;
+        for (uint32_t j = 0; j < tensor->dims; j++)
+        {
+            indices[j] = (uint32_t)rest / stride[j];
+            indices[j] = ranges[j].start + indices[j] * ranges[j].step;
+            rest %= stride[j];
+        }
+
+        data[i] = tensor->data[_get_index(tensor, indices)];
+    }
+
+    return _tensor_create(data, shape, tensor->dims, tensor->device);
 }
 
 float tensor_sum(Tensor *tensor)

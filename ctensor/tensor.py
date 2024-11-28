@@ -13,6 +13,14 @@ class CTensor(ctypes.Structure):
     ]
 
 
+class CRange(ctypes.Structure):
+    _fields_ = [
+        ('start', ctypes.c_uint32),
+        ('stop', ctypes.c_uint32),
+        ('step', ctypes.c_uint32),
+    ]
+
+
 def _init_tensor_c_lib() -> ctypes.CDLL:
     lib = ctypes.CDLL('/content/libtensor.so')
 
@@ -70,6 +78,11 @@ def _init_tensor_c_lib() -> ctypes.CDLL:
         ctypes.c_float,
     ]
     lib.tensor_set_item.restype = None
+    lib.tensor_slice.argtypes = [
+        ctypes.POINTER(CTensor),
+        ctypes.POINTER(CRange),
+    ]
+    lib.tensor_slice.restype = ctypes.POINTER(CTensor)
     lib.tensor_sum.argtypes = [ctypes.POINTER(CTensor)]
     lib.tensor_sum.restype = ctypes.c_float
     lib.tensor_mean.argtypes = [ctypes.POINTER(CTensor)]
@@ -435,6 +448,17 @@ class Tensor:
             (ctypes.c_uint32 * len(key))(*key),
             ctypes.c_float(value)
         )
+
+    def slice(self, ranges: list[tuple[int, int, int]]) -> Tensor:
+        cranges = [
+            CRange(start, stop, step)
+            for start, stop, step in ranges
+        ]
+        c_tensor = Tensor._C.tensor_slice(
+            self.c_tensor,
+            (CRange * len(ranges))(*cranges)
+        )
+        return Tensor(None, None, c_tensor)
 
     def sum(self) -> float:
         return Tensor._C.tensor_sum(self.c_tensor)
