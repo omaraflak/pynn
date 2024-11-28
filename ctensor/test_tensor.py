@@ -1006,6 +1006,21 @@ class TestTensor(unittest.TestCase):
         self.assertEqual(y.device, 0)
         self.assertEqual(y.data, [2, 3, 5, 6, 14, 15, 17, 18])
 
+    def test_slice_all(self):
+        x = Tensor.array([
+            [[1, 2, 3], [4, 5, 6]],
+            [[7, 8, 9], [10, 11, 12]],
+            [[13, 14, 15], [16, 17, 18]],
+        ])
+
+        y = x.slice([(0, 3, 1), (0, 2, 1), (0, 3, 1)])
+
+        self.assertEqual(y.size, x.size)
+        self.assertEqual(y.dims, x.dims)
+        self.assertEqual(y.shape, x.shape)
+        self.assertEqual(y.device, 0)
+        self.assertEqual(y.data, x.data)
+
 
 if __name__ == "__main__":
     unittest.main()
