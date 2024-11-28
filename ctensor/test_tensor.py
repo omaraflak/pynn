@@ -1051,5 +1051,21 @@ class TestTensor(unittest.TestCase):
         self.assertEqual(y.device, 0)
         self.assertEqual(y.data, [18, 16, 15, 13])
 
+    def test_slice_negative_steps_2(self):
+        x = Tensor.array([
+            [[1, 2], [4, 5], [6, 7]],
+            [[8, 9], [10, 11], [12, 13]],
+            [[14, 15], [16, 17], [18, 19]],
+            [[20, 21], [22, 23], [24, 25]],
+        ])
+
+        y = x[::-3, ::-2, ::-2]
+
+        self.assertEqual(y.size, 4)
+        self.assertEqual(y.dims, 3)
+        self.assertEqual(y.shape, (2, 2, 1))
+        self.assertEqual(y.device, 0)
+        self.assertEqual(y.data, [25, 21, 7, 2])
+
 if __name__ == "__main__":
     unittest.main()
