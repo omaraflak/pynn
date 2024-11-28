@@ -449,14 +449,20 @@ class Tensor:
             ctypes.c_float(value)
         )
 
-    def slice(self, ranges: list[tuple[int, int, int]]) -> Tensor:
-        cranges = [
-            CRange(start, stop, step)
-            for start, stop, step in ranges
-        ]
+    def slice(self, slices: list[slice]) -> Tensor:
+        c_ranges = []
+        for i in range(len(self.shape)):
+            d = self.shape[i]
+            if i < len(slices):
+                s = slices[i]
+                r = CRange(s.start or 0, s.stop or d, s.step or 1)
+            else:
+                r = CRange(0, d, 1)
+            c_ranges.append(r)
+
         c_tensor = Tensor._C.tensor_slice(
             self.c_tensor,
-            (CRange * len(ranges))(*cranges)
+            (CRange * len(self.shape))(*c_ranges)
         )
         return Tensor(None, None, c_tensor)
 
@@ -521,8 +527,15 @@ class Tensor:
     def __neg__(self) -> Tensor:
         return self.unary_minus()
 
-    def __getitem__(self, key: tuple[int, ...]) -> float:
-        return self.get(key)
+    def __getitem__(self, key: tuple[int, ...] | tuple[slice, ...]) -> float | Tensor:
+        k = key[0] if isinstance(key, tuple) else key
+        v = key if isinstance(key, tuple) else [key]
+        if isinstance(k, int):
+            return self.get(v)
+        elif isinstance(k, slice):
+            return self.slice(v)
+        else:
+            raise NotImplementedError()
 
     def __setitem__(self, key: tuple[int, ...], value: float):
         self.set(key, value)

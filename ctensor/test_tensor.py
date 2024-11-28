@@ -998,7 +998,7 @@ class TestTensor(unittest.TestCase):
             [[13, 14, 15], [16, 17, 18]],
         ])
 
-        y = x.slice([(0, 3, 2), (0, 2, 1), (1, 3, 1)])
+        y = x[::2, :, 1::]
 
         self.assertEqual(y.size, 8)
         self.assertEqual(y.dims, 3)
@@ -1013,7 +1013,7 @@ class TestTensor(unittest.TestCase):
             [[13, 14, 15], [16, 17, 18]],
         ])
 
-        y = x.slice([(0, 3, 1), (0, 2, 1), (0, 3, 1)])
+        y = x[:]
 
         self.assertEqual(y.size, x.size)
         self.assertEqual(y.dims, x.dims)
