@@ -19,7 +19,7 @@ def plot_decision_boundary(model: modules.Module):
         for y in np.linspace(0, 1, 20):
             x_vals.append(x)
             y_vals.append(y)
-            z_vals.append(model.forward(Tensor([x, y], (2, 1))).data[0])
+            z_vals.append(model.forward(Tensor([x, y], (2, 1)))[0,0])
 
     fig = plt.figure()
     ax = fig.add_subplot(projection="3d")
@@ -28,10 +28,8 @@ def plot_decision_boundary(model: modules.Module):
 
 
 def main():
-    x_train = np.array([[0, 0], [0, 1], [1, 0], [1, 1]]).reshape((4, 2, 1))
-    y_train = np.array([[0], [1], [1], [0]]).reshape((4, 1, 1))
-    x_train = [Tensor.array(x) for x in x_train]
-    y_train = [Tensor.array(y) for y in y_train]
+    x_train = Tensor([0, 0, 0, 1, 1, 0, 1, 1], (4, 2, 1))
+    y_train = Tensor([0, 1, 1, 0], (4, 1, 1))
 
     model = modules.Sequential([
         modules.Linear(2, 3),

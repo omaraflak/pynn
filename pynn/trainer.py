@@ -8,8 +8,8 @@ from pynn import Tensor
 
 def train(
     module: modules.Module,
-    x_train: list[Tensor],
-    y_train: list[Tensor],
+    x_train: Tensor,
+    y_train: Tensor,
     loss: losses.Loss,
     optimizer: optimizers.Optimizer,
     epochs: int,
@@ -33,8 +33,8 @@ def train(
 
 def evaluate(
     module: modules.Module,
-    x_test: list[Tensor],
-    y_test: list[Tensor],
+    x_test: Tensor,
+    y_test: Tensor,
     loss: losses.Loss,
 ) -> float:
     """Evaluates the network on the given data and loss."""
