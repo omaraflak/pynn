@@ -2,6 +2,7 @@ from __future__ import annotations
 from typing import Iterator
 import ctypes
 
+
 class CTensor(ctypes.Structure):
     _fields_ = [
         ('data', ctypes.POINTER(ctypes.c_float)),
@@ -347,7 +348,8 @@ class Tensor:
         if len(dims) == 0:
             new_shape = [i for i in self.shape if i != 1]
         else:
-            new_shape = [self.shape[i] for i in range(self.dims) if i not in dims]
+            new_shape = [self.shape[i]
+                         for i in range(self.dims) if i not in dims]
 
         if len(new_shape) == 0:
             new_shape = [1]
@@ -390,25 +392,29 @@ class Tensor:
         if isinstance(other, Tensor):
             Tensor._C.tensor_add_into(self.c_tensor, other.c_tensor)
         else:
-            Tensor._C.tensor_broadcast_add_into(self.c_tensor, ctypes.c_float(other))
+            Tensor._C.tensor_broadcast_add_into(
+                self.c_tensor, ctypes.c_float(other))
 
     def subtract_into(self, other: Tensor | float):
         if isinstance(other, Tensor):
             Tensor._C.tensor_subtract_into(self.c_tensor, other.c_tensor)
         else:
-            Tensor._C.tensor_broadcast_subtract_into(self.c_tensor, ctypes.c_float(other))
+            Tensor._C.tensor_broadcast_subtract_into(
+                self.c_tensor, ctypes.c_float(other))
 
     def multiply_into(self, other: Tensor | float):
         if isinstance(other, Tensor):
             Tensor._C.tensor_multiply_into(self.c_tensor, other.c_tensor)
         else:
-            Tensor._C.tensor_broadcast_multiply_into(self.c_tensor, ctypes.c_float(other))
+            Tensor._C.tensor_broadcast_multiply_into(
+                self.c_tensor, ctypes.c_float(other))
 
     def divide_into(self, other: Tensor | float):
         if isinstance(other, Tensor):
             Tensor._C.tensor_divide_into(self.c_tensor, other.c_tensor)
         else:
-            Tensor._C.tensor_broadcast_divide_into(self.c_tensor, ctypes.c_float(other))
+            Tensor._C.tensor_broadcast_divide_into(
+                self.c_tensor, ctypes.c_float(other))
 
     def add(self, other: Tensor | float) -> Tensor:
         if isinstance(other, Tensor):
@@ -593,11 +599,13 @@ class Tensor:
                 tmp.squeeze(0)
                 return tmp
             else:
-                raise ValueError("Key must be a tuple of ints the size of dims, or slices")
+                raise ValueError(
+                    "Key must be a tuple of ints the size of dims, or slices")
         elif isinstance(key[0], slice):
             return self.slice(*key)
         else:
-            raise ValueError("Key must be a tuple of ints the size of dims, or slices")
+            raise ValueError(
+                "Key must be a tuple of ints the size of dims, or slices")
 
     def __setitem__(self, key: tuple[int, ...], value: float):
         self.set(key, value)

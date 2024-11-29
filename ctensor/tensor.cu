@@ -33,12 +33,14 @@ int32_t _get_index(Tensor *tensor, int32_t *indices)
     return index;
 }
 
-int32_t mod(int32_t a, int32_t b) {
-  int32_t m = a % b;
-  if (m < 0) {
-    m = (b < 0) ? m - b : m + b;
-  }
-  return m;
+int32_t mod(int32_t a, int32_t b)
+{
+    int32_t m = a % b;
+    if (m < 0)
+    {
+        m = (b < 0) ? m - b : m + b;
+    }
+    return m;
 }
 
 Tensor *_tensor_create(float *data, int32_t *shape, int32_t dims, int32_t device)
@@ -236,10 +238,12 @@ Tensor *tensor_slice(Tensor *tensor, Range *ranges)
     // compute new size given ranges
     for (int32_t i = 0; i < tensor->dims; i++)
     {
-        if (ranges[i].start < 0) {
+        if (ranges[i].start < 0)
+        {
             ranges[i].start = mod(ranges[i].start, tensor->shape[i]);
         }
-        if (ranges[i].stop < 0) {
+        if (ranges[i].stop < 0)
+        {
             ranges[i].stop = mod(ranges[i].stop, tensor->shape[i]);
         }
         shape[i] = ceil((float)(ranges[i].stop - ranges[i].start) / abs(ranges[i].step));
@@ -545,7 +549,8 @@ Tensor *tensor_matmul(Tensor *a, Tensor *b)
     return _tensor_create(data, shape, a->dims, a->device);
 }
 
-void tensor_broadcast_add_into(Tensor *tensor, float value) {
+void tensor_broadcast_add_into(Tensor *tensor, float value)
+{
     if (tensor->device == 0)
     {
         tensor_broadcast_add_cpu(tensor, value, tensor->data);
@@ -556,7 +561,8 @@ void tensor_broadcast_add_into(Tensor *tensor, float value) {
     }
 }
 
-void tensor_broadcast_subtract_into(Tensor *tensor, float value) {
+void tensor_broadcast_subtract_into(Tensor *tensor, float value)
+{
     if (tensor->device == 0)
     {
         tensor_broadcast_subtract_cpu(tensor, value, tensor->data);
@@ -567,7 +573,8 @@ void tensor_broadcast_subtract_into(Tensor *tensor, float value) {
     }
 }
 
-void tensor_broadcast_multiply_into(Tensor *tensor, float value) {
+void tensor_broadcast_multiply_into(Tensor *tensor, float value)
+{
     if (tensor->device == 0)
     {
         tensor_broadcast_multiply_cpu(tensor, value, tensor->data);
@@ -578,7 +585,8 @@ void tensor_broadcast_multiply_into(Tensor *tensor, float value) {
     }
 }
 
-void tensor_broadcast_divide_into(Tensor *tensor, float value) {
+void tensor_broadcast_divide_into(Tensor *tensor, float value)
+{
     if (tensor->device == 0)
     {
         tensor_broadcast_divide_cpu(tensor, value, tensor->data);
