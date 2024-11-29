@@ -146,6 +146,26 @@ def _init_tensor_c_lib() -> ctypes.CDLL:
     ]
     lib.tensor_matmul.restype = ctypes.POINTER(CTensor)
 
+    lib.tensor_broadcast_add_into.argtypes = [
+        ctypes.POINTER(CTensor),
+        ctypes.c_float
+    ]
+    lib.tensor_broadcast_add_into.restype = None
+    lib.tensor_broadcast_subtract_into.argtypes = [
+        ctypes.POINTER(CTensor),
+        ctypes.c_float
+    ]
+    lib.tensor_broadcast_subtract_into.restype = None
+    lib.tensor_broadcast_multiply_into.argtypes = [
+        ctypes.POINTER(CTensor),
+        ctypes.c_float
+    ]
+    lib.tensor_broadcast_multiply_into.restype = None
+    lib.tensor_broadcast_divide_into.argtypes = [
+        ctypes.POINTER(CTensor),
+        ctypes.c_float
+    ]
+    lib.tensor_broadcast_divide_into.restype = None
     lib.tensor_broadcast_add.argtypes = [
         ctypes.POINTER(CTensor),
         ctypes.c_float
@@ -366,17 +386,29 @@ class Tensor:
             self.c_tensor, ctypes.c_int32(axis1), ctypes.c_int32(axis2))
         return Tensor(None, None, c_tensor)
 
-    def add_into(self, other: Tensor):
-        Tensor._C.tensor_add_into(self.c_tensor, other.c_tensor)
+    def add_into(self, other: Tensor | float):
+        if isinstance(other, Tensor):
+            Tensor._C.tensor_add_into(self.c_tensor, other.c_tensor)
+        else:
+            Tensor._C.tensor_broadcast_add_into(self.c_tensor, ctypes.c_float(other))
 
-    def subtract_into(self, other: Tensor):
-        Tensor._C.tensor_subtract_into(self.c_tensor, other.c_tensor)
+    def subtract_into(self, other: Tensor | float):
+        if isinstance(other, Tensor):
+            Tensor._C.tensor_subtract_into(self.c_tensor, other.c_tensor)
+        else:
+            Tensor._C.tensor_broadcast_subtract_into(self.c_tensor, ctypes.c_float(other))
 
-    def multiply_into(self, other: Tensor):
-        Tensor._C.tensor_multiply_into(self.c_tensor, other.c_tensor)
+    def multiply_into(self, other: Tensor | float):
+        if isinstance(other, Tensor):
+            Tensor._C.tensor_multiply_into(self.c_tensor, other.c_tensor)
+        else:
+            Tensor._C.tensor_broadcast_multiply_into(self.c_tensor, ctypes.c_float(other))
 
-    def divide_into(self, other: Tensor):
-        Tensor._C.tensor_divide_into(self.c_tensor, other.c_tensor)
+    def divide_into(self, other: Tensor | float):
+        if isinstance(other, Tensor):
+            Tensor._C.tensor_divide_into(self.c_tensor, other.c_tensor)
+        else:
+            Tensor._C.tensor_broadcast_divide_into(self.c_tensor, ctypes.c_float(other))
 
     def add(self, other: Tensor | float) -> Tensor:
         if isinstance(other, Tensor):

@@ -60,6 +60,11 @@ extern "C"
     Tensor *tensor_divide(Tensor *a, Tensor *b);
     Tensor *tensor_matmul(Tensor *a, Tensor *b);
 
+    void tensor_broadcast_add_into(Tensor *tensor, float value);
+    void tensor_broadcast_subtract_into(Tensor *tensor, float value);
+    void tensor_broadcast_multiply_into(Tensor *tensor, float value);
+    void tensor_broadcast_divide_into(Tensor *tensor, float value);
+
     Tensor *tensor_broadcast_add(Tensor *tensor, float value);
     Tensor *tensor_broadcast_subtract(Tensor *tensor, float value);
     Tensor *tensor_broadcast_multiply(Tensor *tensor, float value);

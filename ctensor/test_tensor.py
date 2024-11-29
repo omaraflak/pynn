@@ -1129,6 +1129,102 @@ class TestTensor(unittest.TestCase):
 
         self.assertEqual(n, 6)
 
+    def test_broadcase_add_into_cpu(self):
+        x = Tensor([1, 2, 3, 4], (2, 2))
+
+        x += 1
+
+        self.assertEqual(x.size, 4)
+        self.assertEqual(x.dims, 2)
+        self.assertEqual(x.shape, (2, 2))
+        self.assertEqual(x.device, 0)
+        self.assertEqual(x.data, [2, 3, 4, 5])
+
+    def test_broadcase_add_into_gpu(self):
+        x = Tensor([1, 2, 3, 4], (2, 2))
+        x.to_gpu()
+
+        x += 1
+        x.to_cpu()
+
+        self.assertEqual(x.size, 4)
+        self.assertEqual(x.dims, 2)
+        self.assertEqual(x.shape, (2, 2))
+        self.assertEqual(x.device, 0)
+        self.assertEqual(x.data, [2, 3, 4, 5])
+
+    def test_broadcase_subtract_into_cpu(self):
+        x = Tensor([1, 2, 3, 4], (2, 2))
+
+        x -= 1
+
+        self.assertEqual(x.size, 4)
+        self.assertEqual(x.dims, 2)
+        self.assertEqual(x.shape, (2, 2))
+        self.assertEqual(x.device, 0)
+        self.assertEqual(x.data, [0, 1, 2, 3])
+
+    def test_broadcase_subtract_into_gpu(self):
+        x = Tensor([1, 2, 3, 4], (2, 2))
+        x.to_gpu()
+
+        x -= 1
+        x.to_cpu()
+
+        self.assertEqual(x.size, 4)
+        self.assertEqual(x.dims, 2)
+        self.assertEqual(x.shape, (2, 2))
+        self.assertEqual(x.device, 0)
+        self.assertEqual(x.data, [0, 1, 2, 3])
+
+    def test_broadcase_multiply_into_cpu(self):
+        x = Tensor([1, 2, 3, 4], (2, 2))
+
+        x *= 2
+
+        self.assertEqual(x.size, 4)
+        self.assertEqual(x.dims, 2)
+        self.assertEqual(x.shape, (2, 2))
+        self.assertEqual(x.device, 0)
+        self.assertEqual(x.data, [2, 4, 6, 8])
+
+    def test_broadcase_multiply_into_gpu(self):
+        x = Tensor([1, 2, 3, 4], (2, 2))
+        x.to_gpu()
+
+        x *= 2
+        x.to_cpu()
+
+        self.assertEqual(x.size, 4)
+        self.assertEqual(x.dims, 2)
+        self.assertEqual(x.shape, (2, 2))
+        self.assertEqual(x.device, 0)
+        self.assertEqual(x.data, [2, 4, 6, 8])
+
+    def test_broadcase_divide_into_cpu(self):
+        x = Tensor([1, 2, 3, 4], (2, 2))
+
+        x /= 2
+
+        self.assertEqual(x.size, 4)
+        self.assertEqual(x.dims, 2)
+        self.assertEqual(x.shape, (2, 2))
+        self.assertEqual(x.device, 0)
+        self.assertEqual(x.data, [0.5, 1, 1.5, 2])
+
+    def test_broadcase_divide_into_gpu(self):
+        x = Tensor([1, 2, 3, 4], (2, 2))
+        x.to_gpu()
+
+        x /= 2
+        x.to_cpu()
+
+        self.assertEqual(x.size, 4)
+        self.assertEqual(x.dims, 2)
+        self.assertEqual(x.shape, (2, 2))
+        self.assertEqual(x.device, 0)
+        self.assertEqual(x.data, [0.5, 1, 1.5, 2])
+
 
 if __name__ == "__main__":
     unittest.main()

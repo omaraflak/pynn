@@ -545,6 +545,50 @@ Tensor *tensor_matmul(Tensor *a, Tensor *b)
     return _tensor_create(data, shape, a->dims, a->device);
 }
 
+void tensor_broadcast_add_into(Tensor *tensor, float value) {
+    if (tensor->device == 0)
+    {
+        tensor_broadcast_add_cpu(tensor, value, tensor->data);
+    }
+    else
+    {
+        tensor_broadcast_add_gpu(tensor, value, tensor->data);
+    }
+}
+
+void tensor_broadcast_subtract_into(Tensor *tensor, float value) {
+    if (tensor->device == 0)
+    {
+        tensor_broadcast_subtract_cpu(tensor, value, tensor->data);
+    }
+    else
+    {
+        tensor_broadcast_subtract_gpu(tensor, value, tensor->data);
+    }
+}
+
+void tensor_broadcast_multiply_into(Tensor *tensor, float value) {
+    if (tensor->device == 0)
+    {
+        tensor_broadcast_multiply_cpu(tensor, value, tensor->data);
+    }
+    else
+    {
+        tensor_broadcast_multiply_gpu(tensor, value, tensor->data);
+    }
+}
+
+void tensor_broadcast_divide_into(Tensor *tensor, float value) {
+    if (tensor->device == 0)
+    {
+        tensor_broadcast_divide_cpu(tensor, value, tensor->data);
+    }
+    else
+    {
+        tensor_broadcast_divide_gpu(tensor, value, tensor->data);
+    }
+}
+
 Tensor *tensor_broadcast_add(Tensor *tensor, float value)
 {
     int32_t *shape = _copy_shape(tensor);
