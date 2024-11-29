@@ -28,7 +28,7 @@ class SGD(Optimizer):
         super().__init__(module)
         self.learning_rate = learning_rate
         self.momentum = momentum
-        self.v = [Tensor.zeros(param.shape) for param in module.parameters()]
+        self.v = [Tensor.zeros(*param.shape) for param in module.parameters()]
 
     def step(self):
         parameters = self.module.parameters()
