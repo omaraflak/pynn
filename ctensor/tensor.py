@@ -67,8 +67,6 @@ def _init_tensor_c_lib() -> ctypes.CDLL:
         ctypes.c_int32
     ]
     lib.tensor_reshape.restype = None
-    lib.tensor_squeeze.argtypes = [ctypes.POINTER(CTensor)]
-    lib.tensor_squeeze.restype = None
     lib.tensor_get_item.argtypes = [
         ctypes.POINTER(CTensor),
         ctypes.POINTER(ctypes.c_int32)
@@ -322,8 +320,19 @@ class Tensor:
             ctypes.c_int32(len(shape))
         )
 
-    def squeeze(self):
-        Tensor._C.tensor_squeeze(self.c_tensor)
+    def squeeze(self, *dims: int):
+        if any(self.shape[i] != 1 for i in dims):
+            raise ValueError("Trying to squeeze dimension that is not 1")
+
+        if len(dims) == 0:
+            new_shape = [i for i in self.shape if i != 1]
+        else:
+            new_shape = [self.shape[i] for i in range(self.dims) if i not in dims]
+
+        if len(new_shape) == 0:
+            new_shape = [1]
+
+        self.reshape(*new_shape)
 
     def fill(self, value: float):
         Tensor._C.tensor_fill(self.c_tensor, ctypes.c_float(value))
@@ -546,14 +555,17 @@ class Tensor:
         if isinstance(key[0], int):
             if len(key) == self.dims:
                 return self.get(*key)
+            elif len(key) == 1:
+                idx = key[0]
+                tmp = self.slice(slice(idx, idx + 1, 1))
+                tmp.squeeze(0)
+                return tmp
             else:
-                slices = tuple(slice(k, k + 1, 1) for k in key)
-                # TODO: only squeeze the first dimension
-                return self.slice(*slices)
+                raise ValueError("Key must be a tuple of ints the size of dims, or slices")
         elif isinstance(key[0], slice):
             return self.slice(*key)
         else:
-            raise ValueError("Key must be a tuple of ints or slices")
+            raise ValueError("Key must be a tuple of ints the size of dims, or slices")
 
     def __setitem__(self, key: tuple[int, ...], value: float):
         self.set(key, value)

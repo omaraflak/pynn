@@ -218,32 +218,6 @@ void tensor_reshape(Tensor *tensor, int32_t *shape, int32_t dims)
     }
 }
 
-void tensor_squeeze(Tensor* tensor) {
-    int32_t new_dims = 0;
-    for (int32_t i=0; i<tensor->dims; i++) {
-        if (tensor->shape[i] > 1) {
-            new_dims++;
-        }
-    }
-
-    if (new_dims == 0) {
-        int32_t new_shape[1] = {1};
-        tensor_reshape(tensor, new_shape, /* dims= */ 1);
-        return;
-    }
-
-    int32_t new_shape[new_dims];
-    int32_t idx = 0;
-
-    for (int32_t i=0; i<tensor->dims; i++) {
-        if (tensor->shape[i] > 1) {
-            new_shape[idx++] = tensor->shape[i];
-        }
-    }
-
-    tensor_reshape(tensor, new_shape, new_dims);
-}
-
 float tensor_get_item(Tensor *tensor, int32_t *indices)
 {
     return tensor->data[_get_index(tensor, indices)];
