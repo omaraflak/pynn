@@ -1121,5 +1121,13 @@ class TestTensor(unittest.TestCase):
         self.assertEqual(z.device, 0)
         self.assertEqual(z.data, [3, 4])
 
+    def test_len(self):
+        x = Tensor.zeros(6, 4, 2)
+
+        n = len(x)
+
+        self.assertEqual(n, 6)
+
+
 if __name__ == "__main__":
     unittest.main()

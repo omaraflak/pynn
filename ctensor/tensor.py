@@ -532,6 +532,9 @@ class Tensor:
     def __neg__(self) -> Tensor:
         return self.unary_minus()
 
+    def __len__(self) -> int:
+        return self.shape[0]
+
     def __iter__(self) -> Iterator[Tensor]:
         return (self[i] for i in range(self.shape[0]))
 
