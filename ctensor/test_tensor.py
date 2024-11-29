@@ -535,15 +535,15 @@ class TestTensor(unittest.TestCase):
         self.assertAlmostEqual(mean, 5, delta=0.3)
         self.assertAlmostEqual(std, 2, delta=0.3)
 
+    def test_zeros(self):
+        x = Tensor.zeros(3, 3)
+
+        self.assertEqual(x.data, [0] * 9)
+
     def test_ones(self):
         x = Tensor.ones(3, 3)
 
-        self.assertListEqual(x.data, [0] * 9)
-
-    def test_ones(self):
-        x = Tensor.ones(3, 3)
-
-        self.assertListEqual(x.data, [1] * 9)
+        self.assertEqual(x.data, [1] * 9)
 
     def test_sum_cpu(self):
         x = Tensor([1, 2, 3, 4, 5, 6], (2, 3))

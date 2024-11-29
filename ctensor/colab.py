@@ -1,17 +1,7 @@
 import subprocess
+import os
 
-files = [
-    "tensor.h",
-    "tensor.cu",
-    "cpu.h",
-    "cpu.cu",
-    "gpu.h",
-    "gpu.cu",
-    "Makefile",
-    "tensor.py",
-    "test_tensor.py",
-]
-
+files = os.listdir(".")
 names = [file.replace(".", "_") for file in files]
 contents = [open(file, "r").read() for file in files]
 code = "\n".join(

@@ -1,7 +1,6 @@
 from __future__ import annotations
 import ctypes
 
-
 class CTensor(ctypes.Structure):
     _fields_ = [
         ('data', ctypes.POINTER(ctypes.c_float)),

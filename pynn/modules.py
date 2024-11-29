@@ -30,8 +30,8 @@ class Linear(Module):
         super().__init__()
         self.weights = Tensor.random_normal((output_size, input_size))
         self.bias = Tensor.random_normal((output_size, 1))
-        self.weights_grad = Tensor.zeros(self.weights.shape)
-        self.bias_grad = Tensor.zeros(self.bias.shape)
+        self.weights_grad = Tensor.zeros(*self.weights.shape)
+        self.bias_grad = Tensor.zeros(*self.bias.shape)
         # TODO: extract this logic into initializers...
         if xavier:
             self.weights = self.weights / (input_size ** 0.5)
