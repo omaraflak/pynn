@@ -4,6 +4,7 @@ from pynn import trainer
 from pynn import modules
 from pynn import losses
 from pynn import optimizers
+from pynn import Tensor
 from examples import mnist_canvas
 import numpy as np
 import keras
@@ -11,7 +12,7 @@ import keras
 
 def preprocess_data(
     x: np.ndarray, y: np.ndarray
-) -> tuple[np.ndarray, np.ndarray]:
+) -> tuple[Tensor, Tensor]:
     # reshape and normalize input data
     x = x.reshape(-1, 28 * 28, 1)
     x = x.astype(np.float32) / 255
@@ -19,7 +20,7 @@ def preprocess_data(
     # e.g. number 3 will become [0, 0, 0, 1, 0, 0, 0, 0, 0, 0]
     y = keras.utils.to_categorical(y)
     y = y.reshape(-1, 10, 1)
-    return x, y
+    return Tensor(x.flatten(), x.shape), Tensor(y.flatten(), y.shape)
 
 
 def main():
