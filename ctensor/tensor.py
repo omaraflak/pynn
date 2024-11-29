@@ -536,7 +536,8 @@ class Tensor:
         return self.shape[0]
 
     def __iter__(self) -> Iterator[Tensor]:
-        return (self[i] for i in range(self.shape[0]))
+        for i in range(self.shape[0]):
+            yield self[i]
 
     def __getitem__(self, key: tuple[int | slice, ...] | int | slice) -> float | Tensor:
         if not isinstance(key, tuple):
@@ -547,13 +548,10 @@ class Tensor:
                 return self.get(*key)
             else:
                 slices = tuple(slice(k, k + 1, 1) for k in key)
-                tmp = self.slice(*slices)
-                tmp.squeeze()
-                return tmp
+                # TODO: only squeeze the first dimension
+                return self.slice(*slices)
         elif isinstance(key[0], slice):
-            tmp = self.slice(*key)
-            tmp.squeeze()
-            return tmp
+            return self.slice(*key)
         else:
             raise ValueError("Key must be a tuple of ints or slices")
 

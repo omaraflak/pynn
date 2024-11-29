@@ -1031,8 +1031,8 @@ class TestTensor(unittest.TestCase):
         y = x[-1:, :-1]
 
         self.assertEqual(y.size, 3)
-        self.assertEqual(y.dims, 1)
-        self.assertEqual(y.shape, (3,))
+        self.assertEqual(y.dims, 3)
+        self.assertEqual(y.shape, (1, 1, 3))
         self.assertEqual(y.device, 0)
         self.assertEqual(y.data, [13, 14, 15])
 
@@ -1046,8 +1046,8 @@ class TestTensor(unittest.TestCase):
         y = x[-1:, ::-1, ::-2]
 
         self.assertEqual(y.size, 4)
-        self.assertEqual(y.dims, 2)
-        self.assertEqual(y.shape, (2, 2))
+        self.assertEqual(y.dims, 3)
+        self.assertEqual(y.shape, (1, 2, 2))
         self.assertEqual(y.device, 0)
         self.assertEqual(y.data, [18, 16, 15, 13])
 
@@ -1062,8 +1062,8 @@ class TestTensor(unittest.TestCase):
         y = x[::-3, ::-2, ::-2]
 
         self.assertEqual(y.size, 4)
-        self.assertEqual(y.dims, 2)
-        self.assertEqual(y.shape, (2, 2))
+        self.assertEqual(y.dims, 3)
+        self.assertEqual(y.shape, (2, 2, 1))
         self.assertEqual(y.device, 0)
         self.assertEqual(y.data, [25, 21, 7, 2])
 
@@ -1078,8 +1078,9 @@ class TestTensor(unittest.TestCase):
         y = x[0]
 
         self.assertEqual(y.size, 6)
-        self.assertEqual(y.dims, 2)
-        self.assertEqual(y.shape, (3, 2))
+        self.assertEqual(y.dims, 3)
+        # TODO: squeeze the first dimension
+        self.assertEqual(y.shape, (1, 3, 2))
         self.assertEqual(y.device, 0)
         self.assertEqual(y.data, [1, 2, 4, 5, 6, 7])
 
@@ -1110,14 +1111,15 @@ class TestTensor(unittest.TestCase):
 
         y, z = list(iter(x))
 
+        # TODO: squeeze the first dimension
         self.assertEqual(y.size, 2)
-        self.assertEqual(y.dims, 1)
-        self.assertEqual(y.shape, (2,))
+        self.assertEqual(y.dims, 2)
+        self.assertEqual(y.shape, (1, 2))
         self.assertEqual(y.device, 0)
         self.assertEqual(y.data, [1, 2])
         self.assertEqual(z.size, 2)
-        self.assertEqual(z.dims, 1)
-        self.assertEqual(z.shape, (2,))
+        self.assertEqual(z.dims, 2)
+        self.assertEqual(z.shape, (1, 2))
         self.assertEqual(z.device, 0)
         self.assertEqual(z.data, [3, 4])
 
