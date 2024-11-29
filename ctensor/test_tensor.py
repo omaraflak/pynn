@@ -1094,5 +1094,16 @@ class TestTensor(unittest.TestCase):
         self.assertEqual(x.device, 0)
         self.assertEqual(x.data, [1, 2, 3, 4])
 
+    def test_squeeze_keep_at_least_one_dim(self):
+        x = Tensor([5], (1, 1, 1))
+
+        x.squeeze()
+
+        self.assertEqual(x.size, 1)
+        self.assertEqual(x.dims, 1)
+        self.assertEqual(x.shape, (1,))
+        self.assertEqual(x.device, 0)
+        self.assertEqual(x.data, [5])
+
 if __name__ == "__main__":
     unittest.main()
