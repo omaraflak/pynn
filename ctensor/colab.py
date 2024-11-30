@@ -1,7 +1,7 @@
 import subprocess
 import os
 
-files = os.listdir(".")
+files = [x for x in os.listdir(".") if os.path.isfile(x)]
 names = [file.replace(".", "_") for file in files]
 contents = [open(file, "r").read() for file in files]
 code = "\n".join(

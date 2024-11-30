@@ -230,23 +230,23 @@ void tensor_set_item(Tensor *tensor, int32_t *indices, float value)
     tensor->data[_get_index(tensor, indices)] = value;
 }
 
-Tensor *tensor_slice(Tensor *tensor, Range *ranges)
+Tensor *tensor_slice(Tensor *tensor, Slice *slices)
 {
     int32_t size = 1;
     int32_t *shape = (int32_t *)malloc(sizeof(int32_t) * tensor->dims);
 
-    // compute new size given ranges
+    // compute new size given slices
     for (int32_t i = 0; i < tensor->dims; i++)
     {
-        if (ranges[i].start < 0)
+        if (slices[i].start < 0)
         {
-            ranges[i].start = mod(ranges[i].start, tensor->shape[i]);
+            slices[i].start = mod(slices[i].start, tensor->shape[i]);
         }
-        if (ranges[i].stop < 0)
+        if (slices[i].stop < 0)
         {
-            ranges[i].stop = mod(ranges[i].stop, tensor->shape[i]);
+            slices[i].stop = mod(slices[i].stop, tensor->shape[i]);
         }
-        shape[i] = ceil((float)(ranges[i].stop - ranges[i].start) / abs(ranges[i].step));
+        shape[i] = ceil((float)(slices[i].stop - slices[i].start) / abs(slices[i].step));
         size *= shape[i];
     }
 
@@ -271,9 +271,9 @@ Tensor *tensor_slice(Tensor *tensor, Range *ranges)
         int32_t rest = i;
         for (int32_t j = 0; j < tensor->dims; j++)
         {
-            uint32_t offset = ranges[j].step < 0 ? ranges[j].stop - 1 : 0;
+            uint32_t offset = slices[j].step < 0 ? slices[j].stop - 1 : 0;
             indices[j] = (int32_t)rest / stride[j];
-            indices[j] = ranges[j].start + offset + indices[j] * ranges[j].step;
+            indices[j] = slices[j].start + offset + indices[j] * slices[j].step;
             rest %= stride[j];
         }
 

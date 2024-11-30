@@ -14,7 +14,7 @@ class CTensor(ctypes.Structure):
     ]
 
 
-class CRange(ctypes.Structure):
+class CSlice(ctypes.Structure):
     _fields_ = [
         ('start', ctypes.c_int32),
         ('stop', ctypes.c_int32),
@@ -81,7 +81,7 @@ def _init_tensor_c_lib() -> ctypes.CDLL:
     lib.tensor_set_item.restype = None
     lib.tensor_slice.argtypes = [
         ctypes.POINTER(CTensor),
-        ctypes.POINTER(CRange),
+        ctypes.POINTER(CSlice),
     ]
     lib.tensor_slice.restype = ctypes.POINTER(CTensor)
     lib.tensor_sum.argtypes = [ctypes.POINTER(CTensor)]
@@ -502,19 +502,19 @@ class Tensor:
         )
 
     def slice(self, *slices: tuple[slice]) -> Tensor:
-        c_ranges = []
+        c_slices = []
         for i in range(len(self.shape)):
             d = self.shape[i]
             if i < len(slices):
                 s = slices[i]
-                r = CRange(s.start or 0, s.stop or d, s.step or 1)
+                r = CSlice(s.start or 0, s.stop or d, s.step or 1)
             else:
-                r = CRange(0, d, 1)
-            c_ranges.append(r)
+                r = CSlice(0, d, 1)
+            c_slices.append(r)
 
         c_tensor = Tensor._C.tensor_slice(
             self.c_tensor,
-            (CRange * len(self.shape))(*c_ranges)
+            (CSlice * len(self.shape))(*c_slices)
         )
         return Tensor(None, None, c_tensor)
 

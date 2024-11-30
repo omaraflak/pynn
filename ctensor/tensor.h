@@ -18,7 +18,7 @@ typedef struct
     int32_t start;
     int32_t stop;
     int32_t step;
-} Range;
+} Slice;
 
 extern "C"
 {
@@ -39,7 +39,7 @@ extern "C"
     float tensor_get_item(Tensor *tensor, int32_t *indices);
     void tensor_set_item(Tensor *tensor, int32_t *indices, float value);
 
-    Tensor *tensor_slice(Tensor *tensor, Range *ranges);
+    Tensor *tensor_slice(Tensor *tensor, Slice *slices);
 
     float tensor_sum(Tensor *tensor);
     float tensor_mean(Tensor *tensor);
