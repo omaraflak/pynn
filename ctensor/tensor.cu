@@ -28,12 +28,12 @@ int32_t _get_index(Tensor *tensor, int32_t *indices)
     int32_t index = 0;
     for (int32_t i = 0; i < tensor->dims; i++)
     {
-        index += tensor->stride[i] * indices[i];
+        index += tensor->offset[i] + tensor->stride[i] * indices[i];
     }
     return index;
 }
 
-int32_t mod(int32_t a, int32_t b)
+int32_t _mod(int32_t a, int32_t b)
 {
     int32_t m = a % b;
     if (m < 0)
@@ -43,17 +43,25 @@ int32_t mod(int32_t a, int32_t b)
     return m;
 }
 
+int32_t _tensor_next_ptr(Tensor *tensor, int32_t current)
+{
+    return 0;
+}
+
 Tensor *_tensor_create(float *data, int32_t *shape, int32_t dims, int32_t device)
 {
     Tensor *tensor = (Tensor *)malloc(sizeof(Tensor));
     tensor->data = data;
     tensor->shape = shape;
     tensor->stride = (int32_t *)malloc(sizeof(int32_t) * dims);
+    tensor->offset = (int32_t *)malloc(sizeof(int32_t) * dims);
     tensor->size = _get_size_from_shape(shape, dims);
     tensor->dims = dims;
     tensor->device = device;
+    // tensor->base = nullptr;
     for (int32_t i = 0; i < dims; i++)
     {
+        tensor->offset[i] = 0;
         tensor->stride[i] = 1;
         for (int32_t j = i + 1; j < dims; j++)
         {
@@ -80,12 +88,15 @@ Tensor *tensor_create_empty(int32_t *shape, int32_t dims)
     tensor->data = (float *)malloc(sizeof(float) * size);
     tensor->shape = (int32_t *)malloc(sizeof(int32_t) * dims);
     tensor->stride = (int32_t *)malloc(sizeof(int32_t) * dims);
+    tensor->offset = (int32_t *)malloc(sizeof(int32_t) * dims);
     tensor->size = size;
     tensor->dims = dims;
     tensor->device = 0;
+    // tensor->base = nullptr;
     for (int32_t i = 0; i < dims; i++)
     {
         tensor->shape[i] = shape[i];
+        tensor->offset[i] = 0;
         tensor->stride[i] = 1;
         for (int32_t j = i + 1; j < dims; j++)
         {
@@ -116,6 +127,8 @@ Tensor *tensor_copy(Tensor *tensor)
 
 void tensor_delete(Tensor *tensor)
 {
+    // if (tensor->base == nullptr)
+    // {
     if (tensor->device == 0)
     {
         free(tensor->data);
@@ -124,8 +137,10 @@ void tensor_delete(Tensor *tensor)
     {
         cudaFree(tensor->data);
     }
+    // }
     free(tensor->shape);
     free(tensor->stride);
+    free(tensor->offset);
     free(tensor);
 }
 
@@ -232,55 +247,30 @@ void tensor_set_item(Tensor *tensor, int32_t *indices, float value)
 
 Tensor *tensor_slice(Tensor *tensor, Slice *slices)
 {
-    int32_t size = 1;
     int32_t *shape = (int32_t *)malloc(sizeof(int32_t) * tensor->dims);
-
-    // compute new size given slices
     for (int32_t i = 0; i < tensor->dims; i++)
     {
         if (slices[i].start < 0)
         {
-            slices[i].start = mod(slices[i].start, tensor->shape[i]);
+            slices[i].start = _mod(slices[i].start, tensor->shape[i]);
         }
         if (slices[i].stop < 0)
         {
-            slices[i].stop = mod(slices[i].stop, tensor->shape[i]);
+            slices[i].stop = _mod(slices[i].stop, tensor->shape[i]);
         }
         shape[i] = ceil((float)(slices[i].stop - slices[i].start) / abs(slices[i].step));
-        size *= shape[i];
     }
 
-    float *data = (float *)malloc(sizeof(float) * size);
+    Tensor *result = _tensor_create(tensor->data, shape, tensor->dims, tensor->device);
+    // result->base = tensor;
 
-    // compute stride for new shape
-    int32_t stride[tensor->dims];
     for (int32_t i = 0; i < tensor->dims; i++)
     {
-        stride[i] = 1;
-        for (int32_t j = i + 1; j < tensor->dims; j++)
-        {
-            stride[i] *= shape[j];
-        }
+        result->offset[i] = slices[i].start * tensor->stride[i];
+        result->stride[i] *= slices[i].step;
     }
 
-    // slice
-    int32_t indices[tensor->dims];
-    for (int32_t i = 0; i < size; i++)
-    {
-        // computes indices in sliced tensor
-        int32_t rest = i;
-        for (int32_t j = 0; j < tensor->dims; j++)
-        {
-            uint32_t offset = slices[j].step < 0 ? slices[j].stop - 1 : 0;
-            indices[j] = (int32_t)rest / stride[j];
-            indices[j] = slices[j].start + offset + indices[j] * slices[j].step;
-            rest %= stride[j];
-        }
-
-        data[i] = tensor->data[_get_index(tensor, indices)];
-    }
-
-    return _tensor_create(data, shape, tensor->dims, tensor->device);
+    return result;
 }
 
 float tensor_sum(Tensor *tensor)

@@ -8,6 +8,7 @@ typedef struct
     float *data;
     int32_t *shape;
     int32_t *stride;
+    int32_t *offset;
     int32_t dims;
     int32_t size;
     int32_t device;
