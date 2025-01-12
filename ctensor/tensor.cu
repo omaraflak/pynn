@@ -232,6 +232,12 @@ void tensor_set_item(Tensor *tensor, int32_t *indices, float value)
 
 Tensor *tensor_slice(Tensor *tensor, Slice *slices)
 {
+    if (tensor->device > 0)
+    {
+        fprintf(stderr, "tensor_slice is not supported on GPU.\n");
+        exit(1);
+    }
+
     int32_t size = 1;
     int32_t *shape = (int32_t *)malloc(sizeof(int32_t) * tensor->dims);
 
