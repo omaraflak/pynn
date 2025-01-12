@@ -43,11 +43,6 @@ int32_t _mod(int32_t a, int32_t b)
     return m;
 }
 
-int32_t _tensor_next_ptr(Tensor *tensor, int32_t current)
-{
-    return 0;
-}
-
 Tensor *_tensor_create(float *data, int32_t *shape, int32_t dims, int32_t device)
 {
     Tensor *tensor = (Tensor *)malloc(sizeof(Tensor));
@@ -58,7 +53,7 @@ Tensor *_tensor_create(float *data, int32_t *shape, int32_t dims, int32_t device
     tensor->size = _get_size_from_shape(shape, dims);
     tensor->dims = dims;
     tensor->device = device;
-    // tensor->base = nullptr;
+    tensor->base = nullptr;
     for (int32_t i = 0; i < dims; i++)
     {
         tensor->offset[i] = 0;
@@ -92,7 +87,7 @@ Tensor *tensor_create_empty(int32_t *shape, int32_t dims)
     tensor->size = size;
     tensor->dims = dims;
     tensor->device = 0;
-    // tensor->base = nullptr;
+    tensor->base = nullptr;
     for (int32_t i = 0; i < dims; i++)
     {
         tensor->shape[i] = shape[i];
@@ -127,17 +122,17 @@ Tensor *tensor_copy(Tensor *tensor)
 
 void tensor_delete(Tensor *tensor)
 {
-    // if (tensor->base == nullptr)
-    // {
-    if (tensor->device == 0)
+    if (tensor->base == nullptr)
     {
-        free(tensor->data);
+        if (tensor->device == 0)
+        {
+            free(tensor->data);
+        }
+        else
+        {
+            cudaFree(tensor->data);
+        }
     }
-    else
-    {
-        cudaFree(tensor->data);
-    }
-    // }
     free(tensor->shape);
     free(tensor->stride);
     free(tensor->offset);
@@ -262,7 +257,7 @@ Tensor *tensor_slice(Tensor *tensor, Slice *slices)
     }
 
     Tensor *result = _tensor_create(tensor->data, shape, tensor->dims, tensor->device);
-    // result->base = tensor;
+    result->base = tensor;
 
     for (int32_t i = 0; i < tensor->dims; i++)
     {

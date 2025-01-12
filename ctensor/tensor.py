@@ -8,6 +8,7 @@ class CTensor(ctypes.Structure):
         ('data', ctypes.POINTER(ctypes.c_float)),
         ('shape', ctypes.POINTER(ctypes.c_int32)),
         ('stride', ctypes.POINTER(ctypes.c_int32)),
+        ('offset', ctypes.POINTER(ctypes.c_int32)),
         ('dims', ctypes.c_int32),
         ('size', ctypes.c_int32),
         ('device', ctypes.c_int32),

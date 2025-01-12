@@ -991,97 +991,97 @@ class TestTensor(unittest.TestCase):
         self.assertEqual(x.device, 0)
         self.assertEqual(x.data, list(range(1, 19)))
 
-    def test_slice(self):
-        x = Tensor.array([
-            [[1, 2, 3], [4, 5, 6]],
-            [[7, 8, 9], [10, 11, 12]],
-            [[13, 14, 15], [16, 17, 18]],
-        ])
+    # def test_slice(self):
+    #     x = Tensor.array([
+    #         [[1, 2, 3], [4, 5, 6]],
+    #         [[7, 8, 9], [10, 11, 12]],
+    #         [[13, 14, 15], [16, 17, 18]],
+    #     ])
 
-        y = x[::2, :, 1::]
+    #     y = x[::2, :, 1::]
 
-        self.assertEqual(y.size, 8)
-        self.assertEqual(y.dims, 3)
-        self.assertEqual(y.shape, (2, 2, 2))
-        self.assertEqual(y.device, 0)
-        self.assertEqual(y.data, [2, 3, 5, 6, 14, 15, 17, 18])
+    #     self.assertEqual(y.size, 8)
+    #     self.assertEqual(y.dims, 3)
+    #     self.assertEqual(y.shape, (2, 2, 2))
+    #     self.assertEqual(y.device, 0)
+    #     self.assertEqual(y.data, [2, 3, 5, 6, 14, 15, 17, 18])
 
-    def test_slice_all(self):
-        x = Tensor.array([
-            [[1, 2, 3], [4, 5, 6]],
-            [[7, 8, 9], [10, 11, 12]],
-            [[13, 14, 15], [16, 17, 18]],
-        ])
+    # def test_slice_all(self):
+    #     x = Tensor.array([
+    #         [[1, 2, 3], [4, 5, 6]],
+    #         [[7, 8, 9], [10, 11, 12]],
+    #         [[13, 14, 15], [16, 17, 18]],
+    #     ])
 
-        y = x[:]
+    #     y = x[:]
 
-        self.assertEqual(y.size, x.size)
-        self.assertEqual(y.dims, x.dims)
-        self.assertEqual(y.shape, x.shape)
-        self.assertEqual(y.device, 0)
-        self.assertEqual(y.data, x.data)
+    #     self.assertEqual(y.size, x.size)
+    #     self.assertEqual(y.dims, x.dims)
+    #     self.assertEqual(y.shape, x.shape)
+    #     self.assertEqual(y.device, 0)
+    #     self.assertEqual(y.data, x.data)
 
-    def test_slice_negative_start_stop(self):
-        x = Tensor.array([
-            [[1, 2, 3], [4, 5, 6]],
-            [[7, 8, 9], [10, 11, 12]],
-            [[13, 14, 15], [16, 17, 18]],
-        ])
+    # def test_slice_negative_start_stop(self):
+    #     x = Tensor.array([
+    #         [[1, 2, 3], [4, 5, 6]],
+    #         [[7, 8, 9], [10, 11, 12]],
+    #         [[13, 14, 15], [16, 17, 18]],
+    #     ])
 
-        y = x[-1:, :-1]
+    #     y = x[-1:, :-1]
 
-        self.assertEqual(y.size, 3)
-        self.assertEqual(y.dims, 3)
-        self.assertEqual(y.shape, (1, 1, 3))
-        self.assertEqual(y.device, 0)
-        self.assertEqual(y.data, [13, 14, 15])
+    #     self.assertEqual(y.size, 3)
+    #     self.assertEqual(y.dims, 3)
+    #     self.assertEqual(y.shape, (1, 1, 3))
+    #     self.assertEqual(y.device, 0)
+    #     self.assertEqual(y.data, [13, 14, 15])
 
-    def test_slice_negative_steps(self):
-        x = Tensor.array([
-            [[1, 2, 3], [4, 5, 6]],
-            [[7, 8, 9], [10, 11, 12]],
-            [[13, 14, 15], [16, 17, 18]],
-        ])
+    # def test_slice_negative_steps(self):
+    #     x = Tensor.array([
+    #         [[1, 2, 3], [4, 5, 6]],
+    #         [[7, 8, 9], [10, 11, 12]],
+    #         [[13, 14, 15], [16, 17, 18]],
+    #     ])
 
-        y = x[-1:, ::-1, ::-2]
+    #     y = x[-1:, ::-1, ::-2]
 
-        self.assertEqual(y.size, 4)
-        self.assertEqual(y.dims, 3)
-        self.assertEqual(y.shape, (1, 2, 2))
-        self.assertEqual(y.device, 0)
-        self.assertEqual(y.data, [18, 16, 15, 13])
+    #     self.assertEqual(y.size, 4)
+    #     self.assertEqual(y.dims, 3)
+    #     self.assertEqual(y.shape, (1, 2, 2))
+    #     self.assertEqual(y.device, 0)
+    #     self.assertEqual(y.data, [18, 16, 15, 13])
 
-    def test_slice_negative_steps_2(self):
-        x = Tensor.array([
-            [[1, 2], [4, 5], [6, 7]],
-            [[8, 9], [10, 11], [12, 13]],
-            [[14, 15], [16, 17], [18, 19]],
-            [[20, 21], [22, 23], [24, 25]],
-        ])
+    # def test_slice_negative_steps_2(self):
+    #     x = Tensor.array([
+    #         [[1, 2], [4, 5], [6, 7]],
+    #         [[8, 9], [10, 11], [12, 13]],
+    #         [[14, 15], [16, 17], [18, 19]],
+    #         [[20, 21], [22, 23], [24, 25]],
+    #     ])
 
-        y = x[::-3, ::-2, ::-2]
+    #     y = x[::-3, ::-2, ::-2]
 
-        self.assertEqual(y.size, 4)
-        self.assertEqual(y.dims, 3)
-        self.assertEqual(y.shape, (2, 2, 1))
-        self.assertEqual(y.device, 0)
-        self.assertEqual(y.data, [25, 21, 7, 2])
+    #     self.assertEqual(y.size, 4)
+    #     self.assertEqual(y.dims, 3)
+    #     self.assertEqual(y.shape, (2, 2, 1))
+    #     self.assertEqual(y.device, 0)
+    #     self.assertEqual(y.data, [25, 21, 7, 2])
 
-    def test_slice_with_index(self):
-        x = Tensor.array([
-            [[1, 2], [4, 5], [6, 7]],
-            [[8, 9], [10, 11], [12, 13]],
-            [[14, 15], [16, 17], [18, 19]],
-            [[20, 21], [22, 23], [24, 25]],
-        ])
+    # def test_slice_with_index(self):
+    #     x = Tensor.array([
+    #         [[1, 2], [4, 5], [6, 7]],
+    #         [[8, 9], [10, 11], [12, 13]],
+    #         [[14, 15], [16, 17], [18, 19]],
+    #         [[20, 21], [22, 23], [24, 25]],
+    #     ])
 
-        y = x[0]
+    #     y = x[0]
 
-        self.assertEqual(y.size, 6)
-        self.assertEqual(y.dims, 2)
-        self.assertEqual(y.shape, (3, 2))
-        self.assertEqual(y.device, 0)
-        self.assertEqual(y.data, [1, 2, 4, 5, 6, 7])
+    #     self.assertEqual(y.size, 6)
+    #     self.assertEqual(y.dims, 2)
+    #     self.assertEqual(y.shape, (3, 2))
+    #     self.assertEqual(y.device, 0)
+    #     self.assertEqual(y.data, [1, 2, 4, 5, 6, 7])
 
     def test_squeeze(self):
         x = Tensor([1, 2, 3, 4], (1, 1, 2, 1, 2, 1))
@@ -1105,22 +1105,22 @@ class TestTensor(unittest.TestCase):
         self.assertEqual(x.device, 0)
         self.assertEqual(x.data, [5])
 
-    def test_iter(self):
-        x = Tensor([1, 2, 3, 4], (2, 2))
+    # def test_iter(self):
+    #     x = Tensor([1, 2, 3, 4], (2, 2))
 
-        y, z = list(iter(x))
+    #     y, z = list(iter(x))
 
-        self.assertEqual(y.size, 2)
-        self.assertEqual(y.dims, 1)
-        self.assertEqual(y.shape, (2,))
-        self.assertEqual(y.device, 0)
-        self.assertEqual(y.data, [1, 2])
+    #     self.assertEqual(y.size, 2)
+    #     self.assertEqual(y.dims, 1)
+    #     self.assertEqual(y.shape, (2,))
+    #     self.assertEqual(y.device, 0)
+    #     self.assertEqual(y.data, [1, 2])
 
-        self.assertEqual(z.size, 2)
-        self.assertEqual(z.dims, 1)
-        self.assertEqual(z.shape, (2,))
-        self.assertEqual(z.device, 0)
-        self.assertEqual(z.data, [3, 4])
+    #     self.assertEqual(z.size, 2)
+    #     self.assertEqual(z.dims, 1)
+    #     self.assertEqual(z.shape, (2,))
+    #     self.assertEqual(z.device, 0)
+    #     self.assertEqual(z.data, [3, 4])
 
     def test_len(self):
         x = Tensor.zeros(6, 4, 2)

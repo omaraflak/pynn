@@ -1,32 +1,39 @@
 #include "cpu.h"
+#include "iterator.h"
 #include <random>
 
 void tensor_fill_cpu(Tensor *a, float value)
 {
-    for (int32_t i = 0; i < a->size; i++)
+    Iterator *it = iterator_create(a);
+    while (iterator_next(a, it))
     {
-        a->data[i] = value;
+        a->data[it->value] = value;
     }
+    iterator_free(it);
 }
 
 void tensor_fill_random_uniform_cpu(Tensor *a, float min, float max)
 {
     std::mt19937 generator;
     std::uniform_real_distribution<float> uniform(min, max);
-    for (int32_t i = 0; i < a->size; i++)
+    Iterator *it = iterator_create(a);
+    while (iterator_next(a, it))
     {
-        a->data[i] = uniform(generator);
+        a->data[it->value] = uniform(generator);
     }
+    iterator_free(it);
 }
 
 void tensor_fill_random_normal_cpu(Tensor *a, float mean, float std)
 {
     std::mt19937 generator;
     std::normal_distribution<float> normal(mean, std);
-    for (int32_t i = 0; i < a->size; i++)
+    Iterator *it = iterator_create(a);
+    while (iterator_next(a, it))
     {
-        a->data[i] = normal(generator);
+        a->data[it->value] = normal(generator);
     }
+    iterator_free(it);
 }
 
 void tensor_fill_identity_cpu(Tensor *a)
@@ -36,50 +43,62 @@ void tensor_fill_identity_cpu(Tensor *a)
     {
         stride_sum += a->stride[i];
     }
-    for (int32_t i = 0; i < a->size; i++)
+    Iterator *it = iterator_create(a);
+    while (iterator_next(a, it))
     {
-        a->data[i] = i % stride_sum == 0 ? 1 : 0;
+        a->data[it->value] = it->value % stride_sum == 0 ? 1 : 0;
     }
+    iterator_free(it);
 }
 
 void tensor_unary_minus_cpu(Tensor *a, float *result)
 {
-    for (int32_t i = 0; i < a->size; i++)
+    Iterator *it = iterator_create(a);
+    while (iterator_next(a, it))
     {
-        result[i] = -a->data[i];
+        result[it->value] = -a->data[it->value];
     }
+    iterator_free(it);
 }
 
 void tensor_add_cpu(Tensor *a, Tensor *b, float *result)
 {
-    for (int32_t i = 0; i < a->size; i++)
+    Iterator *it = iterator_create(a);
+    while (iterator_next(a, it))
     {
-        result[i] = a->data[i] + b->data[i];
+        result[it->value] = a->data[it->value] + b->data[it->value];
     }
+    iterator_free(it);
 }
 
 void tensor_subtract_cpu(Tensor *a, Tensor *b, float *result)
 {
-    for (int32_t i = 0; i < a->size; i++)
+    Iterator *it = iterator_create(a);
+    while (iterator_next(a, it))
     {
-        result[i] = a->data[i] - b->data[i];
+        result[it->value] = a->data[it->value] - b->data[it->value];
     }
+    iterator_free(it);
 }
 
 void tensor_multiply_cpu(Tensor *a, Tensor *b, float *result)
 {
-    for (int32_t i = 0; i < a->size; i++)
+    Iterator *it = iterator_create(a);
+    while (iterator_next(a, it))
     {
-        result[i] = a->data[i] * b->data[i];
+        result[it->value] = a->data[it->value] * b->data[it->value];
     }
+    iterator_free(it);
 }
 
 void tensor_divide_cpu(Tensor *a, Tensor *b, float *result)
 {
-    for (int32_t i = 0; i < a->size; i++)
+    Iterator *it = iterator_create(a);
+    while (iterator_next(a, it))
     {
-        result[i] = a->data[i] / b->data[i];
+        result[it->value] = a->data[it->value] / b->data[it->value];
     }
+    iterator_free(it);
 }
 
 void tensor_matmul_cpu(Tensor *a, Tensor *b, int32_t batch, float *result)
@@ -114,115 +133,143 @@ void tensor_matmul_cpu(Tensor *a, Tensor *b, int32_t batch, float *result)
 
 void tensor_broadcast_add_cpu(Tensor *a, float value, float *result)
 {
-    for (int32_t i = 0; i < a->size; i++)
+    Iterator *it = iterator_create(a);
+    while (iterator_next(a, it))
     {
-        result[i] = a->data[i] + value;
+        result[it->value] = a->data[it->value] + value;
     }
+    iterator_free(it);
 }
 
 void tensor_broadcast_subtract_cpu(Tensor *a, float value, float *result)
 {
-    for (int32_t i = 0; i < a->size; i++)
+    Iterator *it = iterator_create(a);
+    while (iterator_next(a, it))
     {
-        result[i] = a->data[i] - value;
+        result[it->value] = a->data[it->value] - value;
     }
+    iterator_free(it);
 }
 
 void tensor_broadcast_multiply_cpu(Tensor *a, float value, float *result)
 {
-    for (int32_t i = 0; i < a->size; i++)
+    Iterator *it = iterator_create(a);
+    while (iterator_next(a, it))
     {
-        result[i] = a->data[i] * value;
+        result[it->value] = a->data[it->value] * value;
     }
+    iterator_free(it);
 }
 
 void tensor_broadcast_divide_cpu(Tensor *a, float value, float *result)
 {
-    for (int32_t i = 0; i < a->size; i++)
+    Iterator *it = iterator_create(a);
+    while (iterator_next(a, it))
     {
-        result[i] = a->data[i] / value;
+        result[it->value] = a->data[it->value] / value;
     }
+    iterator_free(it);
 }
 
 void tensor_broadcast_right_divide_cpu(Tensor *a, float value, float *result)
 {
-    for (int32_t i = 0; i < a->size; i++)
+    Iterator *it = iterator_create(a);
+    while (iterator_next(a, it))
     {
-        result[i] = value / a->data[i];
+        result[it->value] = value / a->data[it->value];
     }
+    iterator_free(it);
 }
 
 void tensor_power_cpu(Tensor *a, float power, float *result)
 {
-    for (int32_t i = 0; i < a->size; i++)
+    Iterator *it = iterator_create(a);
+    while (iterator_next(a, it))
     {
-        result[i] = pow(a->data[i], power);
+        result[it->value] = pow(a->data[it->value], power);
     }
+    iterator_free(it);
 }
 
 void tensor_exp_cpu(Tensor *a, float *result)
 {
-    for (int32_t i = 0; i < a->size; i++)
+    Iterator *it = iterator_create(a);
+    while (iterator_next(a, it))
     {
-        result[i] = exp(a->data[i]);
+        result[it->value] = exp(a->data[it->value]);
     }
+    iterator_free(it);
 }
 
 void tensor_log_cpu(Tensor *a, float *result)
 {
-    for (int32_t i = 0; i < a->size; i++)
+    Iterator *it = iterator_create(a);
+    while (iterator_next(a, it))
     {
-        result[i] = log(a->data[i]);
+        result[it->value] = log(a->data[it->value]);
     }
+    iterator_free(it);
 }
 
 void tensor_log10_cpu(Tensor *a, float *result)
 {
-    for (int32_t i = 0; i < a->size; i++)
+    Iterator *it = iterator_create(a);
+    while (iterator_next(a, it))
     {
-        result[i] = log10(a->data[i]);
+        result[it->value] = log10(a->data[it->value]);
     }
+    iterator_free(it);
 }
 void tensor_logb_cpu(Tensor *a, float base, float *result)
 {
     float inverse_log_base = 1.0 / log(base);
-    for (int32_t i = 0; i < a->size; i++)
+    Iterator *it = iterator_create(a);
+    while (iterator_next(a, it))
     {
-        result[i] = log(a->data[i]) * inverse_log_base;
+        result[it->value] = log(a->data[it->value]) * inverse_log_base;
     }
+    iterator_free(it);
 }
 
 void tensor_sin_cpu(Tensor *a, float *result)
 {
-    for (int32_t i = 0; i < a->size; i++)
+    Iterator *it = iterator_create(a);
+    while (iterator_next(a, it))
     {
-        result[i] = sin(a->data[i]);
+        result[it->value] = sin(a->data[it->value]);
     }
+    iterator_free(it);
 }
 
 void tensor_cos_cpu(Tensor *a, float *result)
 {
-    for (int32_t i = 0; i < a->size; i++)
+    Iterator *it = iterator_create(a);
+    while (iterator_next(a, it))
     {
-        result[i] = cos(a->data[i]);
+        result[it->value] = cos(a->data[it->value]);
     }
+    iterator_free(it);
 }
 
 void tensor_tanh_cpu(Tensor *a, float *result)
 {
-    for (int32_t i = 0; i < a->size; i++)
+    Iterator *it = iterator_create(a);
+    while (iterator_next(a, it))
     {
-        result[i] = tanh(a->data[i]);
+        result[it->value] = tanh(a->data[it->value]);
     }
+    iterator_free(it);
 }
 
 float tensor_sum_cpu(Tensor *a)
 {
     float result = 0;
-    for (int32_t i = 0; i < a->size; i++)
+    Iterator *it = iterator_create(a);
+    while (iterator_next(a, it))
     {
-        result += a->data[i];
+        result += a->data[it->value];
     }
+    iterator_free(it);
     return result;
 }
 
@@ -234,25 +281,29 @@ float tensor_mean_cpu(Tensor *a)
 float tensor_min_cpu(Tensor *a)
 {
     float result = a->data[0];
-    for (int32_t i = 0; i < a->size; i++)
+    Iterator *it = iterator_create(a);
+    while (iterator_next(a, it))
     {
-        if (a->data[i] < result)
+        if (a->data[it->value] < result)
         {
-            result = a->data[i];
+            result = a->data[it->value];
         }
     }
+    iterator_free(it);
     return result;
 }
 
 float tensor_max_cpu(Tensor *a)
 {
     float result = a->data[0];
-    for (int32_t i = 0; i < a->size; i++)
+    Iterator *it = iterator_create(a);
+    while (iterator_next(a, it))
     {
-        if (a->data[i] > result)
+        if (a->data[it->value] > result)
         {
-            result = a->data[i];
+            result = a->data[it->value];
         }
     }
+    iterator_free(it);
     return result;
 }

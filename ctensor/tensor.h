@@ -3,7 +3,9 @@
 
 #include <stdint.h>
 
-typedef struct
+typedef struct Tensor Tensor;
+
+struct Tensor
 {
     float *data;
     int32_t *shape;
@@ -12,14 +14,15 @@ typedef struct
     int32_t dims;
     int32_t size;
     int32_t device;
-} Tensor;
+    Tensor *base;
+};
 
-typedef struct
+struct Slice
 {
     int32_t start;
     int32_t stop;
     int32_t step;
-} Slice;
+};
 
 extern "C"
 {
