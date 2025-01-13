@@ -315,22 +315,26 @@ float tensor_mean(Tensor *tensor)
 
 float tensor_min(Tensor *tensor)
 {
-    if (tensor->device > 0)
+    if (tensor->device == 0)
     {
-        fprintf(stderr, "tensor_min is not supported on GPU.\n");
-        exit(1);
+        return tensor_min_cpu(tensor);
     }
-    return tensor_min_cpu(tensor);
+    else
+    {
+        return tensor_min_gpu(tensor);
+    }
 }
 
 float tensor_max(Tensor *tensor)
 {
-    if (tensor->device > 0)
+    if (tensor->device == 0)
     {
-        fprintf(stderr, "tensor_max is not supported on GPU.\n");
-        exit(1);
+        return tensor_max_cpu(tensor);
     }
-    return tensor_max_cpu(tensor);
+    else
+    {
+        return tensor_max_gpu(tensor);
+    }
 }
 
 Tensor *tensor_unary_minus(Tensor *tensor)

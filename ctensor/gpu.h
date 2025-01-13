@@ -76,4 +76,10 @@ __global__ void tensor_sum_kernel(float *a, float *outputs, int32_t n);
 float tensor_sum_gpu(Tensor *a);
 float tensor_mean_gpu(Tensor *a);
 
+__global__ void tensor_min_kernel(float *a, int32_t n, float *result);
+float tensor_min_gpu(Tensor *a);
+
+__global__ void tensor_max_kernel(float *a, int32_t n, float *result);
+float tensor_max_gpu(Tensor *a);
+
 #endif // GPU

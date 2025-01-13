@@ -1,7 +1,9 @@
 #include "gpu.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <cfloat>
 #include <curand_kernel.h>
+#include <cuda_runtime.h>
 
 int32_t MAX_BLOCK_DIM = 1024;
 int32_t MAX_BLOCK_DIM_1D = 1024;
@@ -616,4 +618,128 @@ float tensor_sum_gpu(Tensor *a)
 float tensor_mean_gpu(Tensor *a)
 {
     return tensor_sum_gpu(a) / a->size;
+}
+
+__device__ __forceinline__ float atomicMinFloat(float *addr, float value)
+{
+    return (value >= 0) ? __int_as_float(atomicMin((int *)addr, __float_as_int(value))) : __uint_as_float(atomicMax((unsigned int *)addr, __float_as_uint(value)));
+}
+
+__global__ void tensor_min_kernel(float *a, int32_t n, float *result)
+{
+    extern __shared__ float sdata[];
+
+    int tid = threadIdx.x;
+    int gid = blockIdx.x * blockDim.x + threadIdx.x;
+    int stride = gridDim.x * blockDim.x;
+
+    // Initialize local min to first element this thread processes
+    float local_min = FLT_MAX;
+
+    // Grid-stride loop to handle arrays larger than total thread count
+    for (int i = gid; i < n; i += stride)
+    {
+        local_min = min(local_min, a[i]);
+    }
+
+    // Load local min into shared memory
+    sdata[tid] = local_min;
+    __syncthreads();
+
+    // Reduction in shared memory
+    for (int s = blockDim.x / 2; s > 0; s >>= 1)
+    {
+        if (tid < s)
+        {
+            sdata[tid] = min(sdata[tid], sdata[tid + s]);
+        }
+        __syncthreads();
+    }
+
+    // Write block result to global memory using atomic operation
+    if (tid == 0)
+    {
+        atomicMinFloat(result, sdata[0]);
+    }
+}
+
+float tensor_min_gpu(Tensor *a)
+{
+    float *c_output;
+    float h_output = FLT_MAX;
+
+    cudaMalloc(&c_output, sizeof(float));
+    cudaMemcpy(c_output, &h_output, sizeof(float), cudaMemcpyHostToDevice);
+
+    int32_t threadsPerBlock = 256;
+    int32_t blocksPerGrid = min((a->size + threadsPerBlock - 1) / threadsPerBlock, 1024);
+    int32_t sharedSize = threadsPerBlock * sizeof(float);
+
+    tensor_min_kernel<<<blocksPerGrid, threadsPerBlock, sharedSize>>>(a->data, a->size, c_output);
+
+    cudaMemcpy(&h_output, c_output, sizeof(float), cudaMemcpyDeviceToHost);
+    cudaFree(c_output);
+    return h_output;
+}
+
+__device__ __forceinline__ float atomicMaxFloat(float *addr, float value)
+{
+    return (value >= 0) ? __int_as_float(atomicMax((int *)addr, __float_as_int(value))) : __uint_as_float(atomicMin((unsigned int *)addr, __float_as_uint(value)));
+}
+
+__global__ void tensor_max_kernel(float *a, int32_t n, float *result)
+{
+    extern __shared__ float sdata[];
+
+    int tid = threadIdx.x;
+    int gid = blockIdx.x * blockDim.x + threadIdx.x;
+    int stride = gridDim.x * blockDim.x;
+
+    // Initialize local max to first element this thread processes
+    float local_max = FLT_MIN;
+
+    // Grid-stride loop to handle arrays larger than total thread count
+    for (int i = gid; i < n; i += stride)
+    {
+        local_max = max(local_max, a[i]);
+    }
+
+    // Load local max into shared memory
+    sdata[tid] = local_max;
+    __syncthreads();
+
+    // Reduction in shared memory
+    for (int s = blockDim.x / 2; s > 0; s >>= 1)
+    {
+        if (tid < s)
+        {
+            sdata[tid] = max(sdata[tid], sdata[tid + s]);
+        }
+        __syncthreads();
+    }
+
+    // Write block result to global memory using atomic operation
+    if (tid == 0)
+    {
+        atomicMaxFloat(result, sdata[0]);
+    }
+}
+
+float tensor_max_gpu(Tensor *a)
+{
+    float *c_output;
+    float h_output = FLT_MIN;
+
+    cudaMalloc(&c_output, sizeof(float));
+    cudaMemcpy(c_output, &h_output, sizeof(float), cudaMemcpyHostToDevice);
+
+    int32_t threadsPerBlock = 256;
+    int32_t blocksPerGrid = max((a->size + threadsPerBlock - 1) / threadsPerBlock, 1024);
+    int32_t sharedSize = threadsPerBlock * sizeof(float);
+
+    tensor_max_kernel<<<blocksPerGrid, threadsPerBlock, sharedSize>>>(a->data, a->size, c_output);
+
+    cudaMemcpy(&h_output, c_output, sizeof(float), cudaMemcpyDeviceToHost);
+    cudaFree(c_output);
+    return h_output;
 }
