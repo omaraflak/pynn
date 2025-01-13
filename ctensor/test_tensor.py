@@ -552,8 +552,24 @@ class TestTensor(unittest.TestCase):
 
         self.assertEqual(s, 21)
 
+    def test_sum_gpu(self):
+        x = Tensor([1, 2, 3, 4, 5, 6], (2, 3))
+        x.to_gpu()
+
+        s = x.sum()
+
+        self.assertEqual(s, 21)
+
     def test_mean_cpu(self):
         x = Tensor([1, 2, 3], (3,))
+
+        m = x.mean()
+
+        self.assertEqual(m, 2)
+
+    def test_mean_cgpu(self):
+        x = Tensor([1, 2, 3], (3,))
+        x.to_gpu()
 
         m = x.mean()
 

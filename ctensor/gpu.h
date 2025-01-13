@@ -72,4 +72,8 @@ void tensor_cos_gpu(Tensor *a, float *result);
 __global__ void tensor_tanh_kernel(float *a, int32_t n, float *result);
 void tensor_tanh_gpu(Tensor *a, float *result);
 
+__global__ void tensor_sum_kernel(float *a, float *outputs, int32_t n);
+float tensor_sum_gpu(Tensor *a);
+float tensor_mean_gpu(Tensor *a);
+
 #endif // GPU

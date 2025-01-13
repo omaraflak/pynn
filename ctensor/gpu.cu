@@ -555,3 +555,65 @@ void tensor_tanh_gpu(Tensor *a, float *result)
     tensor_tanh_kernel<<<grid_dim, block_dim>>>(a->data, a->size, result);
     cudaDeviceSynchronize();
 }
+
+__global__ void tensor_sum_kernel(float *a, float *outputs, int32_t n)
+{
+    // Shared memory for block-level reduction
+    extern __shared__ float sdata[];
+
+    // Thread index within the block
+    int32_t tid = threadIdx.x;
+
+    // Global index
+    int32_t i = blockIdx.x * blockDim.x + threadIdx.x;
+
+    // Load input into shared memory
+    sdata[tid] = (i < n) ? a[i] : 0;
+    __syncthreads();
+
+    // Perform reduction in shared memory
+    for (int32_t s = blockDim.x / 2; s > 0; s >>= 1)
+    {
+        if (tid < s)
+        {
+            sdata[tid] += sdata[tid + s];
+        }
+        __syncthreads();
+    }
+
+    // Write result for this block to global memory
+    if (tid == 0)
+    {
+        outputs[blockIdx.x] = sdata[0];
+    }
+}
+
+float tensor_sum_gpu(Tensor *a)
+{
+    float *outputs;
+    int32_t threadsPerBlock = 256;
+    int32_t blocks = (a->size + threadsPerBlock - 1) / threadsPerBlock;
+    int32_t sharedSize = threadsPerBlock * sizeof(float);
+
+    cudaMalloc(&outputs, blocks * sizeof(float));
+
+    tensor_sum_kernel<<<blocks, threadsPerBlock, sharedSize>>>(a->data, outputs, a->size);
+
+    float *partial_sums = new float[blocks];
+    cudaMemcpy(partial_sums, outputs, blocks * sizeof(float), cudaMemcpyDeviceToHost);
+
+    float sum = 0;
+    for (int i = 0; i < blocks; i++)
+    {
+        sum += partial_sums[i];
+    }
+
+    delete[] partial_sums;
+    cudaFree(outputs);
+    return sum;
+}
+
+float tensor_mean_gpu(Tensor *a)
+{
+    return tensor_sum_gpu(a) / a->size;
+}

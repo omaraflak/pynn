@@ -291,22 +291,26 @@ Tensor *tensor_slice(Tensor *tensor, Slice *slices)
 
 float tensor_sum(Tensor *tensor)
 {
-    if (tensor->device > 0)
+    if (tensor->device == 0)
     {
-        fprintf(stderr, "tensor_sum is not supported on GPU.\n");
-        exit(1);
+        return tensor_sum_cpu(tensor);
     }
-    return tensor_sum_cpu(tensor);
+    else
+    {
+        return tensor_sum_gpu(tensor);
+    }
 }
 
 float tensor_mean(Tensor *tensor)
 {
-    if (tensor->device > 0)
+    if (tensor->device == 0)
     {
-        fprintf(stderr, "tensor_mean is not supported on GPU.\n");
-        exit(1);
+        return tensor_mean_cpu(tensor);
     }
-    return tensor_mean_cpu(tensor);
+    else
+    {
+        return tensor_mean_gpu(tensor);
+    }
 }
 
 float tensor_min(Tensor *tensor)
