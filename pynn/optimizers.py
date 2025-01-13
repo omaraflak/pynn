@@ -17,6 +17,17 @@ class Optimizer(abc.ABC):
         for grad in self.module.gradients():
             grad.fill(0)
 
+    def states(self) -> list[Tensor]:
+        return []
+
+    def to_gpu(self):
+        for x in self.states():
+            x.to_gpu()
+
+    def to_cpu(self):
+        for x in self.states():
+            x.to_cpu()
+
 
 class SGD(Optimizer):
     def __init__(
@@ -38,3 +49,6 @@ class SGD(Optimizer):
                 self.momentum * self.v[i] + self.learning_rate * gradients[i]
             )
             parameters[i] -= self.v[i]
+
+    def states(self):
+        return self.v

@@ -22,6 +22,17 @@ class Module:
     def gradients(self) -> list[Tensor]:
         return []
 
+    def states(self) -> list[Tensor]:
+        return [*self.parameters(), *self.gradients()]
+
+    def to_gpu(self):
+        for x in self.states():
+            x.to_gpu()
+
+    def to_cpu(self):
+        for x in self.states():
+            x.to_cpu()
+
 
 class Linear(Module):
     """Linear transformation applied to input column vector."""
@@ -64,7 +75,10 @@ class Softmax(Module):
 
     def backward(self, output_grad: Tensor) -> Tensor:
         n = self.outputs.size
-        return ((Tensor.identity(n) - self.outputs.T) * self.outputs) @ output_grad
+        identity = Tensor.identity(n)
+        if output_grad.device > 0:
+            identity.to_gpu()
+        return ((identity - self.outputs.T) * self.outputs) @ output_grad
 
 
 class Activation(Module):
