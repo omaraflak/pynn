@@ -597,6 +597,14 @@ class TestTensor(unittest.TestCase):
 
         self.assertEqual(m, 11)
 
+    def test_max_gpu(self):
+        x = Tensor([8, 2, 1, 11, 3], (5,))
+        x.to_gpu()
+
+        m = x.max()
+
+        self.assertEqual(m, 11)
+
     def test_power_cpu(self):
         x = Tensor([1, 2, 3], (3,))
 
