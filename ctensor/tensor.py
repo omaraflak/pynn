@@ -3,23 +3,28 @@ from typing import Iterator
 import ctypes
 
 
-class CTensor(ctypes.Structure):
-    _fields_ = [
-        ('data', ctypes.POINTER(ctypes.c_float)),
-        ('shape', ctypes.POINTER(ctypes.c_int32)),
-        ('stride', ctypes.POINTER(ctypes.c_int32)),
-        ('dims', ctypes.c_int32),
-        ('size', ctypes.c_int32),
-        ('device', ctypes.c_int32),
-    ]
-
-
 class CSlice(ctypes.Structure):
     _fields_ = [
         ('start', ctypes.c_int32),
         ('stop', ctypes.c_int32),
         ('step', ctypes.c_int32),
     ]
+
+
+class CTensor(ctypes.Structure):
+    pass
+
+
+CTensor._fields_ = [
+    ('data', ctypes.POINTER(ctypes.c_float)),
+    ('shape', ctypes.POINTER(ctypes.c_int32)),
+    ('stride', ctypes.POINTER(ctypes.c_int32)),
+    ('dims', ctypes.c_int32),
+    ('size', ctypes.c_int32),
+    ('device', ctypes.c_int32),
+    ('base', ctypes.POINTER(CTensor)),
+    ('slice', ctypes.POINTER(CSlice)),
+]
 
 
 def _init_tensor_c_lib() -> ctypes.CDLL:
@@ -73,6 +78,11 @@ def _init_tensor_c_lib() -> ctypes.CDLL:
         ctypes.POINTER(ctypes.c_int32)
     ]
     lib.tensor_get_item.restype = ctypes.c_float
+    lib.tensor_get_item_at.argtypes = [
+        ctypes.POINTER(CTensor),
+        ctypes.c_int32
+    ]
+    lib.tensor_get_item_at.restype = ctypes.c_float
     lib.tensor_set_item.argtypes = [
         ctypes.POINTER(CTensor),
         ctypes.POINTER(ctypes.c_int32),
@@ -306,7 +316,7 @@ class Tensor:
 
     @property
     def data(self) -> list[float]:
-        return [self.c_tensor.contents.data[i] for i in range(self.size)]
+        return [self.at(i) for i in range(self.size)]
 
     @property
     def shape(self) -> tuple[int, ...]:
@@ -315,6 +325,12 @@ class Tensor:
     @property
     def stride(self) -> tuple[int, ...]:
         return tuple(self.c_tensor.contents.stride[i] for i in range(self.dims))
+
+    @property
+    def base(self) -> Tensor | None:
+        if self.c_tensor.contents.base is None:
+            return None
+        return Tensor(c_tensor=self.c_tensor.contents.base)
 
     @property
     def device(self) -> int:
@@ -494,6 +510,9 @@ class Tensor:
     def get(self, *key: int) -> float:
         return Tensor._C.tensor_get_item(self.c_tensor, (ctypes.c_int32 * len(key))(*key))
 
+    def at(self, index: int) -> float:
+        return Tensor._C.tensor_get_item_at(self.c_tensor, ctypes.c_int32(index))
+
     def set(self, key: tuple[int, ...], value: float):
         Tensor._C.tensor_set_item(
             self.c_tensor,
@@ -504,12 +523,12 @@ class Tensor:
     def slice(self, *slices: tuple[slice]) -> Tensor:
         c_slices = []
         for i in range(len(self.shape)):
-            d = self.shape[i]
+            dim = self.shape[i]
             if i < len(slices):
                 s = slices[i]
-                r = CSlice(s.start or 0, s.stop or d, s.step or 1)
+                r = CSlice(s.start or 0, s.stop or dim, s.step or 1)
             else:
-                r = CSlice(0, d, 1)
+                r = CSlice(0, dim, 1)
             c_slices.append(r)
 
         c_tensor = Tensor._C.tensor_slice(

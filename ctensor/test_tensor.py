@@ -1068,37 +1068,6 @@ class TestTensor(unittest.TestCase):
         self.assertEqual(y.device, 0)
         self.assertEqual(y.data, [13, 14, 15])
 
-    def test_slice_negative_steps(self):
-        x = Tensor.array([
-            [[1, 2, 3], [4, 5, 6]],
-            [[7, 8, 9], [10, 11, 12]],
-            [[13, 14, 15], [16, 17, 18]],
-        ])
-
-        y = x[-1:, ::-1, ::-2]
-
-        self.assertEqual(y.size, 4)
-        self.assertEqual(y.dims, 3)
-        self.assertEqual(y.shape, (1, 2, 2))
-        self.assertEqual(y.device, 0)
-        self.assertEqual(y.data, [18, 16, 15, 13])
-
-    def test_slice_negative_steps_2(self):
-        x = Tensor.array([
-            [[1, 2], [4, 5], [6, 7]],
-            [[8, 9], [10, 11], [12, 13]],
-            [[14, 15], [16, 17], [18, 19]],
-            [[20, 21], [22, 23], [24, 25]],
-        ])
-
-        y = x[::-3, ::-2, ::-2]
-
-        self.assertEqual(y.size, 4)
-        self.assertEqual(y.dims, 3)
-        self.assertEqual(y.shape, (2, 2, 1))
-        self.assertEqual(y.device, 0)
-        self.assertEqual(y.data, [25, 21, 7, 2])
-
     def test_slice_with_index(self):
         x = Tensor.array([
             [[1, 2], [4, 5], [6, 7]],
@@ -1114,6 +1083,41 @@ class TestTensor(unittest.TestCase):
         self.assertEqual(y.shape, (3, 2))
         self.assertEqual(y.device, 0)
         self.assertEqual(y.data, [1, 2, 4, 5, 6, 7])
+
+    def test_slice_and_reshape(self):
+        x = Tensor.array([
+            [[1, 2], [4, 5], [6, 7]],
+            [[8, 9], [10, 11], [12, 13]],
+            [[14, 15], [16, 17], [18, 19]],
+            [[20, 21], [22, 23], [24, 25]],
+        ])
+
+        y = x[::2, -1:]
+        y.reshape(4)
+
+        self.assertEqual(y.size, 4)
+        self.assertEqual(y.dims, 1)
+        self.assertEqual(y.shape, (4,))
+        self.assertEqual(y.device, 0)
+        self.assertEqual(y.data, [6, 7, 18, 19])
+
+    def test_slice_twice(self):
+        x = Tensor.array([
+            [[1, 2], [4, 5], [6, 7]],
+            [[8, 9], [10, 11], [12, 13]],
+            [[14, 15], [16, 17], [18, 19]],
+            [[20, 21], [22, 23], [24, 25]],
+        ])
+
+        y = x[::2, -1:]
+        z = y[:, :, 1:]
+        z.reshape(2)
+
+        self.assertEqual(z.size, 2)
+        self.assertEqual(z.dims, 1)
+        self.assertEqual(z.shape, (2,))
+        self.assertEqual(z.device, 0)
+        self.assertEqual(z.data, [7, 19])
 
     def test_squeeze(self):
         x = Tensor([1, 2, 3, 4], (1, 1, 2, 1, 2, 1))

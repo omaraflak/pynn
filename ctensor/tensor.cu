@@ -2,7 +2,6 @@
 #include "cpu.h"
 #include "gpu.h"
 #include <cstring>
-#include <cmath>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -23,14 +22,52 @@ int32_t _get_size_from_shape(int32_t *shape, int32_t dims)
     return size;
 }
 
+void _compute_stride(int32_t *stride, int32_t *shape, int32_t dims)
+{
+    for (int32_t i = 0; i < dims; i++)
+    {
+        stride[i] = 1;
+        for (int32_t j = i + 1; j < dims; j++)
+        {
+            stride[i] *= shape[j];
+        }
+    }
+}
+
+int32_t _get_slice_size(Slice *slice)
+{
+    return (slice->stop - slice->start + slice->step - 1) / slice->step;
+}
+
+int32_t _get_index(Tensor *tensor, int32_t index)
+{
+    if (!tensor->base)
+    {
+        return index;
+    }
+
+    int32_t remaining = index;
+    int32_t base_index = 0;
+    int32_t dim_size = 0;
+
+    for (int32_t i = tensor->base->dims - 1; i >= 0; i--)
+    {
+        dim_size = _get_slice_size(&tensor->slice[i]);
+        base_index += (tensor->slice[i].start + (remaining % dim_size) * tensor->slice[i].step) * tensor->base->stride[i];
+        remaining /= dim_size;
+    }
+
+    return tensor->base->base ? _get_index(tensor->base, base_index) : base_index;
+}
+
 int32_t _get_index(Tensor *tensor, int32_t *indices)
 {
     int32_t index = 0;
     for (int32_t i = 0; i < tensor->dims; i++)
     {
-        index += tensor->stride[i] * indices[i];
+        index += indices[i] * tensor->stride[i];
     }
-    return index;
+    return _get_index(tensor, index);
 }
 
 int32_t mod(int32_t a, int32_t b)
@@ -52,14 +89,9 @@ Tensor *_tensor_create(float *data, int32_t *shape, int32_t dims, int32_t device
     tensor->size = _get_size_from_shape(shape, dims);
     tensor->dims = dims;
     tensor->device = device;
-    for (int32_t i = 0; i < dims; i++)
-    {
-        tensor->stride[i] = 1;
-        for (int32_t j = i + 1; j < dims; j++)
-        {
-            tensor->stride[i] *= shape[j];
-        }
-    }
+    tensor->base = nullptr;
+    tensor->slice = nullptr;
+    _compute_stride(tensor->stride, shape, dims);
     return tensor;
 }
 
@@ -83,15 +115,10 @@ Tensor *tensor_create_empty(int32_t *shape, int32_t dims)
     tensor->size = size;
     tensor->dims = dims;
     tensor->device = 0;
-    for (int32_t i = 0; i < dims; i++)
-    {
-        tensor->shape[i] = shape[i];
-        tensor->stride[i] = 1;
-        for (int32_t j = i + 1; j < dims; j++)
-        {
-            tensor->stride[i] *= shape[j];
-        }
-    }
+    tensor->base = nullptr;
+    tensor->slice = nullptr;
+    memcpy(tensor->shape, shape, sizeof(int32_t) * dims);
+    _compute_stride(tensor->stride, shape, dims);
     return tensor;
 }
 
@@ -116,16 +143,23 @@ Tensor *tensor_copy(Tensor *tensor)
 
 void tensor_delete(Tensor *tensor)
 {
-    if (tensor->device == 0)
+    if (tensor->base == nullptr)
     {
-        free(tensor->data);
-    }
-    else
-    {
-        cudaFree(tensor->data);
+        if (tensor->device == 0)
+        {
+            free(tensor->data);
+        }
+        else
+        {
+            cudaFree(tensor->data);
+        }
     }
     free(tensor->shape);
     free(tensor->stride);
+    if (tensor->slice != nullptr)
+    {
+        free(tensor->slice);
+    }
     free(tensor);
 }
 
@@ -220,6 +254,11 @@ void tensor_reshape(Tensor *tensor, int32_t *shape, int32_t dims)
     }
 }
 
+float tensor_get_item_at(Tensor *tensor, int32_t index)
+{
+    return tensor->data[_get_index(tensor, index)];
+}
+
 float tensor_get_item(Tensor *tensor, int32_t *indices)
 {
     return tensor->data[_get_index(tensor, indices)];
@@ -230,63 +269,39 @@ void tensor_set_item(Tensor *tensor, int32_t *indices, float value)
     tensor->data[_get_index(tensor, indices)] = value;
 }
 
-Tensor *tensor_slice(Tensor *tensor, Slice *slices)
+Tensor *tensor_slice(Tensor *tensor, Slice *slice)
 {
-    if (tensor->device > 0)
-    {
-        fprintf(stderr, "tensor_slice is not supported on GPU.\n");
-        exit(1);
-    }
-
     int32_t size = 1;
     int32_t *shape = (int32_t *)malloc(sizeof(int32_t) * tensor->dims);
 
-    // compute new size given slices
+    // compute new size given the slice
     for (int32_t i = 0; i < tensor->dims; i++)
     {
-        if (slices[i].start < 0)
+        if (slice[i].step <= 0)
         {
-            slices[i].start = mod(slices[i].start, tensor->shape[i]);
+            fprintf(stderr, "Slice step must be greater than 0.\n");
+            exit(1);
         }
-        if (slices[i].stop < 0)
+        if (slice[i].start < 0)
         {
-            slices[i].stop = mod(slices[i].stop, tensor->shape[i]);
+            slice[i].start = mod(slice[i].start, tensor->shape[i]);
         }
-        shape[i] = ceil((float)(slices[i].stop - slices[i].start) / abs(slices[i].step));
+        if (slice[i].stop < 0)
+        {
+            slice[i].stop = mod(slice[i].stop, tensor->shape[i]);
+        }
+        shape[i] = _get_slice_size(&slice[i]);
         size *= shape[i];
     }
 
-    float *data = (float *)malloc(sizeof(float) * size);
+    Slice *slice_copy = (Slice *)malloc(sizeof(Slice) * tensor->dims);
+    memcpy(slice_copy, slice, sizeof(Slice) * tensor->dims);
 
-    // compute stride for new shape
-    int32_t stride[tensor->dims];
-    for (int32_t i = 0; i < tensor->dims; i++)
-    {
-        stride[i] = 1;
-        for (int32_t j = i + 1; j < tensor->dims; j++)
-        {
-            stride[i] *= shape[j];
-        }
-    }
-
-    // slice
-    int32_t indices[tensor->dims];
-    for (int32_t i = 0; i < size; i++)
-    {
-        // computes indices in sliced tensor
-        int32_t rest = i;
-        for (int32_t j = 0; j < tensor->dims; j++)
-        {
-            uint32_t offset = slices[j].step < 0 ? slices[j].stop - 1 : 0;
-            indices[j] = (int32_t)rest / stride[j];
-            indices[j] = slices[j].start + offset + indices[j] * slices[j].step;
-            rest %= stride[j];
-        }
-
-        data[i] = tensor->data[_get_index(tensor, indices)];
-    }
-
-    return _tensor_create(data, shape, tensor->dims, tensor->device);
+    Tensor *result = _tensor_create(nullptr, shape, tensor->dims, tensor->device);
+    result->data = tensor->data;
+    result->base = tensor;
+    result->slice = slice_copy;
+    return result;
 }
 
 float tensor_sum(Tensor *tensor)

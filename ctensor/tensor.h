@@ -5,20 +5,24 @@
 
 typedef struct
 {
+    int32_t start;
+    int32_t stop;
+    int32_t step;
+} Slice;
+
+typedef struct Tensor Tensor;
+
+struct Tensor
+{
     float *data;
     int32_t *shape;
     int32_t *stride;
     int32_t dims;
     int32_t size;
     int32_t device;
-} Tensor;
-
-typedef struct
-{
-    int32_t start;
-    int32_t stop;
-    int32_t step;
-} Slice;
+    Tensor *base;
+    Slice *slice;
+};
 
 extern "C"
 {
@@ -36,6 +40,7 @@ extern "C"
     void tensor_fill_identity(Tensor *tensor);
     void tensor_reshape(Tensor *tensor, int32_t *shape, int32_t dims);
 
+    float tensor_get_item_at(Tensor *tensor, int32_t index);
     float tensor_get_item(Tensor *tensor, int32_t *indices);
     void tensor_set_item(Tensor *tensor, int32_t *indices, float value);
 
