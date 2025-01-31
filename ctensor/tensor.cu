@@ -156,12 +156,12 @@ void tensor_delete(Tensor *tensor)
             cudaFree(tensor->data);
         }
     }
-    free(tensor->shape);
-    free(tensor->stride);
-    if (tensor->slice != nullptr)
+    else
     {
         free(tensor->slice);
     }
+    free(tensor->shape);
+    free(tensor->stride);
     free(tensor);
 }
 
@@ -299,8 +299,7 @@ Tensor *tensor_slice(Tensor *tensor, Slice *slice)
     Slice *slice_copy = (Slice *)malloc(sizeof(Slice) * tensor->dims);
     memcpy(slice_copy, slice, sizeof(Slice) * tensor->dims);
 
-    Tensor *result = _tensor_create(nullptr, shape, tensor->dims, tensor->device);
-    result->data = tensor->data;
+    Tensor *result = _tensor_create(tensor->data, shape, tensor->dims, tensor->device);
     result->base = tensor;
     result->slice = slice_copy;
     return result;
