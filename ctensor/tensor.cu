@@ -48,18 +48,16 @@ int32_t _get_index(Tensor *tensor, int32_t index)
 
     int32_t remaining = index;
     int32_t base_index = 0;
-    int32_t dim_size = 0;
-    int32_t pos = 0;
 
     for (int32_t i = tensor->base->dims - 1; i >= 0; i--)
     {
-        dim_size = _get_slice_size(&tensor->slice[i]);
-        pos = remaining % dim_size;
-        base_index += (tensor->slice[i].start + pos * tensor->slice[i].step) * tensor->base->stride[i];
+        int32_t dim_size = _get_slice_size(&tensor->slice[i]);
+        int32_t dim_idx = remaining % dim_size;
+        base_index += (tensor->slice[i].start + dim_idx * tensor->slice[i].step) * tensor->base->stride[i];
         remaining /= dim_size;
     }
 
-    return tensor->base->base ? _get_index(tensor->base, base_index) : base_index;
+    return _get_index(tensor->base, base_index);
 }
 
 int32_t _get_index(Tensor *tensor, int32_t *indices)
