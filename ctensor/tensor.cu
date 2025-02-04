@@ -57,7 +57,7 @@ int32_t _get_index(Tensor *tensor, int32_t index)
         remaining /= dim_size;
     }
 
-    return _get_index(tensor->base, base_index);
+    return base_index;
 }
 
 int32_t _get_index(Tensor *tensor, int32_t *indices)
@@ -294,11 +294,23 @@ Tensor *tensor_slice(Tensor *tensor, Slice *slice)
         size *= shape[i];
     }
 
+    // make slice relative to base tensor
+    if (tensor->base)
+    {
+        for (int32_t i = 0; i < tensor->dims; i++)
+        {
+            slice[i].start = slice[i].start + slice[i].step * tensor->slice[i].start;
+            slice[i].step = slice[i].step * tensor->slice[i].step;
+            slice[i].stop = slice[i].start + slice[i].step * _get_slice_size(&tensor->slice[i]);
+        }
+    }
+
     Slice *slice_copy = (Slice *)malloc(sizeof(Slice) * tensor->dims);
     memcpy(slice_copy, slice, sizeof(Slice) * tensor->dims);
 
-    Tensor *result = _tensor_create(tensor->data, shape, tensor->dims, tensor->device);
-    result->base = tensor;
+    Tensor *parent = tensor->base ? tensor->base : tensor;
+    Tensor *result = _tensor_create(parent->data, shape, tensor->dims, tensor->device);
+    result->base = parent;
     result->slice = slice_copy;
     return result;
 }
