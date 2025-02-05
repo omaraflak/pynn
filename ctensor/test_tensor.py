@@ -1084,6 +1084,19 @@ class TestTensor(unittest.TestCase):
         self.assertEqual(y.device, 0)
         self.assertEqual(y.data, [1, 2, 4, 5, 6, 7])
 
+    def test_slice_multiple(self):
+        x = Tensor(list(range(24)), (3, 2, 4))
+
+        y1 = x[0:3:2, 0:2, 1:4]
+        y2 = y1[1:2, :2, :2]
+        y3 = y2[:1, :1, 1:2]
+
+        self.assertEqual(y3.size, 1)
+        self.assertEqual(y3.dims, 3)
+        self.assertEqual(y3.shape, (1, 1, 1))
+        self.assertEqual(y3.device, 0)
+        self.assertEqual(y3.data, [18])
+
     def test_slice_and_reshape(self):
         x = Tensor.array([
             [[1, 2], [4, 5], [6, 7]],
@@ -1092,32 +1105,15 @@ class TestTensor(unittest.TestCase):
             [[20, 21], [22, 23], [24, 25]],
         ])
 
-        y = x[::2, -1:]
-        y.reshape(4)
+        y = x[::2, -2:]
+        y.reshape(4, 2)
+        z = y[:, -1:]
 
-        self.assertEqual(y.size, 4)
-        self.assertEqual(y.dims, 1)
-        self.assertEqual(y.shape, (4,))
-        self.assertEqual(y.device, 0)
-        self.assertEqual(y.data, [6, 7, 18, 19])
-
-    def test_slice_twice(self):
-        x = Tensor.array([
-            [[1, 2], [4, 5], [6, 7]],
-            [[8, 9], [10, 11], [12, 13]],
-            [[14, 15], [16, 17], [18, 19]],
-            [[20, 21], [22, 23], [24, 25]],
-        ])
-
-        y = x[::2, -1:]
-        z = y[:, :, 1:]
-        z.reshape(2)
-
-        self.assertEqual(z.size, 2)
-        self.assertEqual(z.dims, 1)
-        self.assertEqual(z.shape, (2,))
+        self.assertEqual(z.size, 4)
+        self.assertEqual(z.dims, 2)
+        self.assertEqual(z.shape, (4, 1))
         self.assertEqual(z.device, 0)
-        self.assertEqual(z.data, [7, 19])
+        self.assertEqual(z.data, [5, 7, 17, 19])
 
     def test_squeeze(self):
         x = Tensor([1, 2, 3, 4], (1, 1, 2, 1, 2, 1))
