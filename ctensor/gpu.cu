@@ -5,6 +5,16 @@
 #include <curand_kernel.h>
 #include <cuda_runtime.h>
 
+#define cudaCheckError()                                                                     \
+    {                                                                                        \
+        cudaError_t e = cudaGetLastError();                                                  \
+        if (e != cudaSuccess)                                                                \
+        {                                                                                    \
+            printf("Cuda failure %s:%d: '%s'\n", __FILE__, __LINE__, cudaGetErrorString(e)); \
+            exit(EXIT_FAILURE);                                                              \
+        }                                                                                    \
+    }
+
 int32_t MAX_BLOCK_DIM = 1024;
 int32_t MAX_BLOCK_DIM_1D = 1024;
 int32_t MAX_BLOCK_DIM_2D = 32;
@@ -80,7 +90,9 @@ void tensor_fill_gpu(Tensor *a, float value)
     int32_t grid_dim, block_dim;
     _get_1d_gpu_config(&grid_dim, &block_dim, a->size);
     tensor_fill_kernel<<<grid_dim, block_dim>>>(a->data, a->size, value);
+    cudaCheckError();
     cudaDeviceSynchronize();
+    cudaCheckError();
 }
 
 __global__ void tensor_fill_random_uniform_kernel(float *a, int32_t n, float min, float max)
@@ -102,7 +114,9 @@ void tensor_fill_random_uniform_gpu(Tensor *a, float min, float max)
     int32_t grid_dim, block_dim;
     _get_1d_gpu_config(&grid_dim, &block_dim, a->size);
     tensor_fill_random_uniform_kernel<<<grid_dim, block_dim>>>(a->data, a->size, min, max);
+    cudaCheckError();
     cudaDeviceSynchronize();
+    cudaCheckError();
 }
 
 __global__ void tensor_fill_random_normal_kernel(float *a, int32_t n, float mean, float std)
@@ -124,7 +138,9 @@ void tensor_fill_random_normal_gpu(Tensor *a, float mean, float std)
     int32_t grid_dim, block_dim;
     _get_1d_gpu_config(&grid_dim, &block_dim, a->size);
     tensor_fill_random_normal_kernel<<<grid_dim, block_dim>>>(a->data, a->size, mean, std);
+    cudaCheckError();
     cudaDeviceSynchronize();
+    cudaCheckError();
 }
 
 __global__ void tensor_fill_identity_kernel(float *a, int32_t n, int32_t stride_sum)
@@ -148,7 +164,9 @@ void tensor_fill_identity_gpu(Tensor *a)
     int32_t grid_dim, block_dim;
     _get_1d_gpu_config(&grid_dim, &block_dim, a->size);
     tensor_fill_identity_kernel<<<grid_dim, block_dim>>>(a->data, a->size, stride_sum);
+    cudaCheckError();
     cudaDeviceSynchronize();
+    cudaCheckError();
 }
 
 __global__ void tensor_unary_minus_kernel(float *a, int32_t n, float *result)
@@ -167,7 +185,9 @@ void tensor_unary_minus_gpu(Tensor *a, float *result)
     int32_t grid_dim, block_dim;
     _get_1d_gpu_config(&grid_dim, &block_dim, a->size);
     tensor_unary_minus_kernel<<<grid_dim, block_dim>>>(a->data, a->size, result);
+    cudaCheckError();
     cudaDeviceSynchronize();
+    cudaCheckError();
 }
 
 __global__ void tensor_add_kernel(float *a, float *b, int32_t n, float *result)
@@ -186,7 +206,9 @@ void tensor_add_gpu(Tensor *a, Tensor *b, float *result)
     int32_t grid_dim, block_dim;
     _get_1d_gpu_config(&grid_dim, &block_dim, a->size);
     tensor_add_kernel<<<grid_dim, block_dim>>>(a->data, b->data, a->size, result);
+    cudaCheckError();
     cudaDeviceSynchronize();
+    cudaCheckError();
 }
 
 __global__ void tensor_subtract_kernel(float *a, float *b, int32_t n, float *result)
@@ -205,7 +227,9 @@ void tensor_subtract_gpu(Tensor *a, Tensor *b, float *result)
     int32_t grid_dim, block_dim;
     _get_1d_gpu_config(&grid_dim, &block_dim, a->size);
     tensor_subtract_kernel<<<grid_dim, block_dim>>>(a->data, b->data, a->size, result);
+    cudaCheckError();
     cudaDeviceSynchronize();
+    cudaCheckError();
 }
 
 __global__ void tensor_multiply_kernel(float *a, float *b, int32_t n, float *result)
@@ -224,7 +248,9 @@ void tensor_multiply_gpu(Tensor *a, Tensor *b, float *result)
     int32_t grid_dim, block_dim;
     _get_1d_gpu_config(&grid_dim, &block_dim, a->size);
     tensor_multiply_kernel<<<grid_dim, block_dim>>>(a->data, b->data, a->size, result);
+    cudaCheckError();
     cudaDeviceSynchronize();
+    cudaCheckError();
 }
 
 __global__ void tensor_divide_kernel(float *a, float *b, int32_t n, float *result)
@@ -243,7 +269,9 @@ void tensor_divide_gpu(Tensor *a, Tensor *b, float *result)
     int32_t grid_dim, block_dim;
     _get_1d_gpu_config(&grid_dim, &block_dim, a->size);
     tensor_divide_kernel<<<grid_dim, block_dim>>>(a->data, b->data, a->size, result);
+    cudaCheckError();
     cudaDeviceSynchronize();
+    cudaCheckError();
 }
 
 // TxMxP @ TxPxN => TxMxN
@@ -305,7 +333,9 @@ void tensor_matmul_gpu(Tensor *a, Tensor *b, int32_t batch, float *result)
     dim3 grid_dim, block_dim;
     _get_3d_gpu_config(&grid_dim, &block_dim, batch, rows, cols);
     tensor_matmul_kernel<<<grid_dim, block_dim>>>(a->data, b->data, a_stride, b_stride, a->dims, batch, rows, comm, cols, result);
+    cudaCheckError();
     cudaDeviceSynchronize();
+    cudaCheckError();
     cudaFree(a_stride);
     cudaFree(b_stride);
 }
@@ -326,7 +356,9 @@ void tensor_broadcast_add_gpu(Tensor *a, float value, float *result)
     int32_t grid_dim, block_dim;
     _get_1d_gpu_config(&grid_dim, &block_dim, a->size);
     tensor_broadcast_add_kernel<<<grid_dim, block_dim>>>(a->data, a->size, value, result);
+    cudaCheckError();
     cudaDeviceSynchronize();
+    cudaCheckError();
 }
 
 __global__ void tensor_broadcast_subtract_kernel(float *a, int32_t n, float value, float *result)
@@ -345,7 +377,9 @@ void tensor_broadcast_subtract_gpu(Tensor *a, float value, float *result)
     int32_t grid_dim, block_dim;
     _get_1d_gpu_config(&grid_dim, &block_dim, a->size);
     tensor_broadcast_subtract_kernel<<<grid_dim, block_dim>>>(a->data, a->size, value, result);
+    cudaCheckError();
     cudaDeviceSynchronize();
+    cudaCheckError();
 }
 
 __global__ void tensor_broadcast_multiply_kernel(float *a, int32_t n, float value, float *result)
@@ -364,7 +398,9 @@ void tensor_broadcast_multiply_gpu(Tensor *a, float value, float *result)
     int32_t grid_dim, block_dim;
     _get_1d_gpu_config(&grid_dim, &block_dim, a->size);
     tensor_broadcast_multiply_kernel<<<grid_dim, block_dim>>>(a->data, a->size, value, result);
+    cudaCheckError();
     cudaDeviceSynchronize();
+    cudaCheckError();
 }
 
 __global__ void tensor_broadcast_divide_kernel(float *a, int32_t n, float value, float *result)
@@ -383,7 +419,9 @@ void tensor_broadcast_divide_gpu(Tensor *a, float value, float *result)
     int32_t grid_dim, block_dim;
     _get_1d_gpu_config(&grid_dim, &block_dim, a->size);
     tensor_broadcast_divide_kernel<<<grid_dim, block_dim>>>(a->data, a->size, value, result);
+    cudaCheckError();
     cudaDeviceSynchronize();
+    cudaCheckError();
 }
 
 __global__ void tensor_broadcast_right_divide_kernel(float *a, int32_t n, float value, float *result)
@@ -402,7 +440,9 @@ void tensor_broadcast_right_divide_gpu(Tensor *a, float value, float *result)
     int32_t grid_dim, block_dim;
     _get_1d_gpu_config(&grid_dim, &block_dim, a->size);
     tensor_broadcast_right_divide_kernel<<<grid_dim, block_dim>>>(a->data, a->size, value, result);
+    cudaCheckError();
     cudaDeviceSynchronize();
+    cudaCheckError();
 }
 
 __global__ void tensor_power_kernel(float *a, int32_t n, float power, float *result)
@@ -421,7 +461,9 @@ void tensor_power_gpu(Tensor *a, float power, float *result)
     int32_t grid_dim, block_dim;
     _get_1d_gpu_config(&grid_dim, &block_dim, a->size);
     tensor_power_kernel<<<grid_dim, block_dim>>>(a->data, a->size, power, result);
+    cudaCheckError();
     cudaDeviceSynchronize();
+    cudaCheckError();
 }
 
 __global__ void tensor_exp_kernel(float *a, int32_t n, float *result)
@@ -440,7 +482,9 @@ void tensor_exp_gpu(Tensor *a, float *result)
     int32_t grid_dim, block_dim;
     _get_1d_gpu_config(&grid_dim, &block_dim, a->size);
     tensor_exp_kernel<<<grid_dim, block_dim>>>(a->data, a->size, result);
+    cudaCheckError();
     cudaDeviceSynchronize();
+    cudaCheckError();
 }
 
 __global__ void tensor_log_kernel(float *a, int32_t n, float *result)
@@ -459,7 +503,9 @@ void tensor_log_gpu(Tensor *a, float *result)
     int32_t grid_dim, block_dim;
     _get_1d_gpu_config(&grid_dim, &block_dim, a->size);
     tensor_log_kernel<<<grid_dim, block_dim>>>(a->data, a->size, result);
+    cudaCheckError();
     cudaDeviceSynchronize();
+    cudaCheckError();
 }
 
 __global__ void tensor_log10_kernel(float *a, int32_t n, float *result)
@@ -478,7 +524,9 @@ void tensor_log10_gpu(Tensor *a, float *result)
     int32_t grid_dim, block_dim;
     _get_1d_gpu_config(&grid_dim, &block_dim, a->size);
     tensor_log10_kernel<<<grid_dim, block_dim>>>(a->data, a->size, result);
+    cudaCheckError();
     cudaDeviceSynchronize();
+    cudaCheckError();
 }
 
 __global__ void tensor_logb_kernel(float *a, int32_t n, float base, float *result)
@@ -498,7 +546,9 @@ void tensor_logb_gpu(Tensor *a, float base, float *result)
     int32_t grid_dim, block_dim;
     _get_1d_gpu_config(&grid_dim, &block_dim, a->size);
     tensor_logb_kernel<<<grid_dim, block_dim>>>(a->data, a->size, base, result);
+    cudaCheckError();
     cudaDeviceSynchronize();
+    cudaCheckError();
 }
 
 __global__ void tensor_sin_kernel(float *a, int32_t n, float *result)
@@ -517,7 +567,9 @@ void tensor_sin_gpu(Tensor *a, float *result)
     int32_t grid_dim, block_dim;
     _get_1d_gpu_config(&grid_dim, &block_dim, a->size);
     tensor_sin_kernel<<<grid_dim, block_dim>>>(a->data, a->size, result);
+    cudaCheckError();
     cudaDeviceSynchronize();
+    cudaCheckError();
 }
 
 __global__ void tensor_cos_kernel(float *a, int32_t n, float *result)
@@ -536,7 +588,9 @@ void tensor_cos_gpu(Tensor *a, float *result)
     int32_t grid_dim, block_dim;
     _get_1d_gpu_config(&grid_dim, &block_dim, a->size);
     tensor_cos_kernel<<<grid_dim, block_dim>>>(a->data, a->size, result);
+    cudaCheckError();
     cudaDeviceSynchronize();
+    cudaCheckError();
 }
 
 __global__ void tensor_tanh_kernel(float *a, int32_t n, float *result)
@@ -555,7 +609,9 @@ void tensor_tanh_gpu(Tensor *a, float *result)
     int32_t grid_dim, block_dim;
     _get_1d_gpu_config(&grid_dim, &block_dim, a->size);
     tensor_tanh_kernel<<<grid_dim, block_dim>>>(a->data, a->size, result);
+    cudaCheckError();
     cudaDeviceSynchronize();
+    cudaCheckError();
 }
 
 __global__ void tensor_sum_kernel(float *a, float *outputs, int32_t n)
