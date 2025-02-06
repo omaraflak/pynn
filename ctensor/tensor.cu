@@ -274,7 +274,7 @@ Tensor *tensor_slice(Tensor *tensor, Slice *slice)
     int32_t size = 1;
     int32_t *shape = (int32_t *)malloc(sizeof(int32_t) * tensor->dims);
 
-    // compute new size given the slice
+    // offset negative slicing and compute new size and shape
     for (int32_t i = 0; i < tensor->dims; i++)
     {
         if (slice[i].step <= 0)
@@ -294,19 +294,23 @@ Tensor *tensor_slice(Tensor *tensor, Slice *slice)
         size *= shape[i];
     }
 
+    Slice *slice_copy = (Slice *)malloc(sizeof(Slice) * tensor->dims);
+
     // make slice relative to base tensor
     if (tensor->base)
     {
+        memcpy(slice_copy, tensor->slice, sizeof(Slice) * tensor->dims);
         for (int32_t i = 0; i < tensor->dims; i++)
         {
-            slice[i].start = slice[i].start + slice[i].step * tensor->slice[i].start;
-            slice[i].step = slice[i].step * tensor->slice[i].step;
-            slice[i].stop = slice[i].start + slice[i].step * _get_slice_size(&tensor->slice[i]);
+            slice_copy[i].start += slice_copy[i].step * slice[i].start;
+            slice_copy[i].step *= slice[i].step;
+            slice_copy[i].stop = slice_copy[i].start + slice_copy[i].step * _get_slice_size(&slice[i]);
         }
     }
-
-    Slice *slice_copy = (Slice *)malloc(sizeof(Slice) * tensor->dims);
-    memcpy(slice_copy, slice, sizeof(Slice) * tensor->dims);
+    else
+    {
+        memcpy(slice_copy, slice, sizeof(Slice) * tensor->dims);
+    }
 
     Tensor *parent = tensor->base ? tensor->base : tensor;
     Tensor *result = _tensor_create(parent->data, shape, tensor->dims, tensor->device);
