@@ -1,34 +1,34 @@
 from __future__ import annotations
 from typing import Iterator
 import ctypes
+import os
+
+
+class CTensor(ctypes.Structure):
+    _fields_ = [
+        ("data", ctypes.POINTER(ctypes.c_float)),
+        ("shape", ctypes.POINTER(ctypes.c_int32)),
+        ("stride", ctypes.POINTER(ctypes.c_int32)),
+        ("dims", ctypes.c_int32),
+        ("size", ctypes.c_int32),
+        ("device", ctypes.c_int32),
+    ]
 
 
 class CSlice(ctypes.Structure):
     _fields_ = [
-        ('start', ctypes.c_int32),
-        ('stop', ctypes.c_int32),
-        ('step', ctypes.c_int32),
+        ("start", ctypes.c_int32),
+        ("stop", ctypes.c_int32),
+        ("step", ctypes.c_int32),
     ]
 
 
-class CTensor(ctypes.Structure):
-    pass
-
-
-CTensor._fields_ = [
-    ('data', ctypes.POINTER(ctypes.c_float)),
-    ('shape', ctypes.POINTER(ctypes.c_int32)),
-    ('stride', ctypes.POINTER(ctypes.c_int32)),
-    ('dims', ctypes.c_int32),
-    ('size', ctypes.c_int32),
-    ('device', ctypes.c_int32),
-    ('base', ctypes.POINTER(CTensor)),
-    ('slice', ctypes.POINTER(CSlice)),
-]
+def _get_tensorlib_path(libname: str = "libtensor.so") -> str:
+    return os.path.join(os.path.dirname(os.path.realpath(__file__)), libname)
 
 
 def _init_tensor_c_lib() -> ctypes.CDLL:
-    lib = ctypes.CDLL('/content/libtensor.so')
+    lib = ctypes.CDLL(_get_tensorlib_path())
 
     lib.tensor_create.argtypes = [
         ctypes.POINTER(ctypes.c_float),

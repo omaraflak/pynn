@@ -8,7 +8,8 @@ Under development...
 
 ```
 pip install -e .
-python3 examples/xor.py
+make -C ctensor
+python examples/xor.py
 ```
 
 # Usage
