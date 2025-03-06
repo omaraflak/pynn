@@ -1097,6 +1097,34 @@ class TestTensor(unittest.TestCase):
         self.assertEqual(y3.device, 0)
         self.assertEqual(y3.data, [18])
 
+    def test_slice_and_add(self):
+        x = Tensor.array([
+            [[1, 2], [4, 5], [6, 7]],
+            [[8, 9], [10, 11], [12, 13]],
+            [[1, 2], [2, 1], [1, 0]],
+            [[20, 21], [22, 23], [24, 25]],
+        ])
+
+        y = x[0] + x[2]
+
+        self.assertEqual(y.size, 6)
+        self.assertEqual(y.dims, 2)
+        self.assertEqual(y.shape, (3, 2))
+        self.assertEqual(y.device, 0)
+        self.assertEqual(y.data, [2, 4, 6, 6, 7, 7])
+
+    def test_slice_and_matmul(self):
+        a = Tensor([1, 2, 3, 4, 5, 6, 1, 0, 2, 3, 4, 1, -2, -2, -2, -2, -2, -2], (3, 2, 3))
+        b = Tensor([6, 4, 3, 2, 7, 6, 0, 5, 2, 1, 6, 0, -4, -4, -4, -4, -4, -4], (3, 3, 2))
+
+        c = a[:-1] @ b[:-1]
+
+        self.assertEqual(c.size, 8)
+        self.assertEqual(c.dims, 3)
+        self.assertEqual(c.shape, (2, 2, 2))
+        self.assertEqual(c.device, 0)
+        self.assertEqual(c.data, [33, 26, 81, 62, 12, 5, 14, 19])
+
     # def test_slice_and_reshape(self):
     #     x = Tensor.array([
     #         [[1, 2], [4, 5], [6, 7]],

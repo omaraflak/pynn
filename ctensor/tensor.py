@@ -628,3 +628,6 @@ class Tensor:
 
     def __setitem__(self, key: tuple[int, ...], value: float):
         self.set(key, value)
+
+    def __str__(self) -> str:
+        return str(self.data)
