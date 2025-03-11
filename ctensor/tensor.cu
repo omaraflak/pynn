@@ -269,8 +269,19 @@ void tensor_set_item(Tensor *tensor, int32_t *indices, float value)
     tensor->data[_get_index(tensor, indices)] = value;
 }
 
+int32_t tensor_get_data_index(Tensor* tensor, int32_t index) {
+    return _get_index(tensor, index);
+}
+
 Tensor *tensor_slice(Tensor *tensor, Slice *slice)
 {
+
+    // if slicing after a reshaping to a different dim then we need to create a new base tensor
+    // if (tensor->base && tensor->base->dims != tensor->dims) {
+
+    // }
+
+
     int32_t size = 1;
     int32_t *shape = (int32_t *)malloc(sizeof(int32_t) * tensor->dims);
 

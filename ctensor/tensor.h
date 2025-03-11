@@ -43,6 +43,7 @@ extern "C"
     float tensor_get_item_at(Tensor *tensor, int32_t index);
     float tensor_get_item(Tensor *tensor, int32_t *indices);
     void tensor_set_item(Tensor *tensor, int32_t *indices, float value);
+    int32_t tensor_get_data_index(Tensor* tensor, int32_t index);
 
     Tensor *tensor_slice(Tensor *tensor, Slice *slices);
 

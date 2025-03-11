@@ -5,14 +5,17 @@ import os
 
 
 class CTensor(ctypes.Structure):
-    _fields_ = [
-        ("data", ctypes.POINTER(ctypes.c_float)),
-        ("shape", ctypes.POINTER(ctypes.c_int32)),
-        ("stride", ctypes.POINTER(ctypes.c_int32)),
-        ("dims", ctypes.c_int32),
-        ("size", ctypes.c_int32),
-        ("device", ctypes.c_int32),
-    ]
+    pass
+
+CTensor._fields_ = [
+    ("data", ctypes.POINTER(ctypes.c_float)),
+    ("shape", ctypes.POINTER(ctypes.c_int32)),
+    ("stride", ctypes.POINTER(ctypes.c_int32)),
+    ("dims", ctypes.c_int32),
+    ("size", ctypes.c_int32),
+    ("device", ctypes.c_int32),
+    ("base", ctypes.POINTER(CTensor))
+]
 
 
 class CSlice(ctypes.Structure):
@@ -89,6 +92,11 @@ def _init_tensor_c_lib() -> ctypes.CDLL:
         ctypes.c_float,
     ]
     lib.tensor_set_item.restype = None
+    lib.tensor_get_data_index.restype = ctypes.c_int32
+    lib.tensor_get_data_index.argtypes = [
+        ctypes.POINTER(CTensor),
+        ctypes.c_int32
+    ]
     lib.tensor_slice.argtypes = [
         ctypes.POINTER(CTensor),
         ctypes.POINTER(CSlice),
@@ -319,6 +327,13 @@ class Tensor:
         return [self.at(i) for i in range(self.size)]
 
     @property
+    def indices(self) -> list[int]:
+        return [
+            Tensor._C.tensor_get_data_index(self.c_tensor, ctypes.c_int32(i))
+            for i in range(self.size)
+        ]
+
+    @property
     def shape(self) -> tuple[int, ...]:
         return tuple(self.c_tensor.contents.shape[i] for i in range(self.dims))
 
@@ -328,9 +343,9 @@ class Tensor:
 
     @property
     def base(self) -> Tensor | None:
-        if self.c_tensor.contents.base is None:
-            return None
-        return Tensor(c_tensor=self.c_tensor.contents.base)
+        if self.c_tensor.contents.base:
+            return Tensor(None, None, self.c_tensor.contents.base)
+        return None
 
     @property
     def device(self) -> int:
@@ -631,3 +646,6 @@ class Tensor:
 
     def __str__(self) -> str:
         return str(self.data)
+
+    def __eq__(self, other: Tensor) -> bool:
+        return ctypes.addressof(self.c_tensor.contents) == ctypes.addressof(other.c_tensor.contents)
