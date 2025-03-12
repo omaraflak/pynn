@@ -163,6 +163,15 @@ void tensor_delete(Tensor *tensor)
     free(tensor);
 }
 
+void tensor_print_info(Tensor* tensor) {
+    printf("tensor = %p\n", tensor);
+    printf("base = %p\n", tensor->base);
+    printf("data = %p\n", tensor->data);
+    printf("slice = %p\n", tensor->slice);
+    printf("stride = %p\n", tensor->stride);
+    printf("shape = %p\n", tensor->shape);
+}
+
 void tensor_cpu_to_gpu(Tensor *tensor)
 {
     float *data;
@@ -323,9 +332,9 @@ Tensor *tensor_slice(Tensor *tensor, Slice *slice)
         memcpy(slice_copy, slice, sizeof(Slice) * tensor->dims);
     }
 
-    Tensor *parent = tensor->base ? tensor->base : tensor;
-    Tensor *result = _tensor_create(parent->data, shape, tensor->dims, tensor->device);
-    result->base = parent;
+    Tensor *root = tensor->base ? tensor->base : tensor;
+    Tensor *result = _tensor_create(root->data, shape, tensor->dims, tensor->device);
+    result->base = root;
     result->slice = slice_copy;
     return result;
 }

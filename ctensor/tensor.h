@@ -30,6 +30,7 @@ extern "C"
     Tensor *tensor_create_empty(int32_t *shape, int32_t dims);
     Tensor *tensor_copy(Tensor *tensor);
     void tensor_delete(Tensor *tensor);
+    void tensor_print_info(Tensor* tensor);
 
     void tensor_cpu_to_gpu(Tensor *tensor);
     void tensor_gpu_to_cpu(Tensor *tensor);

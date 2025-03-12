@@ -4,3 +4,4 @@ pynn.egg-info
 .venv
 *.so
 *.o
+TODO.md

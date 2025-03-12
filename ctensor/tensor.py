@@ -1,5 +1,6 @@
 from __future__ import annotations
 from typing import Iterator
+from collections import defaultdict
 import ctypes
 import os
 
@@ -48,6 +49,8 @@ def _init_tensor_c_lib() -> ctypes.CDLL:
     lib.tensor_copy.restype = ctypes.POINTER(CTensor)
     lib.tensor_delete.argtypes = [ctypes.POINTER(CTensor)]
     lib.tensor_delete.restype = None
+    lib.tensor_print_info.argtypes = [ctypes.POINTER(CTensor)]
+    lib.tensor_print_info.restype = None
 
     lib.tensor_cpu_to_gpu.argtypes = [ctypes.POINTER(CTensor)]
     lib.tensor_cpu_to_gpu.restype = None
@@ -252,6 +255,10 @@ def _get_array_and_shape(array: list[float | list]) -> tuple[list[float], tuple[
 class Tensor:
     _C = _init_tensor_c_lib()
 
+    # keeps mapping of address(tensor) -> count to avoid early dereferencing
+    _REGISTRY: dict[int, int] = defaultdict(int)
+
+
     def __init__(
         self,
         data: list[float] | None,
@@ -260,6 +267,7 @@ class Tensor:
     ):
         if c_tensor:
             self.c_tensor = c_tensor
+            self._increase_ref_count()
             return
 
         if data is None or shape is None:
@@ -270,6 +278,7 @@ class Tensor:
             (ctypes.c_int32 * len(shape))(*shape),
             ctypes.c_int32(len(shape)),
         )
+        self._increase_ref_count()
 
     @classmethod
     def _empty(cls, shape: tuple[int, ...]) -> Tensor:
@@ -354,6 +363,10 @@ class Tensor:
     @property
     def T(self) -> Tensor:
         return self.transpose()
+
+    @property
+    def address(self) -> int:
+        return ctypes.addressof(self.c_tensor.contents)
 
     def copy(self) -> Tensor:
         c_tensor = Tensor._C.tensor_copy(self.c_tensor)
@@ -564,8 +577,13 @@ class Tensor:
     def max(self) -> float:
         return Tensor._C.tensor_max(self.c_tensor)
 
+    def print_info(self):
+        Tensor._C.tensor_print_info(self.c_tensor)
+
     def __del__(self):
-        Tensor._C.tensor_delete(self.c_tensor)
+        self._decrease_ref_count()
+        if self._has_no_ref():
+            Tensor._C.tensor_delete(self.c_tensor)
 
     def __iadd__(self, other: Tensor) -> Tensor:
         self.add_into(other)
@@ -648,4 +666,13 @@ class Tensor:
         return str(self.data)
 
     def __eq__(self, other: Tensor) -> bool:
-        return ctypes.addressof(self.c_tensor.contents) == ctypes.addressof(other.c_tensor.contents)
+        return self.address == other.address
+
+    def _increase_ref_count(self):
+        self._REGISTRY[self.address] += 1
+
+    def _decrease_ref_count(self):
+        self._REGISTRY[self.address] -= 1
+
+    def _has_no_ref(self) -> bool:
+        return self._REGISTRY[self.address] == 0

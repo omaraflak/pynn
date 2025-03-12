@@ -523,7 +523,7 @@ class TestTensor(unittest.TestCase):
         self.assertAlmostEqual(std, 2, delta=0.3)
 
     def test_fill_random_normal_gpu(self):
-        n = 10000
+        n = 100000
         x = Tensor.zeros(n)
         x.to_gpu()
 
@@ -1105,8 +1105,8 @@ class TestTensor(unittest.TestCase):
         self.assertEqual(y3.device, 0)
         self.assertEqual(y3.data, [18])
         self.assertEqual(y3.indices, [18])
-        self.assertEqual(y3.base, y2)
-        self.assertEqual(y2.base, y1)
+        self.assertEqual(y3.base, x)
+        self.assertEqual(y2.base, x)
         self.assertEqual(y1.base, x)
 
     def test_slice_and_add(self):
@@ -1142,7 +1142,27 @@ class TestTensor(unittest.TestCase):
         self.assertEqual(c.base, None)
 
 
-    # def test_slice_and_reshape(self):
+    def test_slice_and_reshape(self):
+        x = Tensor.array([
+            [[1, 2], [4, 5], [6, 7]],
+            [[8, 9], [10, 11], [12, 13]],
+            [[14, 15], [16, 17], [18, 19]],
+            [[20, 21], [22, 23], [24, 25]],
+        ])
+
+        y = x[::2, -2:]
+        y.reshape(4, 2)
+
+        self.assertEqual(y.size, 8)
+        self.assertEqual(y.dims, 2)
+        self.assertEqual(y.shape, (4, 2))
+        self.assertEqual(y.device, 0)
+        self.assertEqual(y.data, [4, 5, 6, 7, 16, 17, 18, 19])
+        self.assertEqual(y.indices, [2, 3, 4, 5, 14, 15, 16, 17])
+        self.assertEqual(y.base, x)
+
+
+    # def test_slice_reshape_slice(self):
     #     x = Tensor.array([
     #         [[1, 2], [4, 5], [6, 7]],
     #         [[8, 9], [10, 11], [12, 13]],
