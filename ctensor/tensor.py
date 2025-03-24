@@ -665,8 +665,10 @@ class Tensor:
     def __str__(self) -> str:
         return str(self.data)
 
-    def __eq__(self, other: Tensor) -> bool:
-        return self.address == other.address
+    def __eq__(self, other: Any) -> bool:
+        if isinstance(other, Tensor):
+            return self.address == other.address
+        return False
 
     def _increase_ref_count(self):
         self._REGISTRY[self.address] += 1

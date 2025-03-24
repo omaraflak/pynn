@@ -53,6 +53,36 @@ class TestTensor(unittest.TestCase):
         self.assertEqual(y.device, 0)
         self.assertEqual(y.data, [1, 2, 3, 4, 5, 6])
 
+    def test_copy_sliced_cpu(self):
+        x = Tensor.array([[1, 2], [3, 4], [5, 6]])
+
+        y = x[::2].copy()
+
+        self.assertEqual(y.size, 4)
+        self.assertEqual(y.dims, 2)
+        self.assertEqual(y.shape, (2, 2))
+        self.assertEqual(y.device, 0)
+        self.assertEqual(y.data, [1, 2, 5, 6])
+        self.assertEqual(y.indices, [0, 1, 4, 5])
+        self.assertEqual(y.base, x)
+        self.assertNotEqual(y, x)
+
+    def test_copy_sliced_gpu(self):
+        x = Tensor.array([[1, 2], [3, 4], [5, 6]])
+        x.to_gpu()
+
+        y = x[::2].copy()
+        y.to_cpu()
+
+        self.assertEqual(y.size, 4)
+        self.assertEqual(y.dims, 2)
+        self.assertEqual(y.shape, (2, 2))
+        self.assertEqual(y.device, 0)
+        self.assertEqual(y.data, [1, 2, 5, 6])
+        self.assertEqual(y.indices, [0, 1, 4, 5])
+        self.assertEqual(y.base, x)
+        self.assertNotEqual(y, x)
+
     def test_fill_cpu(self):
         x = Tensor([1, 2, 3, 4, 5, 6], (3, 2))
 

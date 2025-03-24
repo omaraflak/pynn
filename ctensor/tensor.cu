@@ -12,7 +12,7 @@ int32_t *_copy_shape(Tensor *tensor)
     return shape;
 }
 
-int32_t _get_size_from_shape(int32_t *shape, int32_t dims)
+int32_t _compute_size(int32_t *shape, int32_t dims)
 {
     int32_t size = 1;
     for (int32_t i = 0; i < dims; i++)
@@ -70,7 +70,7 @@ int32_t _get_index(Tensor *tensor, int32_t *indices)
     return _get_index(tensor, index);
 }
 
-int32_t mod(int32_t a, int32_t b)
+int32_t _mod(int32_t a, int32_t b)
 {
     int32_t m = a % b;
     if (m < 0)
@@ -86,7 +86,7 @@ Tensor *_tensor_create(float *data, int32_t *shape, int32_t dims, int32_t device
     tensor->data = data;
     tensor->shape = shape;
     tensor->stride = (int32_t *)malloc(sizeof(int32_t) * dims);
-    tensor->size = _get_size_from_shape(shape, dims);
+    tensor->size = _compute_size(shape, dims);
     tensor->dims = dims;
     tensor->device = device;
     tensor->base = nullptr;
@@ -107,7 +107,7 @@ Tensor *tensor_create(float *data, int32_t *shape, int32_t dims)
 
 Tensor *tensor_create_empty(int32_t *shape, int32_t dims)
 {
-    int32_t size = _get_size_from_shape(shape, dims);
+    int32_t size = _compute_size(shape, dims);
     Tensor *tensor = (Tensor *)malloc(sizeof(Tensor));
     tensor->data = (float *)malloc(sizeof(float) * size);
     tensor->shape = (int32_t *)malloc(sizeof(int32_t) * dims);
@@ -122,23 +122,35 @@ Tensor *tensor_create_empty(int32_t *shape, int32_t dims)
     return tensor;
 }
 
+// TODO: copy sliced data instead of base array
 Tensor *tensor_copy(Tensor *tensor)
 {
     int32_t *shape = _copy_shape(tensor);
+    int32_t size = tensor->base ? tensor->base->size : tensor->size;
 
     float *data;
+
     if (tensor->device == 0)
     {
-        data = (float *)malloc(sizeof(float) * tensor->size);
-        memcpy(data, tensor->data, sizeof(float) * tensor->size);
+        data = (float *)malloc(sizeof(float) * size);
+        memcpy(data, tensor->data, sizeof(float) * size);
     }
     else
     {
-        cudaMalloc(&data, sizeof(float) * tensor->size);
-        cudaMemcpy(data, tensor->data, sizeof(float) * tensor->size, cudaMemcpyDeviceToDevice);
+        cudaMalloc(&data, sizeof(float) * size);
+        cudaMemcpy(data, tensor->data, sizeof(float) * size, cudaMemcpyDeviceToDevice);
     }
 
-    return _tensor_create(data, shape, tensor->dims, tensor->device);
+    Tensor* result = _tensor_create(data, shape, tensor->dims, tensor->device);
+    if (tensor->base) {
+        result->base = tensor->base;
+
+        Slice* slice = (Slice*) malloc(sizeof(Slice) * tensor->dims);
+        memcpy(slice, tensor->slice, sizeof(Slice) * tensor->dims);
+        result->slice = slice;
+    }
+
+    return result;
 }
 
 void tensor_delete(Tensor *tensor)
@@ -284,13 +296,6 @@ int32_t tensor_get_data_index(Tensor* tensor, int32_t index) {
 
 Tensor *tensor_slice(Tensor *tensor, Slice *slice)
 {
-
-    // if slicing after a reshaping to a different dim then we need to create a new base tensor
-    // if (tensor->base && tensor->base->dims != tensor->dims) {
-
-    // }
-
-
     int32_t size = 1;
     int32_t *shape = (int32_t *)malloc(sizeof(int32_t) * tensor->dims);
 
@@ -304,11 +309,11 @@ Tensor *tensor_slice(Tensor *tensor, Slice *slice)
         }
         if (slice[i].start < 0)
         {
-            slice[i].start = mod(slice[i].start, tensor->shape[i]);
+            slice[i].start = _mod(slice[i].start, tensor->shape[i]);
         }
         if (slice[i].stop < 0)
         {
-            slice[i].stop = mod(slice[i].stop, tensor->shape[i]);
+            slice[i].stop = _mod(slice[i].stop, tensor->shape[i]);
         }
         shape[i] = _get_slice_size(&slice[i]);
         size *= shape[i];
