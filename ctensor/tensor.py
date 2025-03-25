@@ -8,6 +8,7 @@ import os
 class CTensor(ctypes.Structure):
     pass
 
+# must be ordered as the C struct!
 CTensor._fields_ = [
     ("data", ctypes.POINTER(ctypes.c_float)),
     ("shape", ctypes.POINTER(ctypes.c_int32)),
@@ -15,6 +16,7 @@ CTensor._fields_ = [
     ("dims", ctypes.c_int32),
     ("size", ctypes.c_int32),
     ("device", ctypes.c_int32),
+    ("offset", ctypes.c_int32),
     ("base", ctypes.POINTER(CTensor))
 ]
 
@@ -355,6 +357,10 @@ class Tensor:
         if self.c_tensor.contents.base:
             return Tensor(None, None, self.c_tensor.contents.base)
         return None
+
+    @property
+    def offset(self) -> int:
+        return self.c_tensor.contents.offset
 
     @property
     def device(self) -> int:

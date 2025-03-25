@@ -14,17 +14,13 @@ int32_t idx(Tensor *tensor, int32_t index)
     }
 
     int32_t remaining = index;
-    int32_t base_index = 0;
+    int32_t base_index = tensor->offset;
 
-    for (int32_t i = tensor->base->dims - 1; i >= 0; i--)
-    {
-        int32_t dim_size = get_slice_size(&tensor->slice[i]);
-        int32_t dim_idx = remaining % dim_size;
-        base_index += (tensor->slice[i].start + dim_idx * tensor->slice[i].step) * tensor->base->stride[i];
-        remaining /= dim_size;
+    for (int32_t i=0; i<tensor->dims; i++) {
+        int32_t dim = remaining / tensor->stride[i];
+        base_index += dim * tensor->stride[i];
+        remaining %= tensor->stride[i];
     }
-
-    // printf("%d -> %d\n", index, base_index);
 
     return base_index;
 }

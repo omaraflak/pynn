@@ -1,7 +1,7 @@
 #if !defined(CPU)
 #define CPU
 
-#include "tensor.h"
+#include "_tensor.h"
 
 void tensor_fill_cpu(Tensor *a, float value);
 void tensor_fill_random_uniform_cpu(Tensor *a, float min, float max);

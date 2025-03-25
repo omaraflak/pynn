@@ -34,24 +34,29 @@ class TestTensor(unittest.TestCase):
 
         y = x.copy()
 
-        self.assertEqual(y.size, 6)
-        self.assertEqual(y.dims, 2)
-        self.assertEqual(y.shape, (3, 2))
-        self.assertEqual(y.device, 0)
-        self.assertEqual(y.data, [1, 2, 3, 4, 5, 6])
+        self.assertEqual(y.size, x.size)
+        self.assertEqual(y.dims, x.dims)
+        self.assertEqual(y.shape, x.shape)
+        self.assertEqual(y.stride, x.stride)
+        self.assertEqual(y.device, x.device)
+        self.assertEqual(y.data, x.data)
+        self.assertNotEqual(y, x)
 
     def test_copy_gpu(self):
         x = Tensor([1, 2, 3, 4, 5, 6], (3, 2))
         x.to_gpu()
 
         y = x.copy()
+        x.to_cpu()
         y.to_cpu()
 
-        self.assertEqual(y.size, 6)
-        self.assertEqual(y.dims, 2)
-        self.assertEqual(y.shape, (3, 2))
-        self.assertEqual(y.device, 0)
-        self.assertEqual(y.data, [1, 2, 3, 4, 5, 6])
+        self.assertEqual(y.size, x.size)
+        self.assertEqual(y.dims, x.dims)
+        self.assertEqual(y.shape, x.shape)
+        self.assertEqual(y.stride, x.stride)
+        self.assertEqual(y.device, x.device)
+        self.assertEqual(y.data, x.data)
+        self.assertNotEqual(y, x)
 
     def test_copy_sliced_cpu(self):
         x = Tensor.array([[1, 2], [3, 4], [5, 6]])
@@ -61,6 +66,7 @@ class TestTensor(unittest.TestCase):
         self.assertEqual(y.size, 4)
         self.assertEqual(y.dims, 2)
         self.assertEqual(y.shape, (2, 2))
+        self.assertEqual(y.stride, (4, 1))
         self.assertEqual(y.device, 0)
         self.assertEqual(y.data, [1, 2, 5, 6])
         self.assertEqual(y.indices, [0, 1, 4, 5])
@@ -72,11 +78,13 @@ class TestTensor(unittest.TestCase):
         x.to_gpu()
 
         y = x[::2].copy()
+        x.to_cpu()
         y.to_cpu()
 
         self.assertEqual(y.size, 4)
         self.assertEqual(y.dims, 2)
         self.assertEqual(y.shape, (2, 2))
+        self.assertEqual(y.stride, (4, 1))
         self.assertEqual(y.device, 0)
         self.assertEqual(y.data, [1, 2, 5, 6])
         self.assertEqual(y.indices, [0, 1, 4, 5])
@@ -1065,6 +1073,8 @@ class TestTensor(unittest.TestCase):
         self.assertEqual(y.size, 8)
         self.assertEqual(y.dims, 3)
         self.assertEqual(y.shape, (2, 2, 2))
+        self.assertEqual(y.stride, (12, 3, 1))
+        self.assertEqual(y.offset, 1)
         self.assertEqual(y.device, 0)
         self.assertEqual(y.data, [2, 3, 5, 6, 14, 15, 17, 18])
         self.assertEqual(y.indices, [1, 2, 4, 5, 13, 14, 16, 17])
@@ -1082,9 +1092,11 @@ class TestTensor(unittest.TestCase):
         self.assertEqual(y.size, x.size)
         self.assertEqual(y.dims, x.dims)
         self.assertEqual(y.shape, x.shape)
-        self.assertEqual(y.device, 0)
+        self.assertEqual(y.stride, x.stride)
+        self.assertEqual(y.offset, x.offset)
+        self.assertEqual(y.device, x.device)
         self.assertEqual(y.data, x.data)
-        self.assertEqual(y.indices, list(range(x.size)))
+        self.assertEqual(y.indices, x.indices)
         self.assertEqual(y.base, x)
 
     def test_slice_negative_start_stop(self):
@@ -1099,6 +1111,8 @@ class TestTensor(unittest.TestCase):
         self.assertEqual(y.size, 3)
         self.assertEqual(y.dims, 3)
         self.assertEqual(y.shape, (1, 1, 3))
+        self.assertEqual(y.stride, x.stride)
+        self.assertEqual(y.offset, 12)
         self.assertEqual(y.device, 0)
         self.assertEqual(y.data, [13, 14, 15])
         self.assertEqual(y.indices, [12, 13, 14])
@@ -1117,6 +1131,8 @@ class TestTensor(unittest.TestCase):
         self.assertEqual(y.size, 6)
         self.assertEqual(y.dims, 2)
         self.assertEqual(y.shape, (3, 2))
+        self.assertEqual(y.stride, (2, 1))
+        self.assertEqual(y.offset, 0)
         self.assertEqual(y.device, 0)
         self.assertEqual(y.data, [1, 2, 4, 5, 6, 7])
         self.assertEqual(y.indices, [0, 1, 2, 3, 4, 5])
@@ -1129,9 +1145,16 @@ class TestTensor(unittest.TestCase):
         y2 = y1[1:2, :2, :2]
         y3 = y2[:1, :1, 1:2]
 
+        self.assertEqual(x.offset, 0)
+        self.assertEqual(y1.offset, 1)
+        self.assertEqual(y1.stride, (16, 4, 1))
+        self.assertEqual(y2.offset, 17)
+        self.assertEqual(y2.stride, (16, 4, 1))
         self.assertEqual(y3.size, 1)
         self.assertEqual(y3.dims, 3)
         self.assertEqual(y3.shape, (1, 1, 1))
+        self.assertEqual(y3.stride, (16, 4, 1))
+        self.assertEqual(y3.offset, 18)
         self.assertEqual(y3.device, 0)
         self.assertEqual(y3.data, [18])
         self.assertEqual(y3.indices, [18])
@@ -1152,6 +1175,8 @@ class TestTensor(unittest.TestCase):
         self.assertEqual(y.size, 6)
         self.assertEqual(y.dims, 2)
         self.assertEqual(y.shape, (3, 2))
+        self.assertEqual(y.stride, (2, 1))
+        self.assertEqual(y.offset, 0)
         self.assertEqual(y.device, 0)
         self.assertEqual(y.data, [2, 4, 6, 6, 7, 7])
         self.assertEqual(y.indices, [0, 1, 2, 3, 4, 5])
@@ -1166,13 +1191,33 @@ class TestTensor(unittest.TestCase):
         self.assertEqual(c.size, 8)
         self.assertEqual(c.dims, 3)
         self.assertEqual(c.shape, (2, 2, 2))
+        self.assertEqual(y.stride, (4, 2, 1))
+        self.assertEqual(y.offset, 0)
         self.assertEqual(c.device, 0)
         self.assertEqual(c.data, [33, 26, 81, 62, 12, 5, 14, 19])
         self.assertEqual(c.indices, [0, 1, 2, 3, 4, 5, 6, 7])
         self.assertEqual(c.base, None)
 
+    def test_slice_and_reshape_same_shape(self):
+        x = Tensor.array([
+            [[1, 2], [4, 5], [6, 7]],
+            [[8, 9], [10, 11], [12, 13]],
+            [[14, 15], [16, 17], [18, 19]],
+            [[20, 21], [22, 23], [24, 25]],
+        ])
 
-    def test_slice_and_reshape(self):
+        y = x[::2, -2:]
+        y.reshape(4, 2, 1)
+
+        self.assertEqual(y.size, 8)
+        self.assertEqual(y.dims, 3)
+        self.assertEqual(y.shape, (4, 2, 1))
+        self.assertEqual(y.device, 0)
+        self.assertEqual(y.data, [4, 5, 6, 7, 16, 17, 18, 19])
+        self.assertEqual(y.indices, [2, 3, 4, 5, 14, 15, 16, 17])
+        self.assertEqual(y.base, x)
+
+    def test_slice_and_reshape_different_shape(self):
         x = Tensor.array([
             [[1, 2], [4, 5], [6, 7]],
             [[8, 9], [10, 11], [12, 13]],

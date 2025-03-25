@@ -1,7 +1,7 @@
 #if !defined(GPU)
 #define GPU
 
-#include "tensor.h"
+#include "_tensor.h"
 
 __global__ void tensor_fill_kernel(float *a, int32_t n, float value);
 void tensor_fill_gpu(Tensor *a, float value);

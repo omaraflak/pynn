@@ -2,27 +2,7 @@
 #define TENSOR
 
 #include <stdint.h>
-
-typedef struct
-{
-    int32_t start;
-    int32_t stop;
-    int32_t step;
-} Slice;
-
-typedef struct Tensor Tensor;
-
-struct Tensor
-{
-    float *data;
-    int32_t *shape;
-    int32_t *stride;
-    int32_t dims;
-    int32_t size;
-    int32_t device;
-    Tensor *base;
-    Slice *slice;
-};
+#include "_tensor.h"
 
 extern "C"
 {
