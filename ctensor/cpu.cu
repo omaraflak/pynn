@@ -1,10 +1,6 @@
 #include "cpu.h"
+#include "iterator.h"
 #include <random>
-
-int32_t get_slice_size(Slice *slice)
-{
-    return (slice->stop - slice->start + slice->step - 1) / slice->step;
-}
 
 int32_t idx(Tensor *tensor, int32_t index)
 {
@@ -16,10 +12,10 @@ int32_t idx(Tensor *tensor, int32_t index)
     int32_t remaining = index;
     int32_t base_index = tensor->offset;
 
-    for (int32_t i=0; i<tensor->dims; i++) {
-        int32_t dim = remaining / tensor->stride[i];
+    for (int32_t i=tensor->dims-1; i>=0; i--) {
+        int32_t dim = remaining % tensor->shape[i];
         base_index += dim * tensor->stride[i];
-        remaining %= tensor->stride[i];
+        remaining /= tensor->shape[i];
     }
 
     return base_index;
