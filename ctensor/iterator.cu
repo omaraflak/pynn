@@ -4,7 +4,7 @@ TensorIterator* iterator_create(Tensor* tensor) {
 	TensorIterator* it = (TensorIterator*) malloc(sizeof(TensorIterator));
 	it->tensor = tensor;
 	it->counters = (int32_t*) malloc(sizeof(int32_t) * tensor->dims);
-	it->idx = 0;
+	it->idx = tensor->offset;
 	for (int32_t i=0; i<tensor->dims; i++) {
 		it->counters[i] = 0;
 	}
