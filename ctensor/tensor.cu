@@ -242,12 +242,41 @@ void tensor_fill_identity(Tensor *tensor)
     }
 }
 
-void tensor_reshape(Tensor *tensor, int32_t *shape, int32_t dims)
+bool _is_squeezing(Tensor *tensor, int32_t *shape, int32_t dims) {
+    for (int32_t i=0; i<dims; i++) {
+        if (shape[i] == 1) {
+            continue;
+        }
+        bool found = false;
+        for (int32_t j=0; j<tensor->dims; j++) {
+            if (shape[i] == tensor->shape[j]) {
+                found = true;
+            }
+        }
+        if (!found) {
+            return false;
+        }
+    }
+    return true;
+}
+
+Tensor* tensor_reshape(Tensor *tensor, int32_t *shape, int32_t dims)
 {
     if (_compute_size(shape, dims) != tensor->size) {
         fprintf(stderr, "Cannot reshape to a size different than tensor size.\n");
         exit(1);
     }
+
+    // make copy if not squeezing 1s dims
+    if (tensor->base && !_is_squeezing(tensor, shape, dims)) {
+        Tensor* result = tensor_create_empty(shape, dims);
+        for (int i=0; i<tensor->size; i++) {
+            result->data[i] = tensor->data[_get_index(tensor, i)];
+        }
+        return result;
+    }
+
+    // TODO: fix reshape when base exists
     if (tensor->dims != dims)
     {
         free(tensor->shape);
@@ -268,6 +297,8 @@ void tensor_reshape(Tensor *tensor, int32_t *shape, int32_t dims)
             tensor->stride[i] *= shape[j];
         }
     }
+
+    return tensor;
 }
 
 float tensor_get_item_at(Tensor *tensor, int32_t index)

@@ -80,7 +80,7 @@ def _init_tensor_c_lib() -> ctypes.CDLL:
         ctypes.POINTER(ctypes.c_int32),
         ctypes.c_int32
     ]
-    lib.tensor_reshape.restype = None
+    lib.tensor_reshape.restype = ctypes.POINTER(CTensor)
     lib.tensor_get_item.argtypes = [
         ctypes.POINTER(CTensor),
         ctypes.POINTER(ctypes.c_int32)
@@ -384,12 +384,14 @@ class Tensor:
     def to_cpu(self):
         Tensor._C.tensor_gpu_to_cpu(self.c_tensor)
 
-    def reshape(self, *shape: int):
-        Tensor._C.tensor_reshape(
+    def reshape(self, *shape: int) -> Tensor:
+        result = Tensor._C.tensor_reshape(
             self.c_tensor,
             (ctypes.c_int32 * len(shape))(*shape),
             ctypes.c_int32(len(shape))
         )
+        return Tensor(None, None, result)
+
 
     def squeeze(self, *dims: int):
         if any(self.shape[i] != 1 for i in dims):
