@@ -242,23 +242,69 @@ void tensor_fill_identity(Tensor *tensor)
     }
 }
 
-bool _is_squeezing(Tensor *tensor, int32_t *shape, int32_t dims) {
-    for (int32_t i=0; i<dims; i++) {
-        if (shape[i] == 1) {
-            continue;
-        }
-        bool found = false;
-        for (int32_t j=0; j<tensor->dims; j++) {
-            if (shape[i] == tensor->shape[j]) {
-                found = true;
-            }
-        }
-        if (!found) {
+bool _is_squeezing_or_expanding(int32_t* shape1, int32_t dim1, int32_t* shape2, int32_t dim2) {
+    int32_t i = 0;
+    int32_t j = 0;
+
+    while (i < dim1 && j < dim2) {
+        if (shape1[i] == shape2[j]) {
+            i++;
+            j++;
+        } else if (shape1[i] == 1) {
+            i++;
+        } else if (shape2[j] == 1) {
+            j++;
+        } else {
             return false;
         }
     }
+
+    if (i < dim1) {
+        for (int32_t k=i; k<dim1; k++) {
+            if (shape1[k] != 1) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    if (j < dim2) {
+        for (int32_t k=j; k<dim2; k++) {
+            if (shape2[k] != 1) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     return true;
 }
+
+void _compute_compatible_stride(
+    int32_t* shape,
+    int32_t* stride,
+    int32_t dims,
+    int32_t* new_shape,
+    int32_t* new_stride,
+    int32_t new_dims
+) {
+    // example 1:
+    // (2, 2, 2) -> (2, 1, 2, 2, 1)
+    // (2,) -> (2, 1)
+    // (2,) -> (2,)
+    // (2,) -> (2, 1)
+    // (x, y, z) -> (x, x, y, z, z)
+
+    // example 2:
+    // (2, 1, 2, 2, 1) -> (2, 2, 2)
+    // (2,) -> (2, 1)
+    // (2,) -> (2,)
+    // (2,) -> (2, 1)
+    // (x, x, y, z, z) -> (x, y, z)
+
+    // TODO: complete
+}
+
 
 Tensor* tensor_reshape(Tensor *tensor, int32_t *shape, int32_t dims)
 {
@@ -267,8 +313,10 @@ Tensor* tensor_reshape(Tensor *tensor, int32_t *shape, int32_t dims)
         exit(1);
     }
 
-    // make copy if not squeezing 1s dims
-    if (tensor->base && !_is_squeezing(tensor, shape, dims)) {
+    bool compatible = _is_squeezing_or_expanding(tensor->shape, tensor->dims, shape, dims);
+
+    // reshape is not compatible with sliced tensor: make a copy
+    if (tensor->base && !compatible) {
         Tensor* result = tensor_create_empty(shape, dims);
         for (int i=0; i<tensor->size; i++) {
             result->data[i] = tensor->data[_get_index(tensor, i)];
@@ -276,7 +324,21 @@ Tensor* tensor_reshape(Tensor *tensor, int32_t *shape, int32_t dims)
         return result;
     }
 
-    // TODO: fix reshape when base exists
+    // sliced tensor with compatible shape: adjust strides
+    if (tensor->base) {
+        int32_t* new_shape = (int32_t *)malloc(sizeof(int32_t) * dims);
+        int32_t* new_stride = (int32_t *)malloc(sizeof(int32_t) * dims);
+        memcpy(new_shape, shape, sizeof(int32_t) * dims);
+        _compute_compatible_stride(tensor->shape, tensor->stride, tensor->dims, new_shape, new_stride, dims);
+        free(tensor->shape);
+        free(tensor->stride);
+        tensor->shape = new_shape;
+        tensor->stride = new_stride;
+        tensor->dims = dims;
+        return tensor;
+    }
+
+    // not a sliced tensor: recompute shape and stride normally
     if (tensor->dims != dims)
     {
         free(tensor->shape);
@@ -285,10 +347,7 @@ Tensor* tensor_reshape(Tensor *tensor, int32_t *shape, int32_t dims)
         tensor->shape = (int32_t *)malloc(sizeof(int32_t) * dims);
         tensor->stride = (int32_t *)malloc(sizeof(int32_t) * dims);
     }
-    for (int32_t i = 0; i < dims; i++)
-    {
-        tensor->shape[i] = shape[i];
-    }
+    memcpy(tensor->shape, shape, sizeof(int32_t) * dims);
     for (int32_t i = 0; i < dims; i++)
     {
         tensor->stride[i] = 1;
@@ -297,7 +356,6 @@ Tensor* tensor_reshape(Tensor *tensor, int32_t *shape, int32_t dims)
             tensor->stride[i] *= shape[j];
         }
     }
-
     return tensor;
 }
 
