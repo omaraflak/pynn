@@ -1,6 +1,7 @@
 #include "tensor.h"
 #include "cpu.h"
 #include "gpu.h"
+#include "iterator.h"
 #include <cstring>
 #include <stdio.h>
 #include <stdlib.h>
@@ -37,35 +38,6 @@ void _compute_stride(int32_t *stride, int32_t *shape, int32_t dims)
 int32_t _get_slice_size(Slice *slice)
 {
     return (slice->stop - slice->start + slice->step - 1) / slice->step;
-}
-
-int32_t _get_index(Tensor *tensor, int32_t index)
-{
-    if (!tensor->base)
-    {
-        return index;
-    }
-
-    int32_t remaining = index;
-    int32_t base_index = tensor->offset;
-
-    for (int32_t i=tensor->dims-1; i>=0; i--) {
-        int32_t dim = remaining % tensor->shape[i];
-        base_index += dim * tensor->stride[i];
-        remaining /= tensor->shape[i];
-    }
-
-    return base_index;
-}
-
-int32_t _get_index(Tensor *tensor, int32_t *indices)
-{
-    int32_t index = tensor->offset;
-    for (int32_t i = 0; i < tensor->dims; i++)
-    {
-        index += indices[i] * tensor->stride[i];
-    }
-    return index;
 }
 
 int32_t _mod(int32_t a, int32_t b)
@@ -396,28 +368,28 @@ Tensor* tensor_reshape(Tensor *tensor, int32_t *shape, int32_t dims)
     // incompatible reshape: make a copy
     Tensor* result = tensor_create_empty(shape, dims);
     for (int i=0; i<tensor->size; i++) {
-        result->data[i] = tensor->data[_get_index(tensor, i)];
+        result->data[i] = tensor->data[get_index(tensor, i)];
     }
     return result;
 }
 
 float tensor_get_item_at(Tensor *tensor, int32_t index)
 {
-    return tensor->data[_get_index(tensor, index)];
+    return tensor->data[get_index(tensor, index)];
 }
 
 float tensor_get_item(Tensor *tensor, int32_t *indices)
 {
-    return tensor->data[_get_index(tensor, indices)];
+    return tensor->data[get_index(tensor, indices)];
 }
 
 void tensor_set_item(Tensor *tensor, int32_t *indices, float value)
 {
-    tensor->data[_get_index(tensor, indices)] = value;
+    tensor->data[get_index(tensor, indices)] = value;
 }
 
 int32_t tensor_get_data_index(Tensor* tensor, int32_t index) {
-    return _get_index(tensor, index);
+    return get_index(tensor, index);
 }
 
 Tensor *tensor_slice(Tensor *tensor, Slice *slice)

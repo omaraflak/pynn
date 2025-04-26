@@ -1,46 +1,50 @@
 #include "iterator.h"
 
-TensorIterator* iterator_create(Tensor* tensor) {
-	TensorIterator* it = (TensorIterator*) malloc(sizeof(TensorIterator));
-	it->tensor = tensor;
-	it->idx = tensor->offset;
-	if (it->tensor->base) {
-		it->counters = (int32_t*) malloc(sizeof(int32_t) * tensor->dims);
-		for (int32_t i=0; i<tensor->dims; i++) {
-			it->counters[i] = 0;
-		}
-	}
-	return it;
+
+int32_t get_index(Tensor *tensor, int32_t index)
+{
+    return get_index(
+        tensor->shape,
+        tensor->stride,
+        tensor->offset,
+        tensor->dims,
+        tensor->base,
+        index
+    );
 }
 
-void iterator_next(TensorIterator* it) {
-	if (!it->tensor->base) {
-		it->idx++;
-		if (it->idx == it->tensor->size) {
-			it->idx = -1;
-		}
-		return;
-	}
-
-	bool increment = false;
-	for (int32_t i=it->tensor->dims - 1; i>=0; i--) {
-		if (it->counters[i] + 1 < it->tensor->shape[i]) {
-			it->counters[i]++;
-			it->idx += it->tensor->stride[i];
-			increment = true;
-			break;
-		}
-		it->idx -= it->counters[i] * it->tensor->stride[i];
-		it->counters[i] = 0;
-	}
-	if (!increment) {
-		it->idx = -1;
-	}
+int32_t get_index(Tensor *tensor, int32_t *indices)
+{
+    int32_t index = tensor->offset;
+    for (int32_t i = 0; i < tensor->dims; i++)
+    {
+        index += indices[i] * tensor->stride[i];
+    }
+    return index;
 }
 
-void iterator_free(TensorIterator* it) {
-	if (it->tensor->base) {
-		free(it->counters);
-	}
-	free(it);
+__host__ __device__
+int32_t get_index(
+    int32_t *shape,
+    int32_t* stride,
+    int32_t offset,
+    int32_t dims,
+    bool has_base,
+    int32_t index
+) {
+    if (!has_base)
+    {
+        return index;
+    }
+
+    int32_t remaining = index;
+    int32_t base_index = offset;
+
+    for (int32_t i=dims-1; i>=0; i--) {
+        int32_t dim = remaining % shape[i];
+        base_index += dim * stride[i];
+        remaining /= shape[i];
+    }
+
+    return base_index;
 }
