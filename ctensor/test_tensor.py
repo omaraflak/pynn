@@ -1238,7 +1238,7 @@ class TestTensor(unittest.TestCase):
         self.assertEqual(z.size, 8)
         self.assertEqual(z.dims, 5)
         self.assertEqual(z.shape, (2, 1, 2, 2, 1))
-        self.assertEqual(z.stride, (12, 12, 2, 1, 1))
+        self.assertEqual(z.stride, (12, 1, 2, 1, 1))
         self.assertEqual(z.offset, 2)
         self.assertEqual(z.device, 0)
         self.assertEqual(z.data, [4, 5, 6, 7, 16, 17, 18, 19])

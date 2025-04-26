@@ -280,10 +280,21 @@ bool _is_squeezing_or_expanding(int32_t* shape1, int32_t dim1, int32_t* shape2, 
     return true;
 }
 
+int32_t _index_of(int32_t* array, int32_t size, int32_t value, int32_t start) {
+    for (int32_t i=start; i<size; i++) {
+        if (array[i] == value) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+// Special function to compute strides when a tensor is sliced then reshaped,
+// but only expanding or squeezing the shape (adding/removing 1s from the shape)
 void _compute_compatible_stride(
-    int32_t* shape,
-    int32_t* stride,
-    int32_t dims,
+    int32_t* old_shape,
+    int32_t* old_stride,
+    int32_t old_dims,
     int32_t* new_shape,
     int32_t* new_stride,
     int32_t new_dims
@@ -297,14 +308,39 @@ void _compute_compatible_stride(
 
     // example 2:
     // (2, 1, 2, 2, 1) -> (2, 2, 2)
-    // (2,) -> (2, 1)
-    // (2,) -> (2,)
-    // (2,) -> (2, 1)
-    // (x, x, y, z, z) -> (x, y, z)
+    // (2, 1) -> (2,)
+    // (2,)   -> (2,)
+    // (2, 1) -> (2,)
+    // (x, y, z, t, u) -> (x, z, t)
 
-    // TODO: complete
+    int32_t i=0;
+    int32_t j=-1;
+
+    while (i < new_dims) {
+        // get leading 1s
+        while (i < new_dims && new_shape[i] == 1) {
+            new_stride[i] = 1;
+            i++;
+        }
+
+        // check that we didn't reach the end
+        if (i == new_dims) {
+            new_stride[new_dims - 1] = old_stride[old_dims - 1];
+            break;
+        }
+
+        // get stride for dim
+        j = _index_of(old_shape, old_dims, new_shape[i], j + 1);
+        new_stride[i] = old_stride[j];
+        i++;
+
+        // get trailing 1s
+        while (i < new_dims && new_shape[i] == 1) {
+            new_stride[i] = 1;
+            i++;
+        }
+    }
 }
-
 
 Tensor* tensor_reshape(Tensor *tensor, int32_t *shape, int32_t dims)
 {
@@ -313,23 +349,42 @@ Tensor* tensor_reshape(Tensor *tensor, int32_t *shape, int32_t dims)
         exit(1);
     }
 
-    bool compatible = _is_squeezing_or_expanding(tensor->shape, tensor->dims, shape, dims);
-
-    // reshape is not compatible with sliced tensor: make a copy
-    if (tensor->base && !compatible) {
-        Tensor* result = tensor_create_empty(shape, dims);
-        for (int i=0; i<tensor->size; i++) {
-            result->data[i] = tensor->data[_get_index(tensor, i)];
+    // not a sliced tensor: recompute shape and stride normally
+    if (!tensor->base) {
+        if (tensor->dims != dims)
+        {
+            free(tensor->shape);
+            free(tensor->stride);
+            tensor->dims = dims;
+            tensor->shape = (int32_t *)malloc(sizeof(int32_t) * dims);
+            tensor->stride = (int32_t *)malloc(sizeof(int32_t) * dims);
         }
-        return result;
+        memcpy(tensor->shape, shape, sizeof(int32_t) * dims);
+        _compute_stride(tensor->stride, tensor->shape, dims);
+        return tensor;
     }
 
-    // sliced tensor with compatible shape: adjust strides
-    if (tensor->base) {
+    // sliced tensor: check if we can reference the base array, or have to make a copy
+    bool can_reference = _is_squeezing_or_expanding(
+        tensor->shape,
+        tensor->dims,
+        shape,
+        dims
+    );
+
+    // compatible reshape: adjust strides
+    if (can_reference) {
         int32_t* new_shape = (int32_t *)malloc(sizeof(int32_t) * dims);
         int32_t* new_stride = (int32_t *)malloc(sizeof(int32_t) * dims);
         memcpy(new_shape, shape, sizeof(int32_t) * dims);
-        _compute_compatible_stride(tensor->shape, tensor->stride, tensor->dims, new_shape, new_stride, dims);
+        _compute_compatible_stride(
+            tensor->shape,
+            tensor->stride,
+            tensor->dims,
+            new_shape,
+            new_stride,
+            dims
+        );
         free(tensor->shape);
         free(tensor->stride);
         tensor->shape = new_shape;
@@ -338,25 +393,12 @@ Tensor* tensor_reshape(Tensor *tensor, int32_t *shape, int32_t dims)
         return tensor;
     }
 
-    // not a sliced tensor: recompute shape and stride normally
-    if (tensor->dims != dims)
-    {
-        free(tensor->shape);
-        free(tensor->stride);
-        tensor->dims = dims;
-        tensor->shape = (int32_t *)malloc(sizeof(int32_t) * dims);
-        tensor->stride = (int32_t *)malloc(sizeof(int32_t) * dims);
+    // incompatible reshape: make a copy
+    Tensor* result = tensor_create_empty(shape, dims);
+    for (int i=0; i<tensor->size; i++) {
+        result->data[i] = tensor->data[_get_index(tensor, i)];
     }
-    memcpy(tensor->shape, shape, sizeof(int32_t) * dims);
-    for (int32_t i = 0; i < dims; i++)
-    {
-        tensor->stride[i] = 1;
-        for (int32_t j = i + 1; j < dims; j++)
-        {
-            tensor->stride[i] *= shape[j];
-        }
-    }
-    return tensor;
+    return result;
 }
 
 float tensor_get_item_at(Tensor *tensor, int32_t index)
