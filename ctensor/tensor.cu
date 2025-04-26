@@ -92,32 +92,23 @@ Tensor *tensor_create_empty(int32_t *shape, int32_t dims)
     return tensor;
 }
 
-// TODO: copy sliced data instead of base array
 Tensor *tensor_copy(Tensor *tensor)
 {
+    int32_t initial_device = tensor->device;
+    if (initial_device != 0) {
+        tensor_gpu_to_cpu(tensor);
+    }
+    float* data = (float *)malloc(sizeof(float) * tensor->size);
+    for (int32_t i = 0; i < tensor->size; i++)
+    {
+        data[i] =  tensor->data[get_index(tensor, i)];
+    }
     int32_t *shape = _copy_shape(tensor);
-    int32_t size = tensor->base ? tensor->base->size : tensor->size;
-
-    float *data;
-
-    if (tensor->device == 0)
-    {
-        data = (float *)malloc(sizeof(float) * size);
-        memcpy(data, tensor->data, sizeof(float) * size);
-    }
-    else
-    {
-        cudaMalloc(&data, sizeof(float) * size);
-        cudaMemcpy(data, tensor->data, sizeof(float) * size, cudaMemcpyDeviceToDevice);
-    }
-
     Tensor* result = _tensor_create(data, shape, tensor->dims, tensor->device);
-    if (tensor->base) {
-        result->base = tensor->base;
-        result->offset = tensor->offset;
-        memcpy(result->stride, tensor->stride, sizeof(int32_t) * tensor->dims);
+    if (initial_device != 0) {
+        tensor_cpu_to_gpu(tensor);
+        tensor_cpu_to_gpu(result);
     }
-
     return result;
 }
 
@@ -147,11 +138,13 @@ void tensor_print_info(Tensor* tensor) {
     printf("shape = %p\n", tensor->shape);
 }
 
+// what happens to other references to the base tensor??
 void tensor_cpu_to_gpu(Tensor *tensor)
 {
     float *data;
-    cudaMalloc(&data, sizeof(float) * tensor->size);
-    cudaMemcpy(data, tensor->data, sizeof(float) * tensor->size, cudaMemcpyHostToDevice);
+    int32_t size = tensor->base ? tensor->base->size : tensor->size;
+    cudaMalloc(&data, sizeof(float) * size);
+    cudaMemcpy(data, tensor->data, sizeof(float) * size, cudaMemcpyHostToDevice);
     free(tensor->data);
     tensor->data = data;
     tensor->device = 1;
@@ -159,8 +152,9 @@ void tensor_cpu_to_gpu(Tensor *tensor)
 
 void tensor_gpu_to_cpu(Tensor *tensor)
 {
-    float *data = (float *)malloc(sizeof(float) * tensor->size);
-    cudaMemcpy(data, tensor->data, sizeof(float) * tensor->size, cudaMemcpyDeviceToHost);
+    int32_t size = tensor->base ? tensor->base->size : tensor->size;
+    float *data = (float *)malloc(sizeof(float) * size);
+    cudaMemcpy(data, tensor->data, sizeof(float) * size, cudaMemcpyDeviceToHost);
     cudaFree(tensor->data);
     tensor->data = data;
     tensor->device = 0;
