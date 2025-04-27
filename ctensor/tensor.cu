@@ -101,7 +101,7 @@ Tensor *tensor_copy(Tensor *tensor)
     float* data = (float *)malloc(sizeof(float) * tensor->size);
     for (int32_t i = 0; i < tensor->size; i++)
     {
-        data[i] =  tensor->data[get_index(tensor, i)];
+        data[i] = tensor->data[get_index(tensor, i)];
     }
     int32_t *shape = _copy_shape(tensor);
     Tensor* result = _tensor_create(data, shape, tensor->dims, tensor->device);
@@ -141,6 +141,10 @@ void tensor_print_info(Tensor* tensor) {
 // what happens to other references to the base tensor??
 void tensor_cpu_to_gpu(Tensor *tensor)
 {
+    if (tensor->device != 0) {
+        fprintf(stderr, "Trying to move a tensor already on GPU to GPU.\n");
+        exit(1);
+    }
     float *data;
     int32_t size = tensor->base ? tensor->base->size : tensor->size;
     cudaMalloc(&data, sizeof(float) * size);
@@ -152,6 +156,10 @@ void tensor_cpu_to_gpu(Tensor *tensor)
 
 void tensor_gpu_to_cpu(Tensor *tensor)
 {
+    if (tensor->device == 0) {
+        fprintf(stderr, "Trying to move a tensor already on CPU to CPU.\n");
+        exit(1);
+    }
     int32_t size = tensor->base ? tensor->base->size : tensor->size;
     float *data = (float *)malloc(sizeof(float) * size);
     cudaMemcpy(data, tensor->data, sizeof(float) * size, cudaMemcpyDeviceToHost);
@@ -338,33 +346,31 @@ Tensor* tensor_reshape(Tensor *tensor, int32_t *shape, int32_t dims)
         dims
     );
 
-    // compatible reshape: adjust strides
-    if (can_reference) {
-        int32_t* new_shape = (int32_t *)malloc(sizeof(int32_t) * dims);
-        int32_t* new_stride = (int32_t *)malloc(sizeof(int32_t) * dims);
-        memcpy(new_shape, shape, sizeof(int32_t) * dims);
-        _compute_compatible_stride(
-            tensor->shape,
-            tensor->stride,
-            tensor->dims,
-            new_shape,
-            new_stride,
-            dims
-        );
-        free(tensor->shape);
-        free(tensor->stride);
-        tensor->shape = new_shape;
-        tensor->stride = new_stride;
-        tensor->dims = dims;
-        return tensor;
+    // incomptable reshape: make a copy of the sliced data
+    if (!can_reference) {
+        Tensor* result = tensor_copy(tensor);
+        return tensor_reshape(result, shape, dims);
     }
+    
 
-    // incompatible reshape: make a copy
-    Tensor* result = tensor_create_empty(shape, dims);
-    for (int i=0; i<tensor->size; i++) {
-        result->data[i] = tensor->data[get_index(tensor, i)];
-    }
-    return result;
+    // compatible reshape: adjust strides
+    int32_t* new_shape = (int32_t *)malloc(sizeof(int32_t) * dims);
+    int32_t* new_stride = (int32_t *)malloc(sizeof(int32_t) * dims);
+    memcpy(new_shape, shape, sizeof(int32_t) * dims);
+    _compute_compatible_stride(
+        tensor->shape,
+        tensor->stride,
+        tensor->dims,
+        new_shape,
+        new_stride,
+        dims
+    );
+    free(tensor->shape);
+    free(tensor->stride);
+    tensor->shape = new_shape;
+    tensor->stride = new_stride;
+    tensor->dims = dims;
+    return tensor;
 }
 
 float tensor_get_item_at(Tensor *tensor, int32_t index)
