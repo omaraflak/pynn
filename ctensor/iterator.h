@@ -1,5 +1,5 @@
-#if !defined(_ITERATOR)
-#define _ITERATOR
+#if !defined(ITERATOR)
+#define ITERATOR
 
 #include "_tensor.h"
 
@@ -16,4 +16,4 @@ int32_t get_index(
     int32_t index
 );
 
-#endif // _ITERATOR
+#endif // ITERATOR
