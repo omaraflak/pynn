@@ -152,6 +152,68 @@ class TestTensor(unittest.TestCase):
         x.to_cpu()
         self.assertEqual(x.data, [1, 2, 3, 4, 5, 6])
 
+    def test_reshape_sliced_cpu(self):
+        x = Tensor([1, 2, 3, 4, 5, 6], (6, ))
+
+        y = x[2:].reshape(2, 2)
+
+        self.assertEqual(y.size, 4)
+        self.assertEqual(y.dims, 2)
+        self.assertEqual(y.shape, (2, 2))
+        self.assertEqual(y.stride, (2, 1))
+        self.assertEqual(y.device, 0)
+        self.assertEqual(y.offset, 0)
+        self.assertEqual(y.data, [3, 4, 5, 6])
+        self.assertEqual(y.indices, [0, 1, 2, 3])
+
+    def test_reshape_sliced_ref_cpu(self):
+        x = Tensor([1, 2, 3, 4, 5, 6], (6, ))
+
+        y = x[2:].reshape(4, 1)
+
+        self.assertEqual(y.size, 4)
+        self.assertEqual(y.dims, 2)
+        self.assertEqual(y.shape, (4, 1))
+        self.assertEqual(y.stride, (1, 1))
+        self.assertEqual(y.device, 0)
+        self.assertEqual(y.offset, 2)
+        self.assertEqual(y.data, [3, 4, 5, 6])
+        self.assertEqual(y.indices, [2, 3, 4, 5])
+
+    def test_reshape_sliced_gpu(self):
+        x = Tensor([1, 2, 3, 4, 5, 6], (6, ))
+        x.to_gpu()
+
+        y = x[2:].reshape(2, 2)
+
+        self.assertEqual(y.size, 4)
+        self.assertEqual(y.dims, 2)
+        self.assertEqual(y.shape, (2, 2))
+        self.assertEqual(y.stride, (2, 1))
+        self.assertEqual(y.device, 1)
+        self.assertEqual(y.offset, 0)
+        self.assertEqual(y.indices, [0, 1, 2, 3])
+
+        y.to_cpu()
+        self.assertEqual(y.data, [3, 4, 5, 6])
+
+    def test_reshape_sliced_ref_gpu(self):
+        x = Tensor([1, 2, 3, 4, 5, 6], (6, ))
+        x.to_gpu()
+
+        y = x[2:].reshape(4, 1)
+
+        self.assertEqual(y.size, 4)
+        self.assertEqual(y.dims, 2)
+        self.assertEqual(y.shape, (4, 1))
+        self.assertEqual(y.stride, (1, 1))
+        self.assertEqual(y.device, 1)
+        self.assertEqual(y.offset, 2)
+        self.assertEqual(y.indices, [2, 3, 4, 5])
+
+        # y.to_cpu()
+        # self.assertEqual(y.data, [3, 4, 5, 6])
+
     def test_unary_minus_cpu(self):
         x = Tensor([1, 2, 3, 4, 5, 6], (3, 2))
 
