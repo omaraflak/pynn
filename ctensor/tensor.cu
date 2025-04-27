@@ -138,7 +138,6 @@ void tensor_print_info(Tensor* tensor) {
     printf("shape = %p\n", tensor->shape);
 }
 
-// what happens to other references to the base tensor??
 void tensor_cpu_to_gpu(Tensor *tensor)
 {
     if (tensor->device != 0) {
@@ -149,7 +148,7 @@ void tensor_cpu_to_gpu(Tensor *tensor)
     int32_t size = tensor->base ? tensor->base->size : tensor->size;
     cudaMalloc(&data, sizeof(float) * size);
     cudaMemcpy(data, tensor->data, sizeof(float) * size, cudaMemcpyHostToDevice);
-    free(tensor->data);
+    free(tensor->data); // this will mess up other references to the tensor
     tensor->data = data;
     tensor->device = 1;
 }
@@ -163,7 +162,7 @@ void tensor_gpu_to_cpu(Tensor *tensor)
     int32_t size = tensor->base ? tensor->base->size : tensor->size;
     float *data = (float *)malloc(sizeof(float) * size);
     cudaMemcpy(data, tensor->data, sizeof(float) * size, cudaMemcpyDeviceToHost);
-    cudaFree(tensor->data);
+    cudaFree(tensor->data); // this will mess up other references to the tensor
     tensor->data = data;
     tensor->device = 0;
 }
