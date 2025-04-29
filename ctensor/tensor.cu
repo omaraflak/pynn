@@ -68,10 +68,7 @@ Tensor *_tensor_create(float *data, int32_t *shape, int32_t dims, int32_t device
 Tensor *tensor_create(float *data, int32_t *shape, int32_t dims)
 {
     Tensor *tensor = tensor_create_empty(shape, dims);
-    for (int32_t i = 0; i < tensor->size; i++)
-    {
-        tensor->data[i] = data[i];
-    }
+    memcpy(tensor->data, data, sizeof(float) * tensor->size);
     return tensor;
 }
 
