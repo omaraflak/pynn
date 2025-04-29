@@ -44,6 +44,41 @@ class TestTensor(unittest.TestCase):
         self.assertEqual(x.data, [1, 2, 3, 4, 5, 6])
         self.assertEqual(x.indices, [0, 1, 2, 3, 4, 5])
 
+    def test_reference_to_gpu(self):
+        x = Tensor([1, 2, 3, 4, 5, 6], (3, 2))
+
+        y = x[::2]
+        y.to_gpu()
+
+        self.assertEqual(y.size, 4)
+        self.assertEqual(y.dims, 2)
+        self.assertEqual(y.shape, (2, 2))
+        self.assertEqual(y.stride, (2, 1))
+        self.assertEqual(y.device, 1)
+        self.assertEqual(y.offset, 0)
+        self.assertEqual(y.indices, [0, 1, 2, 3])
+        self.assertEqual(y.base, None)
+
+        y.to_cpu()
+        self.assertEqual(y.data, [1, 2, 5, 6])
+
+    def test_reference_to_cpu(self):
+        x = Tensor([1, 2, 3, 4, 5, 6], (3, 2))
+        x.to_gpu()
+
+        y = x[::2]
+        y.to_cpu()
+
+        self.assertEqual(y.size, 4)
+        self.assertEqual(y.dims, 2)
+        self.assertEqual(y.shape, (2, 2))
+        self.assertEqual(y.stride, (2, 1))
+        self.assertEqual(y.device, 0)
+        self.assertEqual(y.offset, 0)
+        self.assertEqual(y.indices, [0, 1, 2, 3])
+        self.assertEqual(y.data, [1, 2, 5, 6])
+        self.assertEqual(y.base, None)
+
     def test_copy_cpu(self):
         x = Tensor([1, 2, 3, 4, 5, 6], (3, 2))
 
@@ -73,7 +108,7 @@ class TestTensor(unittest.TestCase):
         self.assertEqual(y.data, [1, 2, 3, 4, 5, 6])
         self.assertNotEqual(y, x)
 
-    def test_copy_sliced_cpu(self):
+    def test_copy_reference_cpu(self):
         x = Tensor.array([[1, 2], [3, 4], [5, 6]])
 
         y = x[::2].copy()
@@ -82,13 +117,14 @@ class TestTensor(unittest.TestCase):
         self.assertEqual(y.dims, 2)
         self.assertEqual(y.shape, (2, 2))
         self.assertEqual(y.stride, (2, 1))
+        self.assertEqual(y.offset, 0)
         self.assertEqual(y.device, 0)
         self.assertEqual(y.data, [1, 2, 5, 6])
         self.assertEqual(y.indices, [0, 1, 2, 3])
         self.assertEqual(y.base, None)
         self.assertNotEqual(y, x)
 
-    def test_copy_sliced_gpu(self):
+    def test_copy_reference_gpu(self):
         x = Tensor.array([[1, 2], [3, 4], [5, 6]])
         x.to_gpu()
 
@@ -98,6 +134,7 @@ class TestTensor(unittest.TestCase):
         self.assertEqual(y.dims, 2)
         self.assertEqual(y.shape, (2, 2))
         self.assertEqual(y.stride, (2, 1))
+        self.assertEqual(y.offset, 0)
         self.assertEqual(y.device, 1)
         self.assertEqual(y.indices, [0, 1, 2, 3])
         self.assertEqual(y.base, None)
@@ -152,7 +189,7 @@ class TestTensor(unittest.TestCase):
         x.to_cpu()
         self.assertEqual(x.data, [1, 2, 3, 4, 5, 6])
 
-    def test_reshape_sliced_cpu(self):
+    def test_reshape_will_copy_cpu(self):
         x = Tensor.array([
             [[1, 2], [4, 5], [6, 7]],
             [[8, 9], [10, 11], [12, 13]],
@@ -178,7 +215,7 @@ class TestTensor(unittest.TestCase):
         self.assertEqual(z.base, None)
         self.assertNotEqual(z, y)
 
-    def test_reshape_sliced_reference_cpu(self):
+    def test_reshape_will_reference_cpu(self):
         x = Tensor.array([
             [[1, 2], [4, 5], [6, 7]],
             [[8, 9], [10, 11], [12, 13]],
@@ -200,7 +237,7 @@ class TestTensor(unittest.TestCase):
         self.assertEqual(z.base, x)
         self.assertEqual(z, y)
 
-    def test_reshape_sliced_gpu(self):
+    def test_reshape_will_copy_gpu(self):
         x = Tensor([1, 2, 3, 4, 5, 6], (6, ))
         x.to_gpu()
 
@@ -214,10 +251,10 @@ class TestTensor(unittest.TestCase):
         self.assertEqual(y.offset, 0)
         self.assertEqual(y.indices, [0, 1, 2, 3])
 
-        # y.to_cpu()
-        # self.assertEqual(y.data, [3, 4, 5, 6])
+        y.to_cpu()
+        self.assertEqual(y.data, [3, 4, 5, 6])
 
-    def test_reshape_sliced_reference_gpu(self):
+    def test_reshape_will_reference_gpu(self):
         x = Tensor([1, 2, 3, 4, 5, 6], (6, ))
         x.to_gpu()
 
@@ -231,8 +268,8 @@ class TestTensor(unittest.TestCase):
         self.assertEqual(y.offset, 2)
         self.assertEqual(y.indices, [2, 3, 4, 5])
 
-        # y.to_cpu()
-        # self.assertEqual(y.data, [3, 4, 5, 6])
+        y.to_cpu()
+        self.assertEqual(y.data, [3, 4, 5, 6])
 
     def test_unary_minus_cpu(self):
         x = Tensor([1, 2, 3, 4, 5, 6], (3, 2))
@@ -1215,8 +1252,8 @@ class TestTensor(unittest.TestCase):
         self.assertEqual(y.indices, [1, 2, 4, 5, 13, 14, 16, 17])
         self.assertEqual(y.base, x)
 
-        # y.to_cpu()
-        # self.assertEqual(y.data, [2, 3, 5, 6, 14, 15, 17, 18])
+        y.to_cpu()
+        self.assertEqual(y.data, [2, 3, 5, 6, 14, 15, 17, 18])
 
     def test_slice_all(self):
         x = Tensor.array([

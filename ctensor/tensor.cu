@@ -142,12 +142,27 @@ void tensor_cpu_to_gpu(Tensor *tensor)
         exit(1);
     }
     float *data;
-    int32_t size = tensor->base ? tensor->base->size : tensor->size;
-    cudaMalloc(&data, sizeof(float) * size);
-    cudaMemcpy(data, tensor->data, sizeof(float) * size, cudaMemcpyHostToDevice);
-    free(tensor->data); // this will mess up other references to the tensor
-    tensor->data = data;
-    tensor->device = 1;
+    if (tensor->base) {
+        int32_t size = tensor->base->size;
+        float tmp[size];
+        for (int32_t i=0; i<size; i++) {
+            tmp[i] = tensor->data[get_index(tensor, i)];
+        }
+        cudaMalloc(&data, sizeof(float) * size);
+        cudaMemcpy(data, tmp, sizeof(float) * size, cudaMemcpyHostToDevice);
+        _compute_stride(tensor->stride, tensor->shape, tensor->dims);
+        tensor->base = nullptr;
+        tensor->offset = 0;
+        tensor->data = data;
+        tensor->device = 1;
+    } else {
+        int32_t size = tensor->size;
+        cudaMalloc(&data, sizeof(float) * size);
+        cudaMemcpy(data, tensor->data, sizeof(float) * size, cudaMemcpyHostToDevice);
+        free(tensor->data);
+        tensor->data = data;
+        tensor->device = 1;
+    }
 }
 
 void tensor_gpu_to_cpu(Tensor *tensor)
@@ -156,12 +171,27 @@ void tensor_gpu_to_cpu(Tensor *tensor)
         fprintf(stderr, "Trying to move a tensor already on CPU to CPU.\n");
         exit(1);
     }
-    int32_t size = tensor->base ? tensor->base->size : tensor->size;
-    float *data = (float *)malloc(sizeof(float) * size);
-    cudaMemcpy(data, tensor->data, sizeof(float) * size, cudaMemcpyDeviceToHost);
-    cudaFree(tensor->data); // this will mess up other references to the tensor
-    tensor->data = data;
-    tensor->device = 0;
+    if (tensor->base) {
+        int32_t size = tensor->base->size;
+        float *tmp = (float *)malloc(sizeof(float) * size);
+        cudaMemcpy(tmp, tensor->data, sizeof(float) * size, cudaMemcpyDeviceToHost);
+        float *data = (float *)malloc(sizeof(float) * tensor->size);
+        for (int32_t i=0; i<tensor->size; i++) {
+            data[i] = tmp[get_index(tensor, i)];
+        }
+        _compute_stride(tensor->stride, tensor->shape, tensor->dims);
+        tensor->base = nullptr;
+        tensor->offset = 0;
+        tensor->data = data;
+        tensor->device = 0;
+    } else {
+        int32_t size = tensor->size;
+        float *data = (float *)malloc(sizeof(float) * size);
+        cudaMemcpy(data, tensor->data, sizeof(float) * size, cudaMemcpyDeviceToHost);
+        cudaFree(tensor->data);
+        tensor->data = data;
+        tensor->device = 0;
+    }
 }
 
 void tensor_fill(Tensor *tensor, float value)
