@@ -135,6 +135,7 @@ void tensor_print_info(Tensor* tensor) {
     printf("shape = %p\n", tensor->shape);
 }
 
+// consider returning a new instance, since we copy
 void tensor_cpu_to_gpu(Tensor *tensor)
 {
     if (tensor->device != 0) {
@@ -165,6 +166,7 @@ void tensor_cpu_to_gpu(Tensor *tensor)
     }
 }
 
+// consider returning a new instance, since we copy
 void tensor_gpu_to_cpu(Tensor *tensor)
 {
     if (tensor->device == 0) {
