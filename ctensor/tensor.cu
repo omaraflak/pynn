@@ -344,6 +344,19 @@ void _compute_compatible_stride(
     }
 }
 
+void _tensor_reshape(Tensor* tensor, int32_t* shape, int32_t dims) {
+    if (tensor->dims != dims)
+    {
+        free(tensor->shape);
+        free(tensor->stride);
+        tensor->dims = dims;
+        tensor->shape = (int32_t *)malloc(sizeof(int32_t) * dims);
+        tensor->stride = (int32_t *)malloc(sizeof(int32_t) * dims);
+    }
+    memcpy(tensor->shape, shape, sizeof(int32_t) * dims);
+    _compute_stride(tensor->stride, tensor->shape, dims);
+}
+
 Tensor* tensor_reshape(Tensor *tensor, int32_t *shape, int32_t dims)
 {
     if (_compute_size(shape, dims) != tensor->size) {
@@ -351,19 +364,13 @@ Tensor* tensor_reshape(Tensor *tensor, int32_t *shape, int32_t dims)
         exit(1);
     }
 
-    // not a sliced tensor: recompute shape and stride normally
+    // not a sliced tensor: return a view of the current tensor
     if (!tensor->base) {
-        if (tensor->dims != dims)
-        {
-            free(tensor->shape);
-            free(tensor->stride);
-            tensor->dims = dims;
-            tensor->shape = (int32_t *)malloc(sizeof(int32_t) * dims);
-            tensor->stride = (int32_t *)malloc(sizeof(int32_t) * dims);
-        }
-        memcpy(tensor->shape, shape, sizeof(int32_t) * dims);
-        _compute_stride(tensor->stride, tensor->shape, dims);
-        return tensor;
+        int32_t* new_shape = (int32_t *)malloc(sizeof(int32_t) * dims);
+        memcpy(new_shape, shape, sizeof(int32_t) * dims);
+        Tensor* result = _tensor_create(tensor->data, new_shape, dims, tensor->device);
+        result->base = tensor;
+        return result;
     }
 
     // sliced tensor: check if we can reference the base array, or have to make a copy
@@ -377,7 +384,8 @@ Tensor* tensor_reshape(Tensor *tensor, int32_t *shape, int32_t dims)
     // incomptable reshape: make a copy of the sliced data
     if (!can_reference) {
         Tensor* result = tensor_copy(tensor);
-        return tensor_reshape(result, shape, dims);
+        _tensor_reshape(result, shape, dims);
+        return result;
     }
     
 

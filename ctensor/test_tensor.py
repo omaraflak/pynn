@@ -293,32 +293,51 @@ class TestTensor(unittest.TestCase):
     def test_reshape_cpu(self):
         x = Tensor([1, 2, 3, 4, 5, 6], (6, ))
 
-        x.reshape(3, 2)
+        y = x.reshape(3, 2)
 
         self.assertEqual(x.size, 6)
-        self.assertEqual(x.dims, 2)
-        self.assertEqual(x.shape, (3, 2))
-        self.assertEqual(x.stride, (2, 1))
+        self.assertEqual(x.dims, 1)
+        self.assertEqual(x.shape, (6, ))
+        self.assertEqual(x.stride, (1,))
         self.assertEqual(x.device, 0)
         self.assertEqual(x.offset, 0)
         self.assertEqual(x.data, [1, 2, 3, 4, 5, 6])
         self.assertEqual(x.indices, [0, 1, 2, 3, 4, 5])
         self.assertEqual(x.base, None)
 
+        self.assertEqual(y.size, 6)
+        self.assertEqual(y.dims, 2)
+        self.assertEqual(y.shape, (3, 2))
+        self.assertEqual(y.stride, (2, 1))
+        self.assertEqual(y.device, 0)
+        self.assertEqual(y.offset, 0)
+        self.assertEqual(y.data, [1, 2, 3, 4, 5, 6])
+        self.assertEqual(y.indices, [0, 1, 2, 3, 4, 5])
+        self.assertEqual(y.base, x)
+
     def test_reshape_gpu(self):
         x = Tensor([1, 2, 3, 4, 5, 6], (6, ))
         x.to_gpu()
 
-        x.reshape(3, 2)
+        y = x.reshape(3, 2)
 
         self.assertEqual(x.size, 6)
-        self.assertEqual(x.dims, 2)
-        self.assertEqual(x.shape, (3, 2))
-        self.assertEqual(x.stride, (2, 1))
+        self.assertEqual(x.dims, 1)
+        self.assertEqual(x.shape, (6, ))
+        self.assertEqual(x.stride, (1, ))
         self.assertEqual(x.device, 1)
         self.assertEqual(x.offset, 0)
         self.assertEqual(x.indices, [0, 1, 2, 3, 4, 5])
         self.assertEqual(x.base, None)
+
+        self.assertEqual(y.size, 6)
+        self.assertEqual(y.dims, 2)
+        self.assertEqual(y.shape, (3, 2))
+        self.assertEqual(y.stride, (2, 1))
+        self.assertEqual(y.device, 1)
+        self.assertEqual(y.offset, 0)
+        self.assertEqual(y.indices, [0, 1, 2, 3, 4, 5])
+        self.assertEqual(y.base, x)
 
         x.to_cpu()
         self.assertEqual(x.data, [1, 2, 3, 4, 5, 6])
@@ -1430,24 +1449,48 @@ class TestTensor(unittest.TestCase):
     def test_squeeze(self):
         x = Tensor([1, 2, 3, 4], (1, 1, 2, 1, 2, 1))
 
-        x.squeeze()
+        y = x.squeeze()
 
         self.assertEqual(x.size, 4)
-        self.assertEqual(x.dims, 2)
-        self.assertEqual(x.shape, (2, 2))
+        self.assertEqual(x.dims, 6)
+        self.assertEqual(x.shape, (1, 1, 2, 1, 2, 1))
         self.assertEqual(x.device, 0)
+        self.assertEqual(x.offset, 0)
         self.assertEqual(x.data, [1, 2, 3, 4])
+        self.assertEqual(x.indices, [0, 1, 2, 3])
+        self.assertEqual(x.base, None)
+
+        self.assertEqual(y.size, 4)
+        self.assertEqual(y.dims, 2)
+        self.assertEqual(y.shape, (2, 2))
+        self.assertEqual(y.device, 0)
+        self.assertEqual(y.offset, 0)
+        self.assertEqual(y.data, [1, 2, 3, 4])
+        self.assertEqual(y.indices, [0, 1, 2, 3])
+        self.assertEqual(y.base, x)
 
     def test_squeeze_keep_at_least_one_dim(self):
         x = Tensor([5], (1, 1, 1))
 
-        x.squeeze()
+        y = x.squeeze()
 
         self.assertEqual(x.size, 1)
-        self.assertEqual(x.dims, 1)
-        self.assertEqual(x.shape, (1,))
+        self.assertEqual(x.dims, 3)
+        self.assertEqual(x.shape, (1, 1, 1))
         self.assertEqual(x.device, 0)
+        self.assertEqual(x.offset, 0)
         self.assertEqual(x.data, [5])
+        self.assertEqual(x.indices, [0])
+        self.assertEqual(x.base, None)
+
+        self.assertEqual(y.size, 1)
+        self.assertEqual(y.dims, 1)
+        self.assertEqual(y.shape, (1,))
+        self.assertEqual(y.device, 0)
+        self.assertEqual(y.offset, 0)
+        self.assertEqual(y.data, [5])
+        self.assertEqual(y.indices, [0])
+        self.assertEqual(y.base, x)
 
     def test_iter(self):
         x = Tensor([1, 2, 3, 4], (2, 2))

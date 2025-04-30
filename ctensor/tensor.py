@@ -393,7 +393,7 @@ class Tensor:
         return Tensor(None, None, result)
 
 
-    def squeeze(self, *dims: int):
+    def squeeze(self, *dims: int) -> Tensor:
         if any(self.shape[i] != 1 for i in dims):
             raise ValueError("Trying to squeeze dimension that is not 1")
 
@@ -406,7 +406,7 @@ class Tensor:
         if len(new_shape) == 0:
             new_shape = [1]
 
-        self.reshape(*new_shape)
+        return self.reshape(*new_shape)
 
     def fill(self, value: float):
         Tensor._C.tensor_fill(self.c_tensor, ctypes.c_float(value))
@@ -656,7 +656,7 @@ class Tensor:
             elif len(key) == 1:
                 idx = key[0]
                 tmp = self.slice(slice(idx, idx + 1, 1))
-                tmp.squeeze(0)
+                tmp = tmp.squeeze(0)
                 return tmp
             else:
                 raise ValueError(
