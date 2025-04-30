@@ -84,6 +84,7 @@ void tensor_divide_cpu(Tensor *a, Tensor *b, float *result)
     }
 }
 
+// TxMxP @ TxPxN => TxMxN
 void tensor_matmul_cpu(Tensor *a, Tensor *b, int32_t batch, float *result)
 {
     int32_t res_height = a->shape[a->dims - 2];

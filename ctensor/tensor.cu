@@ -706,8 +706,24 @@ Tensor *tensor_divide(Tensor *a, Tensor *b)
     return _tensor_create(data, shape, a->dims, a->device);
 }
 
+// TxMxP @ TxPxN => TxMxN
 Tensor *tensor_matmul(Tensor *a, Tensor *b)
 {
+    if (a->dims != b->dims || a->dims < 2) {
+        fprintf(stderr, "Matmul operation accepts tensors with the same number of dimensions: T1xT2x...xTnxAxB @ T1xT2x...xTnxBxC -> T1xT2x...xTnxAxC\n");
+        exit(1);
+    }
+    for (int32_t i=0; i<a->dims - 2; i++) {
+        if (a->shape[i] != b->shape[i]) {
+            fprintf(stderr, "Matmul operation invoked on tensors with different batch dimensions.\n");
+            exit(1);
+        }
+    }
+    if (a->shape[a->dims - 1] != b->shape[b->dims - 2]) {
+        fprintf(stderr, "Matmul operation invoked on tensors with last two dimensions imcompatible with dot product.\n");
+        exit(1);
+    }
+
     int32_t batch = 1;
     int32_t *shape = (int32_t *)malloc(sizeof(int32_t) * a->dims);
     for (int32_t i = 0; i < a->dims - 2; i++)
