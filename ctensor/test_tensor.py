@@ -456,15 +456,31 @@ class TestTensor(unittest.TestCase):
 
         x.fill(1)
 
+        self.assertEqual(x.size, 6)
+        self.assertEqual(x.dims, 2)
+        self.assertEqual(x.shape, (3, 2))
+        self.assertEqual(x.stride, (2, 1))
+        self.assertEqual(x.offset, 0)
+        self.assertEqual(x.device, 0)
         self.assertEqual(x.data, [1, 1, 1, 1, 1, 1])
+        self.assertEqual(x.indices, [0, 1, 2, 3, 4, 5])
+        self.assertEqual(x.base, None)
 
     def test_fill_gpu(self):
         x = Tensor([1, 2, 3, 4, 5, 6], (3, 2))
         x.to_gpu()
 
         x.fill(1)
-        x.to_cpu()
 
+        self.assertEqual(x.size, 6)
+        self.assertEqual(x.dims, 2)
+        self.assertEqual(x.shape, (3, 2))
+        self.assertEqual(x.stride, (2, 1))
+        self.assertEqual(x.offset, 0)
+        self.assertEqual(x.device, 1)
+        self.assertEqual(x.indices, [0, 1, 2, 3, 4, 5])
+        self.assertEqual(x.base, None)
+        x.to_cpu()
         self.assertEqual(x.data, [1, 1, 1, 1, 1, 1])
 
     def test_unary_minus_cpu(self):
@@ -475,20 +491,28 @@ class TestTensor(unittest.TestCase):
         self.assertEqual(y.size, 6)
         self.assertEqual(y.dims, 2)
         self.assertEqual(y.shape, (3, 2))
+        self.assertEqual(y.stride, (2, 1))
         self.assertEqual(y.device, 0)
+        self.assertEqual(y.offset, 0)
         self.assertEqual(y.data, [-1, -2, -3, -4, -5, -6])
+        self.assertEqual(y.indices, [0, 1, 2, 3, 4, 5])
+        self.assertEqual(y.base, None)
 
     def test_unary_minus_gpu(self):
         x = Tensor([1, 2, 3, 4, 5, 6], (3, 2))
         x.to_gpu()
 
         y = -x
-        y.to_cpu()
 
         self.assertEqual(y.size, 6)
         self.assertEqual(y.dims, 2)
         self.assertEqual(y.shape, (3, 2))
-        self.assertEqual(y.device, 0)
+        self.assertEqual(y.stride, (2, 1))
+        self.assertEqual(y.device, 1)
+        self.assertEqual(y.offset, 0)
+        self.assertEqual(y.indices, [0, 1, 2, 3, 4, 5])
+        self.assertEqual(y.base, None)
+        y.to_cpu()
         self.assertEqual(y.data, [-1, -2, -3, -4, -5, -6])
 
     def test_add_cpu(self):
@@ -500,8 +524,13 @@ class TestTensor(unittest.TestCase):
         self.assertEqual(c.size, 6)
         self.assertEqual(c.dims, 2)
         self.assertEqual(c.shape, (3, 2))
+        self.assertEqual(c.stride, (2, 1))
         self.assertEqual(c.device, 0)
+        self.assertEqual(c.offset, 0)
         self.assertEqual(c.data, [2, 4, 6, 8, 10, 12])
+        self.assertEqual(c.indices, [0, 1, 2, 3, 4, 5])
+        self.assertEqual(c.base, None)
+
 
     def test_add_gpu(self):
         a = Tensor([1, 2, 3, 4, 5, 6], (3, 2))
@@ -510,12 +539,16 @@ class TestTensor(unittest.TestCase):
         b.to_gpu()
 
         c = a + b
-        c.to_cpu()
 
         self.assertEqual(c.size, 6)
         self.assertEqual(c.dims, 2)
         self.assertEqual(c.shape, (3, 2))
-        self.assertEqual(c.device, 0)
+        self.assertEqual(c.stride, (2, 1))
+        self.assertEqual(c.device, 1)
+        self.assertEqual(c.offset, 0)
+        self.assertEqual(c.indices, [0, 1, 2, 3, 4, 5])
+        self.assertEqual(c.base, None)
+        c.to_cpu()
         self.assertEqual(c.data, [2, 4, 6, 8, 10, 12])
 
     def test_broadcast_add_cpu(self):
@@ -526,20 +559,28 @@ class TestTensor(unittest.TestCase):
         self.assertEqual(c.size, 6)
         self.assertEqual(c.dims, 2)
         self.assertEqual(c.shape, (3, 2))
+        self.assertEqual(c.stride, (2, 1))
         self.assertEqual(c.device, 0)
+        self.assertEqual(c.offset, 0)
         self.assertEqual(c.data, [2, 3, 4, 5, 6, 7])
+        self.assertEqual(c.indices, [0, 1, 2, 3, 4, 5])
+        self.assertEqual(c.base, None)
 
     def test_broadcast_add_gpu(self):
         a = Tensor([1, 2, 3, 4, 5, 6], (3, 2))
         a.to_gpu()
 
         c = a + 1
-        c.to_cpu()
 
         self.assertEqual(c.size, 6)
         self.assertEqual(c.dims, 2)
         self.assertEqual(c.shape, (3, 2))
-        self.assertEqual(c.device, 0)
+        self.assertEqual(c.stride, (2, 1))
+        self.assertEqual(c.device, 1)
+        self.assertEqual(c.offset, 0)
+        self.assertEqual(c.indices, [0, 1, 2, 3, 4, 5])
+        self.assertEqual(c.base, None)
+        c.to_cpu()
         self.assertEqual(c.data, [2, 3, 4, 5, 6, 7])
 
     def test_broadcast_right_add_cpu(self):
@@ -550,20 +591,28 @@ class TestTensor(unittest.TestCase):
         self.assertEqual(c.size, 6)
         self.assertEqual(c.dims, 2)
         self.assertEqual(c.shape, (3, 2))
+        self.assertEqual(c.stride, (2, 1))
         self.assertEqual(c.device, 0)
+        self.assertEqual(c.offset, 0)
         self.assertEqual(c.data, [2, 3, 4, 5, 6, 7])
+        self.assertEqual(c.indices, [0, 1, 2, 3, 4, 5])
+        self.assertEqual(c.base, None)
 
     def test_broadcast_right_add_gpu(self):
         a = Tensor([1, 2, 3, 4, 5, 6], (3, 2))
         a.to_gpu()
 
         c = 1 + a
-        c.to_cpu()
 
         self.assertEqual(c.size, 6)
         self.assertEqual(c.dims, 2)
         self.assertEqual(c.shape, (3, 2))
-        self.assertEqual(c.device, 0)
+        self.assertEqual(c.stride, (2, 1))
+        self.assertEqual(c.device, 1)
+        self.assertEqual(c.offset, 0)
+        self.assertEqual(c.indices, [0, 1, 2, 3, 4, 5])
+        self.assertEqual(c.base, None)
+        c.to_cpu()
         self.assertEqual(c.data, [2, 3, 4, 5, 6, 7])
 
     def test_subtract_cpu(self):
@@ -575,8 +624,12 @@ class TestTensor(unittest.TestCase):
         self.assertEqual(c.size, 6)
         self.assertEqual(c.dims, 2)
         self.assertEqual(c.shape, (3, 2))
+        self.assertEqual(c.stride, (2, 1))
         self.assertEqual(c.device, 0)
+        self.assertEqual(c.offset, 0)
         self.assertEqual(c.data, [-5, -2, 0, 2, -2, 0])
+        self.assertEqual(c.indices, [0, 1, 2, 3, 4, 5])
+        self.assertEqual(c.base, None)
 
     def test_subtract_gpu(self):
         a = Tensor([1, 2, 3, 4, 5, 6], (3, 2))
@@ -585,12 +638,16 @@ class TestTensor(unittest.TestCase):
         b.to_gpu()
 
         c = a - b
-        c.to_cpu()
 
         self.assertEqual(c.size, 6)
         self.assertEqual(c.dims, 2)
         self.assertEqual(c.shape, (3, 2))
-        self.assertEqual(c.device, 0)
+        self.assertEqual(c.stride, (2, 1))
+        self.assertEqual(c.device, 1)
+        self.assertEqual(c.offset, 0)
+        self.assertEqual(c.indices, [0, 1, 2, 3, 4, 5])
+        self.assertEqual(c.base, None)
+        c.to_cpu()
         self.assertEqual(c.data, [-5, -2, 0, 2, -2, 0])
 
     def test_broadcast_subtract_cpu(self):
@@ -601,20 +658,28 @@ class TestTensor(unittest.TestCase):
         self.assertEqual(c.size, 6)
         self.assertEqual(c.dims, 2)
         self.assertEqual(c.shape, (3, 2))
+        self.assertEqual(c.stride, (2, 1))
         self.assertEqual(c.device, 0)
+        self.assertEqual(c.offset, 0)
         self.assertEqual(c.data, [0, 1, 2, 3, 4, 5])
+        self.assertEqual(c.indices, [0, 1, 2, 3, 4, 5])
+        self.assertEqual(c.base, None)
 
     def test_broadcast_subtract_gpu(self):
         a = Tensor([1, 2, 3, 4, 5, 6], (3, 2))
         a.to_gpu()
 
         c = a - 1
-        c.to_cpu()
 
         self.assertEqual(c.size, 6)
         self.assertEqual(c.dims, 2)
         self.assertEqual(c.shape, (3, 2))
-        self.assertEqual(c.device, 0)
+        self.assertEqual(c.stride, (2, 1))
+        self.assertEqual(c.device, 1)
+        self.assertEqual(c.offset, 0)
+        self.assertEqual(c.indices, [0, 1, 2, 3, 4, 5])
+        self.assertEqual(c.base, None)
+        c.to_cpu()
         self.assertEqual(c.data, [0, 1, 2, 3, 4, 5])
 
     def test_broadcast_right_subtract_cpu(self):
@@ -625,20 +690,29 @@ class TestTensor(unittest.TestCase):
         self.assertEqual(c.size, 6)
         self.assertEqual(c.dims, 2)
         self.assertEqual(c.shape, (3, 2))
+        self.assertEqual(c.stride, (2, 1))
         self.assertEqual(c.device, 0)
+        self.assertEqual(c.offset, 0)
         self.assertEqual(c.data, [0, -1, -2, -3, -4, -5])
+        self.assertEqual(c.indices, [0, 1, 2, 3, 4, 5])
+        self.assertEqual(c.base, None)
+
 
     def test_broadcast_right_subtract_gpu(self):
         a = Tensor([1, 2, 3, 4, 5, 6], (3, 2))
         a.to_gpu()
 
         c = 1 - a
-        c.to_cpu()
 
         self.assertEqual(c.size, 6)
         self.assertEqual(c.dims, 2)
         self.assertEqual(c.shape, (3, 2))
-        self.assertEqual(c.device, 0)
+        self.assertEqual(c.stride, (2, 1))
+        self.assertEqual(c.device, 1)
+        self.assertEqual(c.offset, 0)
+        self.assertEqual(c.indices, [0, 1, 2, 3, 4, 5])
+        self.assertEqual(c.base, None)
+        c.to_cpu()
         self.assertEqual(c.data, [0, -1, -2, -3, -4, -5])
 
     def test_multiply_cpu(self):
@@ -650,8 +724,12 @@ class TestTensor(unittest.TestCase):
         self.assertEqual(c.size, 6)
         self.assertEqual(c.dims, 2)
         self.assertEqual(c.shape, (3, 2))
+        self.assertEqual(c.stride, (2, 1))
         self.assertEqual(c.device, 0)
+        self.assertEqual(c.offset, 0)
+        self.assertEqual(c.indices, [0, 1, 2, 3, 4, 5])
         self.assertEqual(c.data, [6, 8, 9, 8, 35, 36])
+        self.assertEqual(c.base, None)
 
     def test_multiply_gpu(self):
         a = Tensor([1, 2, 3, 4, 5, 6], (3, 2))
@@ -660,12 +738,16 @@ class TestTensor(unittest.TestCase):
         b.to_gpu()
 
         c = a * b
-        c.to_cpu()
 
         self.assertEqual(c.size, 6)
         self.assertEqual(c.dims, 2)
         self.assertEqual(c.shape, (3, 2))
-        self.assertEqual(c.device, 0)
+        self.assertEqual(c.stride, (2, 1))
+        self.assertEqual(c.device, 1)
+        self.assertEqual(c.offset, 0)
+        self.assertEqual(c.indices, [0, 1, 2, 3, 4, 5])
+        self.assertEqual(c.base, None)
+        c.to_cpu()
         self.assertEqual(c.data, [6, 8, 9, 8, 35, 36])
 
     def test_broadcast_multiply_cpu(self):
@@ -676,20 +758,28 @@ class TestTensor(unittest.TestCase):
         self.assertEqual(c.size, 6)
         self.assertEqual(c.dims, 2)
         self.assertEqual(c.shape, (3, 2))
+        self.assertEqual(c.stride, (2, 1))
         self.assertEqual(c.device, 0)
+        self.assertEqual(c.offset, 0)
+        self.assertEqual(c.indices, [0, 1, 2, 3, 4, 5])
         self.assertEqual(c.data, [2, 4, 6, 8, 10, 12])
+        self.assertEqual(c.base, None)
 
     def test_broadcast_multiply_gpu(self):
         a = Tensor([1, 2, 3, 4, 5, 6], (3, 2))
         a.to_gpu()
 
         c = a * 2
-        c.to_cpu()
 
         self.assertEqual(c.size, 6)
         self.assertEqual(c.dims, 2)
         self.assertEqual(c.shape, (3, 2))
-        self.assertEqual(c.device, 0)
+        self.assertEqual(c.stride, (2, 1))
+        self.assertEqual(c.device, 1)
+        self.assertEqual(c.offset, 0)
+        self.assertEqual(c.indices, [0, 1, 2, 3, 4, 5])
+        self.assertEqual(c.base, None)
+        c.to_cpu()
         self.assertEqual(c.data, [2, 4, 6, 8, 10, 12])
 
     def test_broadcast_right_multiply_cpu(self):
@@ -700,20 +790,28 @@ class TestTensor(unittest.TestCase):
         self.assertEqual(c.size, 6)
         self.assertEqual(c.dims, 2)
         self.assertEqual(c.shape, (3, 2))
+        self.assertEqual(c.stride, (2, 1))
         self.assertEqual(c.device, 0)
+        self.assertEqual(c.offset, 0)
+        self.assertEqual(c.indices, [0, 1, 2, 3, 4, 5])
         self.assertEqual(c.data, [2, 4, 6, 8, 10, 12])
+        self.assertEqual(c.base, None)
 
     def test_broadcast_right_multiply_gpu(self):
         a = Tensor([1, 2, 3, 4, 5, 6], (3, 2))
         a.to_gpu()
 
         c = 2 * a
-        c.to_cpu()
 
         self.assertEqual(c.size, 6)
         self.assertEqual(c.dims, 2)
         self.assertEqual(c.shape, (3, 2))
-        self.assertEqual(c.device, 0)
+        self.assertEqual(c.stride, (2, 1))
+        self.assertEqual(c.device, 1)
+        self.assertEqual(c.offset, 0)
+        self.assertEqual(c.indices, [0, 1, 2, 3, 4, 5])
+        self.assertEqual(c.base, None)
+        c.to_cpu()
         self.assertEqual(c.data, [2, 4, 6, 8, 10, 12])
 
     def test_divide_cpu(self):
@@ -725,8 +823,12 @@ class TestTensor(unittest.TestCase):
         self.assertEqual(c.size, 3)
         self.assertEqual(c.dims, 1)
         self.assertEqual(c.shape, (3,))
+        self.assertEqual(c.stride, (1,))
         self.assertEqual(c.device, 0)
+        self.assertEqual(c.offset, 0)
         self.assertEqual(c.data, [2, 4, 1.5])
+        self.assertEqual(c.indices, [0, 1, 2])
+        self.assertEqual(c.base, None)
 
     def test_divide_gpu(self):
         a = Tensor([6, 4, 3], (3,))
@@ -735,12 +837,16 @@ class TestTensor(unittest.TestCase):
         b.to_gpu()
 
         c = a / b
-        c.to_cpu()
 
         self.assertEqual(c.size, 3)
         self.assertEqual(c.dims, 1)
         self.assertEqual(c.shape, (3,))
-        self.assertEqual(c.device, 0)
+        self.assertEqual(c.stride, (1,))
+        self.assertEqual(c.device, 1)
+        self.assertEqual(c.offset, 0)
+        self.assertEqual(c.indices, [0, 1, 2])
+        self.assertEqual(c.base, None)
+        c.to_cpu()
         self.assertEqual(c.data, [2, 4, 1.5])
 
     def test_broadcast_divide_cpu(self):
@@ -751,20 +857,28 @@ class TestTensor(unittest.TestCase):
         self.assertEqual(c.size, 3)
         self.assertEqual(c.dims, 1)
         self.assertEqual(c.shape, (3,))
+        self.assertEqual(c.stride, (1,))
         self.assertEqual(c.device, 0)
+        self.assertEqual(c.offset, 0)
         self.assertEqual(c.data, [3, 2, 1.5])
+        self.assertEqual(c.indices, [0, 1, 2])
+        self.assertEqual(c.base, None)
 
     def test_broadcast_divide_gpu(self):
         a = Tensor([6, 4, 3], (3,))
         a.to_gpu()
 
         c = a / 2
-        c.to_cpu()
 
         self.assertEqual(c.size, 3)
         self.assertEqual(c.dims, 1)
         self.assertEqual(c.shape, (3,))
-        self.assertEqual(c.device, 0)
+        self.assertEqual(c.stride, (1,))
+        self.assertEqual(c.device, 1)
+        self.assertEqual(c.offset, 0)
+        self.assertEqual(c.indices, [0, 1, 2])
+        self.assertEqual(c.base, None)
+        c.to_cpu()
         self.assertEqual(c.data, [3, 2, 1.5])
 
     def test_broadcast_right_divide_cpu(self):
@@ -775,20 +889,28 @@ class TestTensor(unittest.TestCase):
         self.assertEqual(c.size, 3)
         self.assertEqual(c.dims, 1)
         self.assertEqual(c.shape, (3,))
+        self.assertEqual(c.stride, (1,))
         self.assertEqual(c.device, 0)
+        self.assertEqual(c.offset, 0)
         self.assertEqual(c.data, [2, 3, 4])
+        self.assertEqual(c.indices, [0, 1, 2])
+        self.assertEqual(c.base, None)
 
     def test_broadcast_right_divide_gpu(self):
         a = Tensor([6, 4, 3], (3,))
         a.to_gpu()
 
         c = 12 / a
-        c.to_cpu()
 
         self.assertEqual(c.size, 3)
         self.assertEqual(c.dims, 1)
         self.assertEqual(c.shape, (3,))
-        self.assertEqual(c.device, 0)
+        self.assertEqual(c.stride, (1,))
+        self.assertEqual(c.device, 1)
+        self.assertEqual(c.offset, 0)
+        self.assertEqual(c.indices, [0, 1, 2])
+        self.assertEqual(c.base, None)
+        c.to_cpu()
         self.assertEqual(c.data, [2, 3, 4])
 
     def test_matmul_cpu(self):
@@ -800,8 +922,12 @@ class TestTensor(unittest.TestCase):
         self.assertEqual(c.size, 4)
         self.assertEqual(c.dims, 2)
         self.assertEqual(c.shape, (2, 2))
+        self.assertEqual(c.stride, (2, 1))
         self.assertEqual(c.device, 0)
+        self.assertEqual(c.offset, 0)
+        self.assertEqual(c.indices, [0, 1, 2, 3])
         self.assertEqual(c.data, [33, 26, 81, 62])
+        self.assertEqual(c.base, None)
 
     def test_matmul_gpu(self):
         a = Tensor([1, 2, 3, 4, 5, 6], (2, 3))
@@ -810,12 +936,16 @@ class TestTensor(unittest.TestCase):
         b.to_gpu()
 
         c = a @ b
-        c.to_cpu()
 
         self.assertEqual(c.size, 4)
         self.assertEqual(c.dims, 2)
         self.assertEqual(c.shape, (2, 2))
-        self.assertEqual(c.device, 0)
+        self.assertEqual(c.stride, (2, 1))
+        self.assertEqual(c.device, 1)
+        self.assertEqual(c.offset, 0)
+        self.assertEqual(c.indices, [0, 1, 2, 3])
+        self.assertEqual(c.base, None)
+        c.to_cpu()
         self.assertEqual(c.data, [33, 26, 81, 62])
 
     def test_matmul_batch_cpu(self):
@@ -827,8 +957,12 @@ class TestTensor(unittest.TestCase):
         self.assertEqual(c.size, 8)
         self.assertEqual(c.dims, 3)
         self.assertEqual(c.shape, (2, 2, 2))
+        self.assertEqual(c.stride, (4, 2, 1))
         self.assertEqual(c.device, 0)
+        self.assertEqual(c.offset, 0)
+        self.assertEqual(c.indices, [0, 1, 2, 3, 4, 5, 6, 7])
         self.assertEqual(c.data, [33, 26, 81, 62, 12, 5, 14, 19])
+        self.assertEqual(c.base, None)
 
     def test_matmul_batch_gpu(self):
         a = Tensor([1, 2, 3, 4, 5, 6, 1, 0, 2, 3, 4, 1], (2, 2, 3))
@@ -837,12 +971,16 @@ class TestTensor(unittest.TestCase):
         b.to_gpu()
 
         c = a @ b
-        c.to_cpu()
 
         self.assertEqual(c.size, 8)
         self.assertEqual(c.dims, 3)
         self.assertEqual(c.shape, (2, 2, 2))
-        self.assertEqual(c.device, 0)
+        self.assertEqual(c.stride, (4, 2, 1))
+        self.assertEqual(c.device, 1)
+        self.assertEqual(c.offset, 0)
+        self.assertEqual(c.indices, [0, 1, 2, 3, 4, 5, 6, 7])
+        self.assertEqual(c.base, None)
+        c.to_cpu()
         self.assertEqual(c.data, [33, 26, 81, 62, 12, 5, 14, 19])
 
     def test_matmul_ultra_batch_cpu(self):
@@ -857,9 +995,13 @@ class TestTensor(unittest.TestCase):
         self.assertEqual(c.size, 6 * 5 * 4 * 3 * 7)
         self.assertEqual(c.dims, 5)
         self.assertEqual(c.shape, (6, 5, 4, 3, 7))
+        self.assertEqual(c.stride, (420, 84, 21, 7, 1))
         self.assertEqual(c.device, 0)
+        self.assertEqual(c.offset, 0)
+        self.assertEqual(c.indices, list(range(2520)))
         self.assertEqual(c.data, np.einsum(
             'abcij,abcjk->abcik', na, nb).flatten().tolist())
+        self.assertEqual(c.base, None)
 
     def test_matmul_ultra_batch_gpu(self):
         import numpy as np
@@ -871,12 +1013,16 @@ class TestTensor(unittest.TestCase):
         b.to_gpu()
 
         c = a @ b
-        c.to_cpu()
 
         self.assertEqual(c.size, 6 * 5 * 4 * 3 * 7)
         self.assertEqual(c.dims, 5)
         self.assertEqual(c.shape, (6, 5, 4, 3, 7))
-        self.assertEqual(c.device, 0)
+        self.assertEqual(c.stride, (420, 84, 21, 7, 1))
+        self.assertEqual(c.device, 1)
+        self.assertEqual(c.offset, 0)
+        self.assertEqual(c.indices, list(range(2520)))
+        self.assertEqual(c.base, None)
+        c.to_cpu()
         self.assertEqual(c.data, np.einsum(
             'abcij,abcjk->abcik', na, nb).flatten().tolist())
 
@@ -885,6 +1031,14 @@ class TestTensor(unittest.TestCase):
 
         x.fill_random_uniform(lower=37, upper=38)
 
+        self.assertEqual(x.size, 30)
+        self.assertEqual(x.dims, 1)
+        self.assertEqual(x.shape, (30,))
+        self.assertEqual(x.stride, (1,))
+        self.assertEqual(x.device, 0)
+        self.assertEqual(x.offset, 0)
+        self.assertEqual(x.indices, list(range(30)))
+        self.assertEqual(x.base, None)
         for i in x.data:
             self.assertTrue(37 <= i <= 38)
 
@@ -893,8 +1047,16 @@ class TestTensor(unittest.TestCase):
         x.to_gpu()
 
         x.fill_random_uniform(lower=37, upper=38)
-        x.to_cpu()
 
+        self.assertEqual(x.size, 30)
+        self.assertEqual(x.dims, 1)
+        self.assertEqual(x.shape, (30,))
+        self.assertEqual(x.stride, (1,))
+        self.assertEqual(x.device, 1)
+        self.assertEqual(x.offset, 0)
+        self.assertEqual(x.indices, list(range(30)))
+        self.assertEqual(x.base, None)
+        x.to_cpu()
         for i in x.data:
             self.assertTrue(37 <= i <= 38)
 
@@ -1446,7 +1608,7 @@ class TestTensor(unittest.TestCase):
         self.assertEqual(c.indices, [0, 1, 2, 3, 4, 5, 6, 7])
         self.assertEqual(c.base, None)
 
-    def test_squeeze(self):
+    def test_squeeze_cpu(self):
         x = Tensor([1, 2, 3, 4], (1, 1, 2, 1, 2, 1))
 
         y = x.squeeze()
@@ -1468,6 +1630,32 @@ class TestTensor(unittest.TestCase):
         self.assertEqual(y.data, [1, 2, 3, 4])
         self.assertEqual(y.indices, [0, 1, 2, 3])
         self.assertEqual(y.base, x)
+
+    # def test_squeeze_gpu(self):
+    #     x = Tensor([1, 2, 3, 4], (1, 1, 2, 1, 2, 1))
+    #     x.to_gpu()
+
+    #     y = x.squeeze()
+
+    #     self.assertEqual(x.size, 4)
+    #     self.assertEqual(x.dims, 6)
+    #     self.assertEqual(x.shape, (1, 1, 2, 1, 2, 1))
+    #     self.assertEqual(x.device, 1)
+    #     self.assertEqual(x.offset, 0)
+    #     self.assertEqual(x.indices, [0, 1, 2, 3])
+    #     self.assertEqual(x.base, None)
+    #     x.to_cpu()
+    #     self.assertEqual(x.data, [1, 2, 3, 4])
+
+    #     self.assertEqual(y.size, 4)
+    #     self.assertEqual(y.dims, 2)
+    #     self.assertEqual(y.shape, (2, 2))
+    #     self.assertEqual(y.device, 1)
+    #     self.assertEqual(y.offset, 0)
+    #     self.assertEqual(y.indices, [0, 1, 2, 3])
+    #     self.assertEqual(y.base, x)
+    #     y.to_cpu()
+    #     self.assertEqual(y.data, [1, 2, 3, 4])
 
     def test_squeeze_keep_at_least_one_dim(self):
         x = Tensor([5], (1, 1, 1))
