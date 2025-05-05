@@ -1492,7 +1492,7 @@ class TestTensor(unittest.TestCase):
         self.assertEqual(y.indices, [0])
         self.assertEqual(y.base, x)
 
-    def test_iter(self):
+    def test_iter_cpu(self):
         x = Tensor([1, 2, 3, 4], (2, 2))
 
         y, z = list(iter(x))
@@ -1507,6 +1507,30 @@ class TestTensor(unittest.TestCase):
         self.assertEqual(z.dims, 1)
         self.assertEqual(z.shape, (2,))
         self.assertEqual(z.device, 0)
+        self.assertEqual(z.data, [3, 4])
+
+    def test_iter_gpu(self):
+        x = Tensor([1, 2, 3, 4], (2, 2))
+        x.to_gpu()
+
+        y, z = list(iter(x))
+
+        self.assertEqual(y.size, 2)
+        self.assertEqual(y.dims, 1)
+        self.assertEqual(y.shape, (2,))
+        self.assertEqual(y.device, 1)
+        self.assertEqual(y.offset, 0)
+        self.assertEqual(y.indices, [0, 1])
+        y.to_cpu()
+        self.assertEqual(y.data, [1, 2])
+
+        self.assertEqual(z.size, 2)
+        self.assertEqual(z.dims, 1)
+        self.assertEqual(z.shape, (2,))
+        self.assertEqual(z.device, 1)
+        self.assertEqual(z.offset, 2)
+        self.assertEqual(z.indices, [2, 3])
+        z.to_cpu()
         self.assertEqual(z.data, [3, 4])
 
     def test_len(self):
